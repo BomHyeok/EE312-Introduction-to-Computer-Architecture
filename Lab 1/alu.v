@@ -45,21 +45,32 @@ module ALU(A,B,OP,C,Cout);
 		// ARS
 			4'b1011 : 
 				begin 
-					$display (A[15]);
 					Cout = A[15];
 					C = A >> 1;
 					C[15] = Cout;
 					Cout = 0;
 				end
 
-		// RR
-	//		4'b1100 :
+		// RR (A[0]A[15:1])
+			4'b1100 :
+				begin 
+					Cout = A[0];
+					C = A >> 1;
+					C[15] = Cout;
+					Cout = 0;
+				end
 		// LLS
 			4'b1101 : C = A << 1;
 		// ALS
 			4'b1110 : C = A << 1;
-		// RL
-	//		4'b1111 :
+		// RL (A[14:0]A[15])
+			4'b1111 :
+				begin 
+					Cout = A[15];
+					C = A << 1;
+					C[0] = Cout;
+					Cout = 0;
+				end
 			default : C = 0;
 		endcase
 	end
