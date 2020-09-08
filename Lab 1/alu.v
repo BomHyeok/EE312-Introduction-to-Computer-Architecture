@@ -21,9 +21,21 @@ module ALU(A,B,OP,C,Cout);
 		Cout = 0;
 		case(OP)
 		// ADD
-			4'b0000 : C = A + B;
+			4'b0000 : 
+				begin
+					C = A + B;
+					if ((A[15] == B[15]) && (A[15] != C[15])) begin
+						Cout = 1;
+					end
+				end
 		// SUB
-			4'b0001 : C = A - B;
+			4'b0001 :
+				begin
+					C = A - B;
+					if ((B[15] == C[15]) && (A[15] != B[15])) begin
+						Cout = 1;
+					end
+				end
 		// AND
 			4'b0010 : C = A & B;
 		// OR
