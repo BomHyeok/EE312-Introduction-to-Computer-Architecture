@@ -8,10 +8,6 @@ module ALU(A,B,OP,C,Cout);
 	output [15:0]C;
 	output Cout;
 
-	/*reg [15:0]A;
-	reg [15:0]B;
-	reg [3:0]OP;
-	*/
 	reg [15:0]C;
 	reg Cout;
 
@@ -86,9 +82,6 @@ module ALU(A,B,OP,C,Cout);
 			default : C = 0;
 		endcase
 	end
-
-
-	
 endmodule
 
 
