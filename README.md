@@ -11,5 +11,5 @@ https://medium.com/macoclock/running-verilog-code-on-linux-mac-3b06ddcccc55
 How to compile
 ```
 $ iverilog -o alu ALU_TB.v
-$ vvp alue
+$ vvp alu
 ```
