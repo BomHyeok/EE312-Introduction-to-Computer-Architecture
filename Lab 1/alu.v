@@ -8,10 +8,10 @@ module ALU(A,B,OP,C,Cout);
 	output [15:0]C;
 	output Cout;
 
+	//TODO
+	
 	reg [15:0]C;
 	reg Cout;
-
-	//TODO
 
 	always @ (A, B, OP) begin
 		Cout = 0;
