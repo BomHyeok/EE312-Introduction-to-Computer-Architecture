@@ -56,7 +56,6 @@ module ALU(A,B,OP,C,Cout);
                     C[15] = Var;
                     Var = 0;
                 end
-
         // RR (A[0]A[15:1])
             4'b1100 :
                 begin
