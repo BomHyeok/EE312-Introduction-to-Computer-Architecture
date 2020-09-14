@@ -123,6 +123,7 @@ module vending_machine (
 			if (o_available_item[i] && i_select_item[i]) begin
 				o_output_item[i] = 1;
 				current_total = current_total - kkItemPrice[i];
+				stopwatch = 0;
 			end
 		end
 	end
@@ -156,6 +157,7 @@ module vending_machine (
 			for (i = 0; i < `kNumCoins; i = i + 1) begin
 				if (i_input_coin[i]) begin
 					current_total = current_total + kkCoinValue[i];
+					stopwatch = 0;
 				end
 			end
 /////////////////////////////////////////////////////////////////////////
@@ -166,7 +168,8 @@ module vending_machine (
 
 
 			//if you have to return some coins then you have to turn on the bit
-			if ((stopwatch == 10) && (current_total > 0)) begin
+			if ((stopwatch >= 10) && (current_total > 0)) begin
+				$display("hi");
 				have_to_return = 1;
 				if (current_total > 0) begin
 					while (current_total > kkCoinValue[2]) begin
