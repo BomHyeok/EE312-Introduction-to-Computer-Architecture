@@ -90,12 +90,17 @@ module vending_machine (
 	always @(*) begin
 		// TODO: current_total_nxt
 		// You don't have to worry about concurrent activations in each input vector (or array).
+
 		current_total_nxt = current_total;
+		for (i = 0; i < `kNumCoins; i = i + 1) begin
+			if (i_input_coin[i]) begin
+				current_total_nxt = current_total_nxt + kkCoinValue[i];
+				stopwatch = 0;
+			end
+		end
 
 
-
-
-
+		
 
 		// Calculate the next current_total state. current_total_nxt =
 
@@ -150,16 +155,16 @@ module vending_machine (
 			o_return_coin = 0;
 			stopwatch = 0;
 
+			have_to_return = 0;
+			return_total_2 = 0;
+			return_total_1 = 0;
+			return_total_0 = 0;
+
 		end
 		else begin
 			// TODO: update all states.
-		//	current_total = current_total_nxt;
-			for (i = 0; i < `kNumCoins; i = i + 1) begin
-				if (i_input_coin[i]) begin
-					current_total = current_total + kkCoinValue[i];
-					stopwatch = 0;
-				end
-			end
+			current_total = current_total_nxt;
+			
 /////////////////////////////////////////////////////////////////////////
 
 			// decrease stopwatch
@@ -168,28 +173,55 @@ module vending_machine (
 
 
 			//if you have to return some coins then you have to turn on the bit
-			if ((stopwatch >= 10) && (current_total > 0)) begin
-				$display("hi");
+			if (((stopwatch >= 10)||(i_trigger_return)) && (current_total > 0)) begin
 				have_to_return = 1;
-				if (current_total > 0) begin
-					while (current_total > kkCoinValue[2]) begin
-						current_total = current_total - kkCoinValue[2];
-						return_total_2 = return_total_2 + 1;
-						o_return_coin[2] = 1;
-					end
-					while (current_total > kkCoinValue[1]) begin
-						current_total = current_total - kkCoinValue[1];
-						return_total_1 = return_total_1 + 1;
-						o_return_coin[1] = 1;
-					end
-					while (current_total > kkCoinValue[0]) begin
-						current_total = current_total - kkCoinValue[0];
-						return_total_0 = return_total_0 + 1;
-						o_return_coin[0] = 1;
-					end
+				while (current_total >= kkCoinValue[2]) begin
+					current_total = current_total - kkCoinValue[2];
+					return_total_2 = return_total_2 + 1;
 				end
-				stopwatch = 0;
+				while (current_total >= kkCoinValue[1]) begin
+					current_total = current_total - kkCoinValue[1];
+					return_total_1 = return_total_1 + 1;
+				end
+				while (current_total >= kkCoinValue[0]) begin
+					current_total = current_total - kkCoinValue[0];
+					return_total_0 = return_total_0 + 1;
+				end
+				$display("return total 1000:%d, 500: %d, 100: %d", return_total_2, return_total_1, return_total_0);
+				if (current_total == 0) begin
+					stopwatch = 0;
+				end
+				$display("current_total = %d", current_total);
 			end
+
+			if (have_to_return) begin
+				$display("$$$$$$$$$test2");
+				if (return_total_2 > 0) begin
+					o_return_coin[2] = 1;
+					return_total_2 = return_total_2 - 1;
+				end 
+				else begin
+					o_return_coin[2] = 0;
+				end 
+				if (return_total_1 > 0) begin
+					o_return_coin[1] = 1;
+					return_total_1 = return_total_1 - 1;
+				end 
+				else begin
+					o_return_coin[1] = 0;
+				end 
+				if(return_total_0 > 0) begin
+					o_return_coin[0] = 1;
+					return_total_0 = return_total_0 - 1;
+				end 
+				else begin
+					o_return_coin[0] = 0;
+				end
+				if (o_return_coin == 0) begin
+					have_to_return = 0;
+				end
+			end
+
 
 
 /////////////////////////////////////////////////////////////////////////
