@@ -90,6 +90,8 @@ module vending_machine (
 	always @(*) begin
 		// TODO: current_total_nxt
 		// You don't have to worry about concurrent activations in each input vector (or array).
+		current_total_nxt = current_total;
+
 
 
 
@@ -104,33 +106,87 @@ module vending_machine (
 	// Combinational logic for the outputs
 	always @(*) begin
 	// TODO: o_available_item
-
+		if (current_total >= kkItemPrice[3]) begin
+			o_available_item = 4'b1111;
+		end else if (current_total >= kkItemPrice[2]) begin
+			o_available_item = 4'b0111;
+		end else if (current_total >= kkItemPrice[1]) begin
+			o_available_item = 4'b0011;
+		end else if (current_total >= kkItemPrice[0]) begin
+			o_available_item = 4'b0001;
+		end
 
 
 	// TODO: o_output_item
-
-
+	// Jiyun : only one output is available???????
+		for (i = 0; i < `kNumItems; i = i + 1) begin
+			if (o_available_item[i] && i_select_item[i]) begin
+				o_output_item[i] = 1;
+				current_total = current_total - kkItemPrice[i];
+			end
+		end
 	end
 
 	// Sequential circuit to reset or update the states
 	always @(posedge clk) begin
 		if (!reset_n) begin
 			// TODO: reset all states.
+			current_total = 0;
+			current_total_nxt = 0;
 
+			for (i = 0; i < `kNumCoins; i = i + 1) begin
+				num_coins[i] = 0;
+				num_coins_nxt[i] = 0;
+			end
 
+			for (i = 0; i < `kNumItems; i = i + 1) begin
+				num_items[i] = 0;
+				num_items_nxt[i] = 0;
+			end
+
+			o_available_item = 0;
+			o_output_item = 0;
+			o_return_coin = 0;
+			stopwatch = 0;
 
 		end
 		else begin
 			// TODO: update all states.
-
+		//	current_total = current_total_nxt;
+			for (i = 0; i < `kNumCoins; i = i + 1) begin
+				if (i_input_coin[i]) begin
+					current_total = current_total + kkCoinValue[i];
+				end
+			end
 /////////////////////////////////////////////////////////////////////////
 
-			// decreas stopwatch
-
+			// decrease stopwatch
+			stopwatch = stopwatch + 1;
 
 
 
 			//if you have to return some coins then you have to turn on the bit
+			if ((stopwatch == 10) && (current_total > 0)) begin
+				have_to_return = 1;
+				if (current_total > 0) begin
+					while (current_total > kkCoinValue[2]) begin
+						current_total = current_total - kkCoinValue[2];
+						return_total_2 = return_total_2 + 1;
+						o_return_coin[2] = 1;
+					end
+					while (current_total > kkCoinValue[1]) begin
+						current_total = current_total - kkCoinValue[1];
+						return_total_1 = return_total_1 + 1;
+						o_return_coin[1] = 1;
+					end
+					while (current_total > kkCoinValue[0]) begin
+						current_total = current_total - kkCoinValue[0];
+						return_total_0 = return_total_0 + 1;
+						o_return_coin[0] = 1;
+					end
+				end
+				stopwatch = 0;
+			end
 
 
 /////////////////////////////////////////////////////////////////////////
