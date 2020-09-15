@@ -242,7 +242,6 @@ begin
 		if (o_return_coin[0]) Current = Current - 'd100;
 		if (o_return_coin[1]) Current = Current - 'd500;
 		if (o_return_coin[2]) Current = Current - 'd1000;
-		$display("testbench_current: %d", Current);
 		# 50;
 	end
 

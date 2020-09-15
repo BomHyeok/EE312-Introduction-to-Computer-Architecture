@@ -115,7 +115,6 @@ module vending_machine (
 				current_total_nxt = current_total_nxt - kkCoinValue[0];
 				return_total_0 = return_total_0 + 1;
 			end
-			$display("return 1000: %d, 500: %d, 100: %d",return_total_2, return_total_1, return_total_0);
 			if (current_total_nxt == 0) begin
 				stopwatch = 0;
 			end
@@ -196,13 +195,9 @@ module vending_machine (
 
 
 			//if you have to return some coins then you have to turn on the bit
-			$monitor(" have_to_return: %d, ", have_to_return);
 
 			if (have_to_return) begin
-				$display(" here return 1000: %d, 500: %d, 100: %d",return_total_2, return_total_1, return_total_0);
-
 				if (return_total_2 > 0) begin
-					$monitor("return 1000: %d",return_total_2);
 					o_return_coin[2] <= 1;
 					return_total_2 <= return_total_2 - 1;
 					return_temp <= return_temp + kkCoinValue[2];
@@ -210,9 +205,7 @@ module vending_machine (
 				else begin
 					o_return_coin[2] <= 0;
 				end 
-				$monitor("return output1: %d", o_return_coin);
 				if (return_total_1 > 0) begin
-					$monitor("return 500: %d", return_total_1);
 					o_return_coin[1] <= 1;
 					return_total_1 <= return_total_1 - 1;
 					return_temp <= return_temp + kkCoinValue[1];
@@ -220,9 +213,7 @@ module vending_machine (
 				else begin
 					o_return_coin[1] <= 0;
 				end 
-				$monitor("return output2: %d", o_return_coin);
 				if(return_total_0 > 0) begin
-					$monitor("return 100: %d", return_total_0);
 					o_return_coin[0] <= 1;
 					return_total_0 <= return_total_0 - 1;
 					return_temp <= return_temp + kkCoinValue[0];
@@ -230,7 +221,6 @@ module vending_machine (
 				else begin
 					o_return_coin[0] <= 0;
 				end
-				$monitor("return output3: %d", o_return_coin);
 			end
 
 			
