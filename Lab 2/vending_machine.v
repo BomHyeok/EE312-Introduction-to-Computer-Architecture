@@ -101,6 +101,8 @@ module vending_machine (
 
 		if (((stopwatch >= 10)||(i_trigger_return)) && (current_total_nxt > 0)) begin
 			have_to_return = 1;
+			output_total = current_total_nxt;
+
 			while (current_total_nxt >= kkCoinValue[2]) begin
 				current_total_nxt = current_total_nxt - kkCoinValue[2];
 				return_total_2 = return_total_2 + 1;
@@ -113,11 +115,15 @@ module vending_machine (
 				current_total_nxt = current_total_nxt - kkCoinValue[0];
 				return_total_0 = return_total_0 + 1;
 			end
+			$display("return 1000: %d, 500: %d, 100: %d",return_total_2, return_total_1, return_total_0);
 			if (current_total_nxt == 0) begin
 				stopwatch = 0;
 			end
 		end
 		
+		if (output_total == return_temp) begin
+			have_to_return = 0;
+		end
 
 		// Calculate the next current_total state. current_total_nxt =
 
@@ -154,68 +160,80 @@ module vending_machine (
 	always @(posedge clk) begin
 		if (!reset_n) begin
 			// TODO: reset all states.
-			current_total = 0;
-			current_total_nxt = 0;
+			current_total <= 0;
+			current_total_nxt <= 0;
 
 			for (i = 0; i < `kNumCoins; i = i + 1) begin
-				num_coins[i] = 0;
-				num_coins_nxt[i] = 0;
+				num_coins[i] <= 0;
+				num_coins_nxt[i] <= 0;
 			end
 
 			for (i = 0; i < `kNumItems; i = i + 1) begin
-				num_items[i] = 0;
-				num_items_nxt[i] = 0;
+				num_items[i] <= 0;
+				num_items_nxt[i] <= 0;
 			end
 
-			o_available_item = 0;
-			o_output_item = 0;
-			o_return_coin = 0;
-			stopwatch = 0;
+			o_available_item <= 0;
+			o_output_item <= 0;
+			o_return_coin <= 0;
+			stopwatch <= 0;
 
-			have_to_return = 0;
-			return_total_2 = 0;
-			return_total_1 = 0;
-			return_total_0 = 0;
+			have_to_return <= 0;
+			return_total_2 <= 0;
+			return_total_1 <= 0;
+			return_total_0 <= 0;
 
 		end
 		else begin
 			// TODO: update all states.
-			current_total = current_total_nxt;
+			current_total <= current_total_nxt;
 			
 /////////////////////////////////////////////////////////////////////////
 
 			// increase stopwatch
-			stopwatch = stopwatch + 1;
+			stopwatch <= stopwatch + 1;
 
 
 
 			//if you have to return some coins then you have to turn on the bit
+			$monitor(" have_to_return: %d, ", have_to_return);
+
 			if (have_to_return) begin
+				$display(" here return 1000: %d, 500: %d, 100: %d",return_total_2, return_total_1, return_total_0);
+
 				if (return_total_2 > 0) begin
-					o_return_coin[2] = 1;
-					return_total_2 = return_total_2 - 1;
+					$monitor("return 1000: %d",return_total_2);
+					o_return_coin[2] <= 1;
+					return_total_2 <= return_total_2 - 1;
+					return_temp <= return_temp + kkCoinValue[2];
 				end 
 				else begin
-					o_return_coin[2] = 0;
+					o_return_coin[2] <= 0;
 				end 
+				$monitor("return output1: %d", o_return_coin);
 				if (return_total_1 > 0) begin
-					o_return_coin[1] = 1;
-					return_total_1 = return_total_1 - 1;
+					$monitor("return 500: %d", return_total_1);
+					o_return_coin[1] <= 1;
+					return_total_1 <= return_total_1 - 1;
+					return_temp <= return_temp + kkCoinValue[1];
 				end 
 				else begin
-					o_return_coin[1] = 0;
+					o_return_coin[1] <= 0;
 				end 
+				$monitor("return output2: %d", o_return_coin);
 				if(return_total_0 > 0) begin
-					o_return_coin[0] = 1;
-					return_total_0 = return_total_0 - 1;
+					$monitor("return 100: %d", return_total_0);
+					o_return_coin[0] <= 1;
+					return_total_0 <= return_total_0 - 1;
+					return_temp <= return_temp + kkCoinValue[0];
 				end 
 				else begin
-					o_return_coin[0] = 0;
+					o_return_coin[0] <= 0;
 				end
-				if (o_return_coin == 0) begin
-					have_to_return = 0;
-				end
+				$monitor("return output3: %d", o_return_coin);
 			end
+
+			
 
 
 
