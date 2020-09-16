@@ -90,6 +90,7 @@ module vending_machine (
 	always @(*) begin
 		// TODO: current_total_nxt
 		// You don't have to worry about concurrent activations in each input vector (or array).
+		// Calculate the next current_total state. current_total_nxt =
 
 		current_total_nxt = current_total;
 		for (i = 0; i < `kNumCoins; i = i + 1) begin
@@ -122,13 +123,10 @@ module vending_machine (
 		
 		if (output_total == return_temp) begin
 			have_to_return = 0;
+			output_total = 0;
+			return_temp = 0;
 		end
-
-		// Calculate the next current_total state. current_total_nxt =
-
-
 	end
-
 
 	// Combinational logic for the outputs
 	always @(*) begin
@@ -145,7 +143,6 @@ module vending_machine (
 
 
 	// TODO: o_output_item
-	// Jiyun : only one output is available???????
 		for (i = 0; i < `kNumItems; i = i + 1) begin
 			if (o_available_item[i] && i_select_item[i]) begin
 				o_output_item[i] = 1;
@@ -186,7 +183,7 @@ module vending_machine (
 		else begin
 			// TODO: update all states.
 			current_total <= current_total_nxt;
-			
+			o_output_item <= 0;
 /////////////////////////////////////////////////////////////////////////
 
 			// increase stopwatch
@@ -222,10 +219,6 @@ module vending_machine (
 					o_return_coin[0] <= 0;
 				end
 			end
-
-			
-
-
 
 /////////////////////////////////////////////////////////////////////////
 		end		   //update all state end
