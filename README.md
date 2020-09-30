@@ -13,3 +13,12 @@ How to compile
 $ iverilog -o alu ALU_TB.v
 $ vvp alu
 ```
+
+
+## Lab 2 
+
+How to compile
+```
+$ iverilog -o ven vending_machine_TB.v
+$ vvp ven
+```
