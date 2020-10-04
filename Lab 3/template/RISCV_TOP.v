@@ -45,6 +45,7 @@ module RISCV_TOP (
 	
 	// PC, for HALT
 	wire PRE_HALT;
+	wire [31:00] IMM;
 	initial begin
 		PC <= 0;
 		PRE_HALT <= 0;
@@ -77,24 +78,69 @@ module RISCV_TOP (
 			// LUI
 			// WHy do we have to write 7b' prefix?
 			7b'0110111 :
-				RegWrite(INSTR[11:7], INSTR{[31:12],[11:0]});
+				IMM[31:12] = INSTR[31:12];
+				IMM[11:0] = 0;
+				RF_WA = INSTR[11:7];
+				RF_WE = 1;
+				RF_WD = IMM;
 			// AUIPC
 			7b'0010111 :
+				IMM[31:12] = INSTR[31:12];
+				IMM[11:0] = 0;
+				RF_WA = INSTR[11:7];
+
+				
 			// JAL
 			7b'1101111 :
+				IMM[20:0] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
+				RF_WA = INSTR[11:7];
+				Target = PC + IMM;
+				RF_WD = PC + 4;
+				PC = Target;
 			// JALR
 			7b'1100111 :
+				IMM[11:0] = INSTR[31:20];
+				RF_RA1 = INSTR[19:15];
+				RF_WA = INSTR[11:7];
+				Target = (RF_RD1 + IMM) & 0xfffffffe;
+				RF_WD = PC + 4;
+				PC = Target;
 			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
 			7b'1100011 :
+				IMM[12:0] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
+				RF_RA1 = INSTR[19:15];
+				RF_RA2 = INSTR[24:20];
+				OP = INSTR[14:12];
+
 			// I Type Load (LB, LH, LW, LBU, LHU)
 			7b'0000011 :
+				IMM[11:0] = INSTR[31:20];
+				RF_WA = INSTR[11:7];
+				Effective_address = IMM + RF_RD1;
+				WD = MEM[translate(Effective_address)];
+				PC = PC + 4;
 			// Store (SB, SH, SW)
 			7b'0100011 :
+				IMM[11:5] = INSTR[31:25];
+				IMM[4:0] = INSTR[11:7];
+
 			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
 			7b'0010011 :
+				IMM[11:0] = INSTR[31:20];
+				RF_RA1 = INSTR[19:15];
+				RF_WE = 1;
+				RF_WA = INSTR[11:7];
+				OP = INSTR[14:12];
+				ALU(IMM, RF_RD2, OP, RF_WD);
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 			7b'0110011 :
-			
-			
+				RF_RA1 = INSTR[19:15];
+				RF_RA2 = INSTR[24:20];
+				RF_WE = 1;
+				RF_WA = INSTR[11:7];
+				OP = INSTR[14:12];
+				ALU(RF_RD1, RF_RD2, OP, RF_WD);
+			default: WD = 0;
+		endcase
 	end
 endmodule //
