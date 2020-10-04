@@ -42,29 +42,42 @@ module RISCV_TOP (
 	end
 
 	// TODO: implement
-	// PC(D_MEM_ADDR??? idk), for HALT
+	
+	// PC, for HALT
 	wire PRE_HALT;
 	initial begin
-		D_MEM_ADDR <= 0;
+		PC <= 0;
 		PRE_HALT <= 0;
 	end
 
+	always @ (negedge CLK) begin
+		if (RSTn == 1) begin
+			I_MEM_CSN <= 0;
+			D_MEM_CSN <= 0;
+		end
+		else begin
+			I_MEM_CSN <= 1;
+			D_MEM_CSN <= 1;
+		end
+	end
+
 	// does it cover also in sequentially same NUM_INST?
-	always @ (NUM_INST) begin
-		if (NUM_INST == 0x00c00093) begin
+	always @ (INSTR) begin
+		if (INSTR == 0x00c00093) begin
 			PRE_HALT = 1;
 		end 
 		else begin
 			PRE_HALT = 0;
 		end
-		if (PRE_HALT == 1 && NUM_INST == 0x00008067) begin
+		if (PRE_HALT == 1 && INSTR == 0x00008067) begin
 			PRE_HALT = 0;
 			HALT = 1;
 		end
-		case (NUM_INST[6:0])
+		case (INSTR[6:0])
 			// LUI
 			// WHy do we have to write 7b' prefix?
 			7b'0110111 :
+				RegWrite(INSTR[11:7], INSTR{[31:12],[11:0]});
 			// AUIPC
 			7b'0010111 :
 			// JAL
@@ -81,6 +94,7 @@ module RISCV_TOP (
 			7b'0010011 :
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 			7b'0110011 :
+			
 			
 	end
 endmodule //
