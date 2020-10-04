@@ -98,18 +98,27 @@ initial begin
 	// == Tests start.
 	InitialTest();
 	Insert100CoinTest();
+	$display("Current: %d", Current);
 	Insert500CoinTest();
+	$display("Current: %d", Current);
 	Insert1000CoinTest();
+	$display("Current: %d", Current);
 
 	// After you fully implement o_output_item, run the tests.
 	Select1stItemTest();
+	$display("Current: %d", Current);
 	Select2ndItemTest();
+	$display("Current: %d", Current);
 	Select3rdItemTest();
+	$display("Current: %d", Current);
 	Select4thItemTest();
+	$display("Current: %d", Current);
 
 	// After you fully implement o_return_coin, run the tests.
 	WaitReturnTest();
+	$display("Current: %d", Current);
 	TriggerReturnTest();
+	$display("Current: %d", Current);
 
 	// == Tests end.
 
@@ -303,6 +312,7 @@ begin
 	wait (o_output_item[1]); 	// ** Wait until the o_output_item[1] is true
 	# 100 i_select_item[1] = 0;	// After one cycle, deactivate the signal
 	Current = Current - 'd500;
+
 end
 endtask
 
