@@ -90,48 +90,135 @@ module vending_machine (
 	always @(*) begin
 		// TODO: current_total_nxt
 		// You don't have to worry about concurrent activations in each input vector (or array).
-
-
-
-
-
 		// Calculate the next current_total state. current_total_nxt =
 
+		current_total_nxt = current_total;
+		for (i = 0; i < `kNumCoins; i = i + 1) begin
+			if (i_input_coin[i]) begin
+				current_total_nxt = current_total_nxt + kkCoinValue[i];
+				stopwatch = 0;
+			end
+		end
 
+		if (((stopwatch >= 10)||(i_trigger_return)) && (current_total_nxt > 0)) begin
+			have_to_return = 1;
+			output_total = current_total_nxt;
+
+			while (current_total_nxt >= kkCoinValue[2]) begin
+				current_total_nxt = current_total_nxt - kkCoinValue[2];
+				return_total_2 = return_total_2 + 1;
+			end
+			while (current_total_nxt >= kkCoinValue[1]) begin
+				current_total_nxt = current_total_nxt - kkCoinValue[1];
+				return_total_1 = return_total_1 + 1;
+			end
+			while (current_total_nxt >= kkCoinValue[0]) begin
+				current_total_nxt = current_total_nxt - kkCoinValue[0];
+				return_total_0 = return_total_0 + 1;
+			end
+			if (current_total_nxt == 0) begin
+				stopwatch = 0;
+			end
+		end
+		
+		if (output_total == return_temp) begin
+			have_to_return = 0;
+			output_total = 0;
+			return_temp = 0;
+		end
 	end
-
 
 	// Combinational logic for the outputs
 	always @(*) begin
 	// TODO: o_available_item
-
+		if (current_total >= kkItemPrice[3]) begin
+			o_available_item = 4'b1111;
+		end else if (current_total >= kkItemPrice[2]) begin
+			o_available_item = 4'b0111;
+		end else if (current_total >= kkItemPrice[1]) begin
+			o_available_item = 4'b0011;
+		end else if (current_total >= kkItemPrice[0]) begin
+			o_available_item = 4'b0001;
+		end
 
 
 	// TODO: o_output_item
-
-
+		for (i = 0; i < `kNumItems; i = i + 1) begin
+			if (o_available_item[i] && i_select_item[i]) begin
+				o_output_item[i] = 1;
+				current_total = current_total - kkItemPrice[i];
+				stopwatch = 0;
+			end
+		end
 	end
 
 	// Sequential circuit to reset or update the states
 	always @(posedge clk) begin
 		if (!reset_n) begin
 			// TODO: reset all states.
+			current_total <= 0;
+			current_total_nxt <= 0;
 
+			for (i = 0; i < `kNumCoins; i = i + 1) begin
+				num_coins[i] <= 0;
+				num_coins_nxt[i] <= 0;
+			end
 
+			for (i = 0; i < `kNumItems; i = i + 1) begin
+				num_items[i] <= 0;
+				num_items_nxt[i] <= 0;
+			end
+
+			o_available_item <= 0;
+			o_output_item <= 0;
+			o_return_coin <= 0;
+			stopwatch <= 0;
+
+			have_to_return <= 0;
+			return_total_2 <= 0;
+			return_total_1 <= 0;
+			return_total_0 <= 0;
 
 		end
 		else begin
 			// TODO: update all states.
-
+			current_total <= current_total_nxt;
+			o_output_item <= 0;
 /////////////////////////////////////////////////////////////////////////
 
-			// decreas stopwatch
-
+			// increase stopwatch
+			stopwatch <= stopwatch + 1;
 
 
 
 			//if you have to return some coins then you have to turn on the bit
 
+			if (have_to_return) begin
+				if (return_total_2 > 0) begin
+					o_return_coin[2] <= 1;
+					return_total_2 <= return_total_2 - 1;
+					return_temp <= return_temp + kkCoinValue[2];
+				end 
+				else begin
+					o_return_coin[2] <= 0;
+				end 
+				if (return_total_1 > 0) begin
+					o_return_coin[1] <= 1;
+					return_total_1 <= return_total_1 - 1;
+					return_temp <= return_temp + kkCoinValue[1];
+				end 
+				else begin
+					o_return_coin[1] <= 0;
+				end 
+				if(return_total_0 > 0) begin
+					o_return_coin[0] <= 1;
+					return_total_0 <= return_total_0 - 1;
+					return_temp <= return_temp + kkCoinValue[0];
+				end 
+				else begin
+					o_return_coin[0] <= 0;
+				end
+			end
 
 /////////////////////////////////////////////////////////////////////////
 		end		   //update all state end
