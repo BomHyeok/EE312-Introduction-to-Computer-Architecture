@@ -43,30 +43,43 @@ module RISCV_TOP (
 
 	// TODO: implement
 	
+	assign I_MEM_CSN = ~RSTn;
+	assign D_MEM_CSN = ~RSTn;
 	
 	reg PRE_HALT, _HALT, _RF_WE, INSTR_TYPE;
 	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
-	reg [31:0] INSTR, IMM, PC, _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC;
-	reg [4:0] _RF_WA;
+	reg [31:0] INSTR, PC, _Updated_PC, _ALUSRC;
+//	reg [31:0] _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC
+//	reg [4:0] _RF_WA;
 	reg [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
 	wire [31:0] ALUSRC;
+	wire [31:0] Updated_PC, IMM;
 
 	assign HALT = _HALT;
+	/*
 	assign RF_WE = _RF_WE;
 	assign RF_WD = _RF_WD;
 	assign RF_WA = _RF_WA;
 	assign RF_RA1 = _RF_RA1;
 	assign RF_RA2 = _RF_RA2;
+	*/
 	assign ALUSRC = _ALUSRC;
+	assign Updated_PC = _Updated_PC;
 	
 	initial begin
-		PC <= 0;
 		PRE_HALT = 0;
 	end
 
+	PC pc(
+		.PC		(PC),
+		.CLK	(CLK),
+		.RSTn	(RSTn),
+		.Updated_PC	(Updated_PC)
+	);
+
 	TRANSLATE i_translate(
-		.EFFECTIVE_ADDR          (PC),
+		.EFFECTIVE_ADDR          (Updated_PC),
 		.instruction_type        (1'b1),
 		.data_type   			 (1'b0),
 		.MEM_ADDR         		 (TEMP_MEM_ADDR)
@@ -80,18 +93,24 @@ module RISCV_TOP (
 	);
 */
 
+	always@ (*) begin
+		I_MEM_ADDR = TEMP_MEM_ADDR;
+		INSTR = I_MEM_DI;
+		$display(INSTR);
+	end
+
 	CTRL control(
 		.INSTR          (INSTR),
-		.PC        		(PC),
+		.PC        		(Updated_PC),
 		.RF_RA1 		(RF_RA1),
 		.RF_RA2			(RF_RA2),
-		.RF_WD			(RF_WD),
 		.ALUSRC			(ALUSRC),
 		.RF_RD1			(RF_RD1),
 		.RF_WA1			(RF_WA1),
 		.OP				(OP),
 		.INSTR_TYPE		(INSTR_TYPE),
-		.OUTPUT_PORT	(OUTPUT_PORT)
+		.RF_WD			(RF_WD),
+		.IMM			(IMM)
 	);
 
 	MUX alusrc(
@@ -104,28 +123,11 @@ module RISCV_TOP (
 	ALU alu(
 		.A	(ALUSRC),
 		.B	(RF_RD2),
-		.OP	(OP),
-		.C	(RF_WD)
+		.OP		(OP),
+		.Out (RF_WD)
 	);
 
-	always@ (*) begin
-		I_MEM_ADDR = TEMP_MEM_ADDR;
-		INSTR = I_MEM_DI;
-		$display(INSTR);
-	end
-
-	always @ (negedge CLK) begin
-		/*
-		if (RSTn == 1) begin
-			assign I_MEM_CSN = 0;
-			assign D_MEM_CSN = 0;
-		end
-		else begin
-			I_MEM_CSN = 1;
-			D_MEM_CSN = 1;
-		end
-		*/
-	end
+	
 
 	// does it cover also in sequentially same NUM_INST?
 	always @ (INSTR) begin

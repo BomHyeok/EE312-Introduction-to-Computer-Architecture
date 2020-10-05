@@ -1,11 +1,14 @@
 //`timescale 1ns / 100ps
 // change input RD1 to also effect to imm 
-module ALU(A,B,OP,C);
+module ALU(A,B,OP,Out);
 
     input wire [31:0] A;
     input wire [31:0] B;
     input wire [3:0] OP;
-    output wire reg [31:0] C;
+    output wire [31:0] Out;
+
+    reg [31:0] C;
+    assign Out = C;
 
     always @ (A, B, OP) begin
         case(OP)
