@@ -43,12 +43,14 @@ module RISCV_TOP (
 
 	// TODO: implement
 	
-	// PC, for HALT
-	reg PRE_HALT, _HALT, _RF_WE;
-	reg [31:0] INSTR, IMM, PC, _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR;
+	
+	reg PRE_HALT, _HALT, _RF_WE, INSTR_TYPE;
+	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
+	reg [31:0] INSTR, IMM, PC, _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC;
 	reg [4:0] _RF_WA;
-	reg [2:0] OP;
+	reg [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
+	wire [31:0] ALUSRC;
 
 	assign HALT = _HALT;
 	assign RF_WE = _RF_WE;
@@ -56,7 +58,7 @@ module RISCV_TOP (
 	assign RF_WA = _RF_WA;
 	assign RF_RA1 = _RF_RA1;
 	assign RF_RA2 = _RF_RA2;
-
+	assign ALUSRC = _ALUSRC;
 	
 	initial begin
 		PC <= 0;
@@ -78,8 +80,15 @@ module RISCV_TOP (
 	);
 */
 
+	MUX alusrc(
+		.A	(RF_RD1),
+		.B	(IMM),
+		.S	(INSTR_TYPE),
+		.Out	(ALUSRC)
+	);
+
 	ALU alu(
-		.A	(A),
+		.A	(ALUSRC),
 		.B	(RF_RD2),
 		.OP	(OP),
 		.C	(RF_WD)
@@ -172,7 +181,7 @@ module RISCV_TOP (
 				IMM[11:0] = INSTR[31:20];
 				_RF_WA = INSTR[11:7];
 				EFFECTIVE_ADDR = IMM + RF_RD1;
-				_RF_WD = MEM[d_translate(EFFECTIVE_ADDR)];
+			//	_RF_WD = MEM[d_translate(EFFECTIVE_ADDR)];
 				PC = PC + 4;
 			end
 				
@@ -192,7 +201,8 @@ module RISCV_TOP (
 				_RF_WE = 1;
 				_RF_WA = INSTR[11:7];
 				OP = INSTR[14:12];
-				ALU(IMM, RF_RD2, OP, RF_WD);
+				INSTR_TYPE = 1;
+			//	ALU(IMM, RF_RD2, OP, RF_WD);
 			end
 				
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
@@ -203,7 +213,8 @@ module RISCV_TOP (
 				_RF_WE = 1;
 				_RF_WA = INSTR[11:7];
 				OP = INSTR[14:12];
-				ALU(RF_RD1, RF_RD2, OP, RF_WD);
+				INSTR_TYPE = 0;
+			//	ALU(RF_RD1, RF_RD2, OP, RF_WD);
 			end
 				
 			default: _RF_WD = 0; // need to modify
