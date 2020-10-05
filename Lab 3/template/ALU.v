@@ -2,18 +2,15 @@
 // change input RD1 to also effect to imm 
 module ALU(A,B,OP,C);
 
-    input [31:0] A;
-    input [31:0] B;
-    input [3:0] OP;
-    output [31:0] C;
+    input wire [31:0] A;
+    input wire [31:0] B;
+    input wire [3:0] OP;
+    output wire reg [31:0] C;
 
     always @ (A, B, OP) begin
         case(OP)
         // ADD / SUB
-            3'b000 :
-                begin
-                    C = A + B;
-                end
+            3'b000 : C = A + B;
         // SLL (logical left shift)
             3'b001 : C = A << B[4:0];
         // SLT (perform signed and unsigned compares respectively)
