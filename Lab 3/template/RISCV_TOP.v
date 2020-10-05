@@ -45,9 +45,8 @@ module RISCV_TOP (
 	
 	// PC, for HALT
 	reg PRE_HALT;
-	reg [31:00] INSTR;
-	reg [31:00] IMM;
-	reg [31:00] PC;
+	reg [31:0] INSTR, IMM, PC;
+	wire [11:0] TEMP_MEM_ADDR;
 	
 	initial begin
 		PC <= 0;
@@ -58,7 +57,7 @@ module RISCV_TOP (
 		.EFFECTIVE_ADDR          (PC),
 		.instruction_type        (1'b1),
 		.data_type   			 (1'b0),
-		.MEM_ADDR         		 (I_MEM_ADDR)
+		.MEM_ADDR         		 (TEMP_MEM_ADDR)
 	);
 /*
 	TRANSLATE d_translate(
@@ -68,6 +67,12 @@ module RISCV_TOP (
 		.MEM_ADDR         		 (MEM_ADDR)
 	);
 */
+	always@ (*) begin
+		I_MEM_ADDR = TEMP_MEM_ADDR;
+		INSTR = I_MEM_DI;
+		$display(INSTR);
+	end
+
 	always @ (negedge CLK) begin
 		/*
 		if (RSTn == 1) begin
@@ -79,9 +84,6 @@ module RISCV_TOP (
 			D_MEM_CSN = 1;
 		end
 		*/
-		I_MEM_ADDR <= i_translate(PC);
-		INSTR <= I_MEM_DI;
-		$display(INSTR);
 	end
 
 	// does it cover also in sequentially same NUM_INST?
