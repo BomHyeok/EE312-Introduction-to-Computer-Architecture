@@ -25,6 +25,7 @@ module RISCV_TOP (
 	input wire [31:0] RF_RD2,
 	output wire [31:0] RF_WD,
 	output wire HALT,                   // if set, terminate program
+	// If get the instruction sequences 0x00c00093 0x00008067, HALT output wire should be set to 1
 	output reg [31:0] NUM_INST,         // number of instruction completed
 	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
 	);
@@ -41,5 +42,130 @@ module RISCV_TOP (
 	end
 
 	// TODO: implement
+	
+	// PC, for HALT
+	reg PRE_HALT;
+	reg [31:00] INSTR;
+	reg [31:00] IMM;
+	reg [31:00] PC;
+	
+	initial begin
+		PC <= 0;
+		PRE_HALT = 0;
+	end
 
+	TRANSLATE i_translate(
+		.EFFECTIVE_ADDR          (PC),
+		.instruction_type        (1'b1),
+		.data_type   			 (1'b0),
+		.MEM_ADDR         		 (I_MEM_ADDR)
+	);
+/*
+	TRANSLATE d_translate(
+		.EFFECTIVE_ADDR          (EFFECTIVE_ADDR),
+		.instruction_type        (0),
+		.data_type   			 (1),
+		.MEM_ADDR         		 (MEM_ADDR)
+	);
+*/
+	always @ (negedge CLK) begin
+		/*
+		if (RSTn == 1) begin
+			assign I_MEM_CSN = 0;
+			assign D_MEM_CSN = 0;
+		end
+		else begin
+			I_MEM_CSN = 1;
+			D_MEM_CSN = 1;
+		end
+		*/
+		I_MEM_ADDR <= i_translate(PC);
+		INSTR <= I_MEM_DI;
+		$display(INSTR);
+	end
+
+	// does it cover also in sequentially same NUM_INST?
+	always @ (INSTR) begin
+		/*
+		if (INSTR == 0x00c00093) begin
+			PRE_HALT = 1;
+		end 
+		else begin
+			PRE_HALT = 0;
+		end
+		if (PRE_HALT == 1 && INSTR == 0x00008067) begin
+			PRE_HALT = 0;
+			HALT = 1;
+		end
+		case (INSTR[6:0])
+			// LUI
+			// WHy do we have to write 7b' prefix?
+			7'b0110111 :
+				IMM[31:12] = INSTR[31:12];
+				IMM[11:0] = 0;
+				RF_WA = INSTR[11:7];
+				RF_WE = 1;
+				RF_WD = IMM;
+				
+			// AUIPC
+			7'b0010111 :
+				IMM[31:12] = INSTR[31:12];
+				IMM[11:0] = 0;
+				RF_WA = INSTR[11:7];
+
+
+			// JAL
+			7'b1101111 :
+				IMM[20:0] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
+				RF_WA = INSTR[11:7];
+				Target = PC + IMM;
+				RF_WD = PC + 4;
+				PC = Target;
+			// JALR
+			7'b1100111 :
+				IMM[11:0] = INSTR[31:20];
+				RF_RA1 = INSTR[19:15];
+				RF_WA = INSTR[11:7];
+				Target = (RF_RD1 + IMM) & 0xfffffffe;
+				RF_WD = PC + 4;
+				PC = Target;
+			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
+			7'b1100011 :
+				IMM[12:0] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
+				RF_RA1 = INSTR[19:15];
+				RF_RA2 = INSTR[24:20];
+				OP = INSTR[14:12];
+
+			// I Type Load (LB, LH, LW, LBU, LHU)
+			7'b0000011 :
+				IMM[11:0] = INSTR[31:20];
+				RF_WA = INSTR[11:7];
+				Effective_address = IMM + RF_RD1;
+				WD = MEM[translate(Effective_address)];
+				PC = PC + 4;
+			// Store (SB, SH, SW)
+			7'b0100011 :
+				IMM[11:5] = INSTR[31:25];
+				IMM[4:0] = INSTR[11:7];
+
+			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
+			7'b0010011 :
+				IMM[11:0] = INSTR[31:20];
+				RF_RA1 = INSTR[19:15];
+				RF_WE = 1;
+				RF_WA = INSTR[11:7];
+				OP = INSTR[14:12];
+				ALU(IMM, RF_RD2, OP, RF_WD);
+			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
+			7'b0110011 :
+				RF_RA1 = INSTR[19:15];
+				RF_RA2 = INSTR[24:20];
+				RF_WE = 1;
+				RF_WA = INSTR[11:7];
+				funct = INSTR[14:12];
+				ALU(RF_RD1, RF_RD2, funct, RF_WD);
+			default: RF_WD = 0;
+		endcase
+		*/
+	end
 endmodule //
