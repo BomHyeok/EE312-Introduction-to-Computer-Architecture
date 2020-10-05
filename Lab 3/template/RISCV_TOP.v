@@ -44,10 +44,10 @@ module RISCV_TOP (
 	// TODO: implement
 	
 	
-	reg PRE_HALT, _HALT, _RF_WE, INSTR_TYPE;
+	reg _HALT, _RF_WE, INSTR_TYPE;
 	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
-	reg [31:0] INSTR, IMM, PC, _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC;
-	reg [4:0] _RF_WA;
+	reg [31:0] INSTR, IMM, PC, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC;
+	reg [4:0] _RF_RA1, _RF_RA2, _RF_WA;
 	reg [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
 	wire [31:0] ALUSRC;
@@ -55,14 +55,13 @@ module RISCV_TOP (
 	assign HALT = _HALT;
 	assign RF_WE = _RF_WE;
 	assign RF_WD = _RF_WD;
-	assign RF_WA = _RF_WA;
+	assign RF_WA1 = _RF_WA;
 	assign RF_RA1 = _RF_RA1;
 	assign RF_RA2 = _RF_RA2;
 	assign ALUSRC = _ALUSRC;
 	
 	initial begin
 		PC <= 0;
-		PRE_HALT = 0;
 	end
 
 	TRANSLATE i_translate(
@@ -80,6 +79,28 @@ module RISCV_TOP (
 	);
 */
 
+	always@ (*) begin
+		I_MEM_ADDR = TEMP_MEM_ADDR;
+		INSTR = I_MEM_DI;
+		$display(INSTR);
+	end
+
+	assign I_MEM_CSN = ~RSTn;
+	assign D_MEM_CSN = ~RSTn;
+
+	CTRL control(
+		._INSTR (INSTR),
+		.IMM	(IMM),
+		.RF_RA1	(_RF_RA1),
+		.RF_RA2	(_RF_RA2),
+		.RF_WA	(_RF_WA),
+		.RF_WE	(_RF_WE),
+		.RF_WD	(_RF_WD),
+		._INST_TYPE	(INSTR_TYPE),
+		.OP	(OP),
+		.HALT	(_HALT)
+	);
+
 	MUX alusrc(
 		.A	(RF_RD1),
 		.B	(IMM),
@@ -94,26 +115,22 @@ module RISCV_TOP (
 		.C	(RF_WD)
 	);
 
-	always@ (*) begin
-		I_MEM_ADDR = TEMP_MEM_ADDR;
-		INSTR = I_MEM_DI;
-		$display(INSTR);
-	end
-
+	/*
 	always @ (negedge CLK) begin
-		/*
+		
 		if (RSTn == 1) begin
 			assign I_MEM_CSN = 0;
 			assign D_MEM_CSN = 0;
 		end
 		else begin
-			I_MEM_CSN = 1;
-			D_MEM_CSN = 1;
+			assign I_MEM_CSN = 1;
+			assign D_MEM_CSN = 1;
 		end
-		*/
+		
 	end
-
+	*/
 	// does it cover also in sequentially same NUM_INST?
+	/*
 	always @ (INSTR) begin
 		if (INSTR == 32'h00c00093) begin
 			PRE_HALT = 1;
@@ -220,4 +237,5 @@ module RISCV_TOP (
 			default: _RF_WD = 0; // need to modify
 		endcase
 	end
+	*/
 endmodule //
