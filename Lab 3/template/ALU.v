@@ -15,11 +15,10 @@ module ALU(A,B,OP,Out);
         // ADD
             4'b0000 : C = A + B;
         // SUB
-            4'b1000 : C = A + B;
+            4'b1000 : C = A - B;
         // SLL (logical left shift)
             4'b0001 : C = A << B[4:0];
         // SLT 
-        // writing 1 to rd if rs1 < rs2, 0 otherwise. 
             4'b0010 : 
                 begin
                     if ($signed(A) < $signed(B)) begin
@@ -30,10 +29,11 @@ module ALU(A,B,OP,Out);
                     end
                 end
         // SLTU
-        // rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
+        // SLTU rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
+        // SLTIU rd, rs1, 1 sets rd to 1 if rs1 equals zero, otherwise sets rd to 0
             4'b0011 : 
                 begin
-                    if (B != 0) begin
+                    if (A < B) begin
                         C = 1;
                     end
                     else begin
