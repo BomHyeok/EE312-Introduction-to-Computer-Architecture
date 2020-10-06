@@ -51,8 +51,6 @@ module RISCV_TOP (
 	reg [31:0] _RF_WD;
 	assign RF_WD = _RF_WD;
 	
-	reg PRE_HALT, _HALT;
-	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
 	reg [31:0] INSTR;
 
 	wire isItype, isLoad;
@@ -60,13 +58,6 @@ module RISCV_TOP (
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
 	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA;
-
-	assign HALT = _HALT;
-
-	
-	initial begin
-		PRE_HALT = 0;
-	end
 
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -87,9 +78,16 @@ module RISCV_TOP (
 		if (isLoad) _RF_WD = DataToReg;
 		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
 		if (RF_WE) _RF_WD = ALU_RESULT;
-		// we may delete the following
+		// for test
+		/*
 		INSTR = I_MEM_DI;
 		$display(INSTR);
+		$display("--------------------------------------------------------------------------------");
+     	$display("Instruction: 0x%0h  IsStore: 0x%0h", INSTR, D_MEM_WEN);
+    	$display("RF_RD1: 0x%0h, ALUSRC: 0x%0h, IMM: 0x%0h, IMM_EX: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSRC, IMM, IMM_EX, ALU_RESULT);
+    	$display("PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, Updated_PC, NUM_INST);
+    	$display("RF_WE: 0x%0h, isLoad: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, isLoad, RF_WD, OUTPUT_PORT);
+		*/
 	end
 
 	CTRL control(
@@ -140,7 +138,7 @@ module RISCV_TOP (
 		.Out	(DataToReg)
 	);
 
-	// if SB, SH, SW
+	// SB, SH, SW
 	TRANSLATE d_translate(
 		.EFFECTIVE_ADDR          (ALU_RESULT),
 		.instruction_type        (1'b0),

@@ -144,11 +144,11 @@ module CTRL(
 				_RF_WA1 = INSTR[11:7];
 				_OP[2:0] = INSTR[14:12];
 				if (_OP == 4'b0101 && INSTR[30]) _OP[3] = 1;
+				else _OP[3] = 0;
 				_isItype = 1;
 				_isLoad = 0;
 				_RF_WE = 1;
                 _D_MEM_WEN = 1;
-			//	ALU(IMM, RF_RD1, OP, RF_WD);
 			end
 				
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
@@ -159,11 +159,11 @@ module CTRL(
 				_RF_WA1 = INSTR[11:7];
 				_OP[2:0] = INSTR[14:12];
 				if (INSTR[30]) _OP[3] = 1;
+				else _OP[3] = 0;
 				_isItype = 0;
 				_isLoad = 0;
 				_RF_WE = 1;
                 _D_MEM_WEN = 1;
-			//	ALU(RF_RD1, RF_RD2, OP, RF_WD);
 			end
 		endcase
     end

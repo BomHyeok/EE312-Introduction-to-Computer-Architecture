@@ -50,8 +50,6 @@ module ALU(A,B,OP,Out);
             4'b0110 : C = A | B;
         // AND
             4'b0111 : C = A & B;
-        
-            default : C = 0;
         endcase
     end
 endmodule
