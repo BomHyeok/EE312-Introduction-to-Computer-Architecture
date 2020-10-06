@@ -1,12 +1,12 @@
 module PC(
-    input wire [31:0] PC,
+    input wire [31:0] Updated_PC,
     input wire CLK,
     input wire RSTn,
-    output wire [31:0] Updated_PC
+    output wire [31:0] PC
     );
 
     reg [31:0] reg_PC;
-    assign Updated_PC = reg_PC;
+    assign PC = reg_PC;
     
     initial begin
 		reg_PC = 0;

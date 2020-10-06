@@ -48,16 +48,17 @@ module RISCV_TOP (
 	assign D_MEM_DOUT = RF_RD2;
 	assign RF_WD = _RF_WD;
 	
-	reg PRE_HALT, _HALT, _RF_WE, INSTR_TYPE;
+	reg PRE_HALT, _HALT, _RF_WE;
 	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
 	reg [31:0] INSTR, _RF_WD;
 	// reg [31:0] INSTR, PC, _Updated_PC, _ALUSRC, _ALU_RESULT, _DataToReg, _RF_WD;
 	// reg [3:0] _OP;
 //	reg [2:0] _OP;
 //	reg _isItype;
+	wire isItype, isLoad;
 	wire [2:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC;
+	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC;
 
 	assign HALT = _HALT;
 //	assign ALUSRC = _ALUSRC;
@@ -72,14 +73,14 @@ module RISCV_TOP (
 	end
 
 	PC pc(
-		.PC		(PC),
+		.Updated_PC	(Updated_PC),
 		.CLK	(CLK),
 		.RSTn	(RSTn),
-		.Updated_PC	(Updated_PC)
+		.PC		(PC)
 	);
 
 	TRANSLATE i_translate(
-		.EFFECTIVE_ADDR          (Updated_PC),
+		.EFFECTIVE_ADDR          (PC),
 		.instruction_type        (1'b1),
 		.data_type   			 (1'b0),
 		.MEM_ADDR         		 (TEMP_MEM_ADDR)
@@ -100,6 +101,8 @@ module RISCV_TOP (
 		.RF_WA1			(RF_WA1),
 		.OP				(OP),
 		.isItype		(isItype),
+		.isLoad			(isLoad),
+		.isJump			(isJump),
 		.RF_WE			(RF_WE),
 		.RF_WD			(RF_WD),
 		.IMM			(IMM),
@@ -141,10 +144,28 @@ module RISCV_TOP (
 	);
 
 	ALU addpc(
-		.A	(Updated_PC),
+		.A	(PC),
 		.B	(32'h00000004),
 		.OP	(3'b000),
 		.Out (ADD_PC)
+	);
+
+	MUX branch(
+		.A		(ADD_PC),
+	//	.B		(BRANCH),
+	//	.S		(isBranchTaken),
+		.B		(ADD_PC),
+		.S		(1'b0),
+		.Out	(BRANCH_PC)
+	);
+
+	MUX jump(
+		.A		(BRANCH_PC),
+	//	.B		(JUMP),
+	//	.S		(isJump),
+		.B		(BRANCH_PC),
+		.S		(1'b0),
+		.Out	(Updated_PC)
 	);
 
 	// does it cover also in sequentially same NUM_INST?

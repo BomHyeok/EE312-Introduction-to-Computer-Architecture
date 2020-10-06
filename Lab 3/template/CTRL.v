@@ -6,7 +6,7 @@ module CTRL(
     output wire [31:0] RF_WD, IMM, 
     output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
     output wire [3:0] D_MEM_BE,
-    output wire RF_WE, isItype, D_MEM_WEN
+    output wire RF_WE, isItype, isLoad, isJump, D_MEM_WEN
     );
 
 
@@ -16,7 +16,7 @@ module CTRL(
     reg [3:0] _D_MEM_BE;
 //    reg [3:0] _OP;
     reg [2:0] _OP;
-    reg _RF_WE, _D_MEM_WEN, _isItype;
+    reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump;
 
     assign IMM = _IMM;
 //    assign PC = _PC;
@@ -29,6 +29,8 @@ module CTRL(
     assign D_MEM_WEN = _D_MEM_WEN;
     assign D_MEM_BE = _D_MEM_BE;
     assign isItype = _isItype;
+    assign isLoad = _isLoad;
+    assign isJump = _isJump;
     
     initial begin
         _IMM = 0;
