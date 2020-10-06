@@ -64,7 +64,7 @@ module TB_RISCV_sort ();
 
 	//I-Memory
 	SP_SRAM #(
-		.ROMDATA ("sort.hex"), //Initialize I-Memory
+		.ROMDATA ("C:\\modelsim_project\\lab3\\3. single-cycle-sol\\sort.hex"), //Initialize I-Memory
 		.AWIDTH  (10),
 		.SIZE    (1024)
 	) i_mem1 (

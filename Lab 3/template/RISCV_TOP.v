@@ -57,7 +57,7 @@ module RISCV_TOP (
 	wire [2:0] Lfunct;
 	wire [3:0] OP, OP_branch;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC, Updated_PC, BRANCH_PC, branch_out, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, ;
+	wire [31:0] PC, ALUSRC, Updated_PC, BRANCH_PC, branch_out, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, LOAD_DATA;
 
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -159,20 +159,21 @@ module RISCV_TOP (
 		.A	(PC),
 		.B	(IMM),
 		.OP	(4'h0),
-		.out	(BRANCH_PC)
+		.Out	(BRANCH_PC)
 	);
 
-	ALU branch-alu	(
+	ALU branch_alu	(
 		.A	(RF_RD1),
 		.B	(RF_RD2),
 		.OP	(OP_branch),
-		.out	(branch_out)
+		.Out	(branch_out)
 	);
 
 	BRANCH_CON Branch_con	(
 		.branch_out	(branch_out),
 		.isbranch	(isbranch),
 		.branch_con	(branch_con)
+
 	);
 
 	MUX branch(

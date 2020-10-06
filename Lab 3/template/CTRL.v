@@ -37,6 +37,7 @@ module CTRL(
         _RF_RA1 = 0;
         _RF_RA2 = 0;
         _OP = 0;
+	_OP_branch = 0;
         _D_MEM_WEN = 1;
         _D_MEM_BE = 0;
         _isItype = 0;
@@ -54,6 +55,10 @@ module CTRL(
 				_isbranch = 0;
 			//	_RF_WD = _IMM;
                 		_D_MEM_WEN = 1;
+               			_OP = 0;
+                		_isItype = 1;
+                		_isLoad = 1;
+               			_Lfunct = 3'b010;
 			end
 					
 			// AUIPC
@@ -63,7 +68,9 @@ module CTRL(
 				_IMM[11:0] = 0;
 				_RF_WA1 = INSTR[11:7];
                 		_D_MEM_WEN = 1;
-				_isbranch = 0;
+				_isbranch = 1;
+				_RF_WE = 0;
+				_OP_branch = 4'b1001;
 			end
 				
 			// JAL
@@ -98,9 +105,9 @@ module CTRL(
 			7'b1100011 :
 			begin
 				_IMM[12:1] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
-				_IMM[0] = 0
-				if (IMM[12] == 0) IMM[31:13] = 0;
-				else IMM[31:13] = 1;
+				_IMM[0] = 0;
+				if (IMM[12] == 0) _IMM[31:13] = 0;
+				else _IMM[31:13] = 1;
 				_RF_RA1 = INSTR[19:15];
 				_RF_RA2 = INSTR[24:20];
 				_OP[2:0] = INSTR[14:12];
