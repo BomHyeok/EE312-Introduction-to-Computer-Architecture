@@ -4,7 +4,7 @@ module CTRL(
     output wire [31:0] IMM, 
     output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
     output wire [3:0] OP, OP_branch, D_MEM_BE,
-    output wire RF_WE, isItype, isLoad, isJump, isbranch, D_MEM_WEN
+    output wire RF_WE, isItype, isLoad, isJump, isbranch, isjalr, D_MEM_WEN
     );
 
 
@@ -13,7 +13,7 @@ module CTRL(
     reg [3:0] _D_MEM_BE;
     reg [3:0] _OP, _OP_branch;
     reg [2:0] _Lfunct;
-    reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump, _isbranch;
+    reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump, _isbranch, _isjalr;
 
     assign IMM = _IMM;
     assign RF_WE = _RF_WE;
@@ -27,6 +27,7 @@ module CTRL(
     assign isItype = _isItype;
     assign isLoad = _isLoad;
     assign isJump = _isJump;
+    assign isjalr = _isjalr;
     assign Lfunct = _Lfunct;
     assign isbranch = _isbranch;
 
@@ -42,6 +43,7 @@ module CTRL(
         _D_MEM_BE = 0;
         _isItype = 0;
 	_isbranch = 0;
+	_isjalr = 0;
     end
     always @ (*) begin
         case (INSTR[6:0])
@@ -58,6 +60,7 @@ module CTRL(
                			_OP = 0;
                 		_isItype = 1;
                 		_isLoad = 1;
+				_isjalr = 0;
                			_Lfunct = 3'b010;
 			end
 					
@@ -69,6 +72,7 @@ module CTRL(
 				_RF_WA1 = INSTR[11:7];
                 		_D_MEM_WEN = 1;
 				_isbranch = 1;
+				_isjalr = 0;
 				_RF_WE = 0;
 				_OP_branch = 4'b1001;
 			end
@@ -76,10 +80,14 @@ module CTRL(
 			// JAL
 			7'b1101111 :
 			begin
-				_IMM[20:0] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
+				_IMM[20:1] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
+				_IMM[0] = 0;
+				if (_IMM[20] == 0) _IMM[31:21]=11'b00000000000;
+				else if (_IMM[20] == 1) _IMM[31:21] = 11'b11111111111;
 				_RF_WA1 = INSTR[11:7];
                 		_D_MEM_WEN = 1;
 				_isbranch = 0;
+				_isjalr = 0;
                 /*
 				Target = PC + _IMM;
 				_RF_WD = PC + 4;
@@ -93,8 +101,11 @@ module CTRL(
 				_IMM[11:0] = INSTR[31:20];
 				_RF_RA1 = INSTR[19:15];
 				_RF_WA1 = INSTR[11:7];
+				_OP = 4'b0000;
+				_isItype = 1;
                			_D_MEM_WEN = 1;
 				_isbranch = 0;
+				_isjalr = 1;
 			/*	Target = (RF_RD1 + _IMM) & 32'hfffffffe;
 				_RF_WD = PC + 4;
 				_PC = Target;
@@ -106,14 +117,15 @@ module CTRL(
 			begin
 				_IMM[12:1] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
 				_IMM[0] = 0;
-				if (IMM[12] == 0) _IMM[31:13] = 0;
-				else _IMM[31:13] = 1;
+				if (IMM[12] == 0) _IMM[31:13] = 19'b0000000000000000000;
+				else _IMM[31:13] = 19'b1111111111111111111;
 				_RF_RA1 = INSTR[19:15];
 				_RF_RA2 = INSTR[24:20];
 				_OP[2:0] = INSTR[14:12];
                 		_D_MEM_WEN = 1;
 				_RF_WE = 0;
 				_isbranch = 1;
+				_isjalr = 0;
 				case(_OP[2:0])
 				3'b000: // BEQ
 				begin
@@ -157,6 +169,7 @@ module CTRL(
                 		_RF_WE = 1;
                 		_D_MEM_WEN = 1;
 				_isbranch = 0;
+				_isjalr = 0;
 			end
 				
 			// Store (SB, SH, SW)
@@ -172,6 +185,7 @@ module CTRL(
                 		_RF_WE = 0;
                 		_D_MEM_WEN = 0;
 				_isbranch = 0;
+				_isjalr = 0;
                 // mem address = d_translate(EFFECTIVE_ADDR)
                 // store RF_RD2 in mem address
                			case (INSTR[14:12])
@@ -197,6 +211,7 @@ module CTRL(
 				_RF_WE = 1;
                 		_D_MEM_WEN = 1;
 				_isbranch = 0;
+				_isjalr = 0;
 			end
 				
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
@@ -213,6 +228,7 @@ module CTRL(
 				_RF_WE = 1;
                 		_D_MEM_WEN = 1;
 				_isbranch = 0;
+				_isjalr = 0;
 			end
 		endcase
     end

@@ -53,11 +53,11 @@ module RISCV_TOP (
 	
 	reg [31:0] INSTR;
 
-	wire isItype, isLoad, isbranch, branch_con;
+	wire isItype, isLoad, isbranch, isjalr, branch_con;
 	wire [2:0] Lfunct;
 	wire [3:0] OP, OP_branch;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC, Updated_PC, BRANCH_PC, branch_out, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, LOAD_DATA;
+	wire [31:0] PC, ALUSRC, Updated_PC, BRANCH_PC, branch_out, IMM, IMM_EX, ALU_RESULT, JALR_RESULT, DataToReg, ADD_PC, LOAD_DATA;
 
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -77,17 +77,22 @@ module RISCV_TOP (
 		I_MEM_ADDR = TEMP_MEM_ADDR;
 		if (isLoad) _RF_WD = DataToReg;
 		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
-		if (RF_WE) _RF_WD = ALU_RESULT;
+		//if (RF_WE) _RF_WD = ALU_RESULT;
+		if (RF_WE) begin
+			if (isjalr == 1) _RF_WD = 1;
+			else _RF_WD = ALU_RESULT;
+		end
+		
 		// for test
-		/*
+		
 		INSTR = I_MEM_DI;
 		$display(INSTR);
 		$display("--------------------------------------------------------------------------------");
      	$display("Instruction: 0x%0h  IsStore: 0x%0h", INSTR, D_MEM_WEN);
     	$display("RF_RD1: 0x%0h, ALUSRC: 0x%0h, IMM: 0x%0h, IMM_EX: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSRC, IMM, IMM_EX, ALU_RESULT);
-    	$display("PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, Updated_PC, NUM_INST);
+    	$display("PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h, isjalr: 0x%0h", PC, Updated_PC, NUM_INST, isjalr);
     	$display("RF_WE: 0x%0h, isLoad: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, isLoad, RF_WD, OUTPUT_PORT);
-		*/
+		
 	end
 
 	CTRL control(
@@ -101,6 +106,7 @@ module RISCV_TOP (
 		.isLoad			(isLoad),
 		.isJump			(isJump),
 		.isbranch		(isbranch),
+		.isjalr			(isjalr),
 		.Lfunct			(Lfunct),
 		.RF_WE			(RF_WE),
 		.IMM			(IMM),
@@ -125,6 +131,12 @@ module RISCV_TOP (
 		.B	(ALUSRC),
 		.OP		(OP),
 		.Out (ALU_RESULT)
+	);
+
+	isJALR isJalr(
+		.isjalr	(isjalr),
+		.ALU_RESULT	(ALU_RESULT),
+		.JALR_RESULT	(JALR_RESULT)
 	);
 
 	LOAD load(
@@ -155,6 +167,25 @@ module RISCV_TOP (
 		.Out (ADD_PC)
 	);
 
+	MUX branch(
+		.A		(ADD_PC),
+	//	.B		(BRANCH),
+	//	.S		(isBranchTaken),
+		.B		(ADD_PC),
+		.S		(1'b0),
+		.Out	(BRANCH_PC)
+	);
+
+	MUX jump(
+		.A		(BRANCH_PC),
+	//	.B		(JUMP),
+	//	.S		(isJump),
+		.B		(BRANCH_PC),
+		.S		(1'b0),
+		.Out	(Updated_PC)
+	);
+	/*
+
 	ALU branch_pc	(
 		.A	(PC),
 		.B	(IMM),
@@ -182,6 +213,7 @@ module RISCV_TOP (
 		.S		(branch_con),
 		.Out		(Updated_PC)
 	);
+	*/
 	/*
 	MUX jump(
 		.A		(BRANCH_PC),
