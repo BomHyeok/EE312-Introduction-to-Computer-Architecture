@@ -11,7 +11,7 @@ module SIGN_EXTEND(
         if (IMM[11] == 0) begin
             TEMP[31:12] = 0;
         end
-        else if (IMM[11] == 0) begin
+        else if (IMM[11] == 1) begin
             TEMP[31:12] = 20'hfffff;
         end
     end

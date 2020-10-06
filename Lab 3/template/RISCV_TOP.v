@@ -132,10 +132,16 @@ module RISCV_TOP (
 		.S	(isItype),
 		.Out	(ALUSRC)
 	);
+
+	LOAD load(
+		.SRC	(D_MEM_DI),
+		.Lfunct	(Lfunct),
+		.Out	(LOAD_DATA)
+	);
 	
 	MUX memtoreg(
 		.A	(ALU_RESULT),
-		.B	(D_MEM_DI),
+		.B	(LOAD_DATA),
 		.S	(isLoad),
 		.Out	(DataToReg)
 	);

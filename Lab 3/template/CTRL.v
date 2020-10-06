@@ -2,7 +2,7 @@ module CTRL(
     input wire [31:0] INSTR,
 //    input wire [3:0] OP,
 //    input wire [31:0] PC, RF_RD1,
-    output wire [2:0] OP,    
+    output wire [2:0] OP, Lfunct,   
     output wire [31:0] RF_WD, IMM, 
     output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
     output wire [3:0] D_MEM_BE,
@@ -15,7 +15,7 @@ module CTRL(
     reg [4:0] _RF_WA1;
     reg [3:0] _D_MEM_BE;
 //    reg [3:0] _OP;
-    reg [2:0] _OP;
+    reg [2:0] _OP, _Lfunct;
     reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump;
 
     assign IMM = _IMM;
@@ -31,7 +31,8 @@ module CTRL(
     assign isItype = _isItype;
     assign isLoad = _isLoad;
     assign isJump = _isJump;
-    
+    assign Lfunct = _Lfunct;
+
     initial begin
         _IMM = 0;
     //    _PC = 0;
@@ -111,8 +112,12 @@ module CTRL(
 				_RF_WA1 = INSTR[11:7];
 			//	EFFECTIVE_ADDR = _IMM + RF_RD1; // ALU add
 			//	_RF_WD = MEM[d_translate(EFFECTIVE_ADDR)];
+                _OP = 0;
+                _isItype = 1;
+                _isLoad = 1;
+                _Lfunct = INSTR[14:12];
+                _RF_WE = 1;
                 _D_MEM_WEN = 1;
-			//	_PC = PC + 4;
 			end
 				
 			// Store (SB, SH, SW)
@@ -122,13 +127,13 @@ module CTRL(
 				_IMM[4:0] = INSTR[11:7];
                 _RF_RA1 = INSTR[19:15];
                 _RF_RA2 = INSTR[24:20];
-                _isItype = 1;
                 _OP = 0;
+                _isItype = 1;
+                _isLoad = 0;
                 _RF_WE = 0;
                 _D_MEM_WEN = 0;
                 // mem address = d_translate(EFFECTIVE_ADDR)
                 // store RF_RD2 in mem address
-                // _PC = PC + 4;
                 case (INSTR[14:12])
                     3'b000 : _D_MEM_BE = 4'b0001;
                     3'b001 : _D_MEM_BE = 4'b0011;
