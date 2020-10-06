@@ -4,7 +4,8 @@ module ALU(A,B,OP,Out);
 
     input wire [31:0] A;
     input wire [31:0] B;
-    input wire [3:0] OP;
+   // input wire [3:0] OP;
+    input wire [2:0] OP;
     output wire [31:0] Out;
 
     reg [31:0] C;

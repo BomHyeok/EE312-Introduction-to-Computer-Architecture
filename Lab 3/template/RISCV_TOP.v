@@ -45,27 +45,27 @@ module RISCV_TOP (
 	
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
+	assign D_MEM_DOUT = RF_RD2;
+	assign RF_WD = _RF_WD;
 	
 	reg PRE_HALT, _HALT, _RF_WE, INSTR_TYPE;
 	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
-	reg [31:0] INSTR, PC, _Updated_PC, _ALUSRC;
-//	reg [31:0] _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC
-//	reg [4:0] _RF_WA;
-	reg [3:0] OP;
+	reg [31:0] INSTR, _RF_WD;
+	// reg [31:0] INSTR, PC, _Updated_PC, _ALUSRC, _ALU_RESULT, _DataToReg, _RF_WD;
+	// reg [3:0] _OP;
+//	reg [2:0] _OP;
+//	reg _isItype;
+	wire [2:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] ALUSRC;
-	wire [31:0] Updated_PC, IMM;
+	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC;
 
 	assign HALT = _HALT;
-	/*
-	assign RF_WE = _RF_WE;
-	assign RF_WD = _RF_WD;
-	assign RF_WA = _RF_WA;
-	assign RF_RA1 = _RF_RA1;
-	assign RF_RA2 = _RF_RA2;
-	*/
-	assign ALUSRC = _ALUSRC;
-	assign Updated_PC = _Updated_PC;
+//	assign ALUSRC = _ALUSRC;
+//	assign Updated_PC = _Updated_PC;
+//	assign DataToReg = _DataToReg;
+//	assign ALU_RESULT = _ALU_RESULT;
+//	assign isItype = _isItype;
+//	assign OP = _OP;
 	
 	initial begin
 		PRE_HALT = 0;
@@ -84,50 +84,68 @@ module RISCV_TOP (
 		.data_type   			 (1'b0),
 		.MEM_ADDR         		 (TEMP_MEM_ADDR)
 	);
-/*
-	TRANSLATE d_translate(
-		.EFFECTIVE_ADDR          (EFFECTIVE_ADDR),
-		.instruction_type        (0),
-		.data_type   			 (1),
-		.MEM_ADDR         		 (MEM_ADDR)
-	);
-*/
-
+	
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
+		if (RF_WE) _RF_WD = DataToReg;
+		// we may delete the following
 		INSTR = I_MEM_DI;
 		$display(INSTR);
 	end
 
 	CTRL control(
-		.INSTR          (INSTR),
-		.PC        		(Updated_PC),
+		.INSTR          (I_MEM_DI),
 		.RF_RA1 		(RF_RA1),
 		.RF_RA2			(RF_RA2),
-		.ALUSRC			(ALUSRC),
-		.RF_RD1			(RF_RD1),
 		.RF_WA1			(RF_WA1),
 		.OP				(OP),
-		.INSTR_TYPE		(INSTR_TYPE),
+		.isItype		(isItype),
+		.RF_WE			(RF_WE),
 		.RF_WD			(RF_WD),
-		.IMM			(IMM)
-	);
-
-	MUX alusrc(
-		.A	(RF_RD1),
-		.B	(IMM),
-		.S	(INSTR_TYPE),
-		.Out	(ALUSRC)
+		.IMM			(IMM),
+		.D_MEM_WEN		(D_MEM_WEN),
+		.D_MEM_BE		(D_MEM_BE)
 	);
 
 	ALU alu(
-		.A	(ALUSRC),
-		.B	(RF_RD2),
+		.A	(RF_RD1),
+		.B	(ALUSRC),
 		.OP		(OP),
-		.Out (RF_WD)
+		.Out (ALU_RESULT)
 	);
 
+	SIGN_EXTENED imm_sign_extended(
+		.IMM	(IMM),
+		.IMM_EX	(IMM_EX)
+	);
+
+	MUX alusrc(
+		.A	(RF_RD2),
+		.B	(IMM_EX),
+		.S	(isItype),
+		.Out	(ALUSRC)
+	);
 	
+	MUX memtoreg(
+		.A	(ALU_RESULT),
+		.B	(D_MEM_DI),
+		.S	(isLoad),
+		.Out	(DataToReg)
+	);
+
+	TRANSLATE d_translate(
+		.EFFECTIVE_ADDR          (ALU_RESULT),
+		.instruction_type        (1'b0),
+		.data_type   			 (1'b1),
+		.MEM_ADDR         		 (D_MEM_ADDR)
+	);
+
+	ALU addpc(
+		.A	(Updated_PC),
+		.B	(32'h00000004),
+		.OP	(3'b000),
+		.Out (ADD_PC)
+	);
 
 	// does it cover also in sequentially same NUM_INST?
 	always @ (INSTR) begin
