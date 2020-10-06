@@ -107,6 +107,7 @@ module RISCV_TOP (
 		.isItype		(isItype),
 		.isLoad			(isLoad),
 		.isJump			(isJump),
+		.Lfunct			(Lfunct),
 		.RF_WE			(RF_WE),
 		.RF_WD			(RF_WD),
 		.IMM			(IMM),

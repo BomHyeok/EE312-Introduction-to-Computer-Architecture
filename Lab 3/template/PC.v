@@ -12,7 +12,7 @@ module PC(
 		reg_PC = 0;
 	end
 
-    always @ (negedge CLK) begin
+    always @ (posedge CLK) begin
 		if (~RSTn) reg_PC = 0;
         else reg_PC = Updated_PC;
 	end
