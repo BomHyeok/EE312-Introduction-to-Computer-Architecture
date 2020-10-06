@@ -46,11 +46,14 @@ module RISCV_TOP (
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
 	assign D_MEM_DOUT = RF_RD2;
+
+
+	reg [31:0] _RF_WD;
 	assign RF_WD = _RF_WD;
 	
 	reg PRE_HALT, _HALT, _RF_WE;
 	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
-	reg [31:0] INSTR, _RF_WD;
+	reg [31:0] INSTR;
 	// reg [31:0] INSTR, PC, _Updated_PC, _ALUSRC, _ALU_RESULT, _DataToReg, _RF_WD;
 	// reg [3:0] _OP;
 //	reg [2:0] _OP;
@@ -89,6 +92,7 @@ module RISCV_TOP (
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
 		if (RF_WE) _RF_WD = DataToReg;
+		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
 		// we may delete the following
 		INSTR = I_MEM_DI;
 		$display(INSTR);
@@ -117,7 +121,7 @@ module RISCV_TOP (
 		.Out (ALU_RESULT)
 	);
 
-	SIGN_EXTENED imm_sign_extended(
+	SIGN_EXTEND imm_sign_extend(
 		.IMM	(IMM),
 		.IMM_EX	(IMM_EX)
 	);
