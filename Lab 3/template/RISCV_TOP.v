@@ -59,9 +59,9 @@ module RISCV_TOP (
 //	reg [2:0] _OP;
 //	reg _isItype;
 	wire isItype, isLoad;
-	wire [2:0] OP;
+	wire [2:0] OP, Lfunct;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC;
+	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA;
 
 	assign HALT = _HALT;
 //	assign ALUSRC = _ALUSRC;

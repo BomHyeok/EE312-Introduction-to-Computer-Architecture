@@ -1,7 +1,7 @@
 module LOAD(
     input wire [31:0] SRC,
     input wire [2:0] Lfunct,
-    output wire [31:0] Out,
+    output wire [31:0] Out
  );
 
     reg [31:0] TEMP;
@@ -21,7 +21,7 @@ module LOAD(
             begin
                 TEMP[15:0] = SRC[15:0];
                 if (SRC[15] == 0) TEMP[31:16] = 0;
-                else (SRC[15] == 1) TEMP[31:16] = 16'hffff;
+                else TEMP[31:16] = 16'hffff;
             end
         // LW
             3'b010 : TEMP = SRC;   
