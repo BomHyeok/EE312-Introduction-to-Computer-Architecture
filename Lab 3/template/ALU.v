@@ -4,8 +4,7 @@ module ALU(A,B,OP,Out);
 
     input wire [31:0] A;
     input wire [31:0] B;
-   // input wire [3:0] OP;
-    input wire [2:0] OP;
+    input wire [3:0] OP;
     output wire [31:0] Out;
 
     reg [31:0] C;
@@ -13,24 +12,26 @@ module ALU(A,B,OP,Out);
 
     always @ (A, B, OP) begin
         case(OP)
-        // ADD / SUB
-            3'b000 : C = A + B;
+        // ADD
+            4'b0000 : C = A + B;
+        // SUB
+            4'b1000 : C = A + B;
         // SLL (logical left shift)
-            3'b001 : C = A << B[4:0];
-        // SLT (perform signed and unsigned compares respectively)
+            4'b0001 : C = A << B[4:0];
+        // SLT 
         // writing 1 to rd if rs1 < rs2, 0 otherwise. 
-            3'b010 : 
+            4'b0010 : 
                 begin
-                    if (A < B) begin
+                    if ($signed(A) < $signed(B)) begin
                         C = 1;
                     end
                     else begin
-                        C = 1;
+                        C = 0;
                     end
                 end
         // SLTU
         // rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
-            3'b011 : 
+            4'b0011 : 
                 begin
                     if (B != 0) begin
                         C = 1;
@@ -40,14 +41,15 @@ module ALU(A,B,OP,Out);
                     end
                 end
         // XOR
-            3'b100 : C = A ^ B;
+            4'b0100 : C = A ^ B;
         // SRL (logical right shift) 
-        // TODO: SRA (arithmetic right shift)
-            3'b101 : C = A >> B[4:0];
+            4'b0101 : C = A >> B[4:0];
+        // SRA (arithmetic right shift)
+            4'b1101 : C = A >>> B[4:0];
         // OR
-            3'b110 : C = A | B;
+            4'b0110 : C = A | B;
         // AND
-            3'b111 : C = A & B;
+            4'b0111 : C = A & B;
         
             default : C = 0;
         endcase

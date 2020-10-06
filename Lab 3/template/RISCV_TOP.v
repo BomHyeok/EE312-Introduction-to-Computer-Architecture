@@ -51,25 +51,18 @@ module RISCV_TOP (
 	reg [31:0] _RF_WD;
 	assign RF_WD = _RF_WD;
 	
-	reg PRE_HALT, _HALT, _RF_WE;
+	reg PRE_HALT, _HALT;
 	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
 	reg [31:0] INSTR;
-	// reg [31:0] INSTR, PC, _Updated_PC, _ALUSRC, _ALU_RESULT, _DataToReg, _RF_WD;
-	// reg [3:0] _OP;
-//	reg [2:0] _OP;
-//	reg _isItype;
+
 	wire isItype, isLoad;
-	wire [2:0] OP, Lfunct;
+	wire [2:0] Lfunct;
+	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
 	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA;
 
 	assign HALT = _HALT;
-//	assign ALUSRC = _ALUSRC;
-//	assign Updated_PC = _Updated_PC;
-//	assign DataToReg = _DataToReg;
-//	assign ALU_RESULT = _ALU_RESULT;
-//	assign isItype = _isItype;
-//	assign OP = _OP;
+
 	
 	initial begin
 		PRE_HALT = 0;
@@ -91,8 +84,9 @@ module RISCV_TOP (
 	
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
-		if (RF_WE) _RF_WD = DataToReg;
+		if (isLoad) _RF_WD = DataToReg;
 		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
+		if (RF_WE) _RF_WD = ALU_RESULT;
 		// we may delete the following
 		INSTR = I_MEM_DI;
 		$display(INSTR);
@@ -109,17 +103,9 @@ module RISCV_TOP (
 		.isJump			(isJump),
 		.Lfunct			(Lfunct),
 		.RF_WE			(RF_WE),
-		.RF_WD			(RF_WD),
 		.IMM			(IMM),
 		.D_MEM_WEN		(D_MEM_WEN),
 		.D_MEM_BE		(D_MEM_BE)
-	);
-
-	ALU alu(
-		.A	(RF_RD1),
-		.B	(ALUSRC),
-		.OP		(OP),
-		.Out (ALU_RESULT)
 	);
 
 	SIGN_EXTEND imm_sign_extend(
@@ -132,6 +118,13 @@ module RISCV_TOP (
 		.B	(IMM_EX),
 		.S	(isItype),
 		.Out	(ALUSRC)
+	);
+
+	ALU alu(
+		.A	(RF_RD1),
+		.B	(ALUSRC),
+		.OP		(OP),
+		.Out (ALU_RESULT)
 	);
 
 	LOAD load(
@@ -147,6 +140,7 @@ module RISCV_TOP (
 		.Out	(DataToReg)
 	);
 
+	// if SB, SH, SW
 	TRANSLATE d_translate(
 		.EFFECTIVE_ADDR          (ALU_RESULT),
 		.instruction_type        (1'b0),
@@ -157,7 +151,7 @@ module RISCV_TOP (
 	ALU addpc(
 		.A	(PC),
 		.B	(32'h00000004),
-		.OP	(3'b000),
+		.OP	(4'h0),
 		.Out (ADD_PC)
 	);
 
@@ -179,8 +173,7 @@ module RISCV_TOP (
 		.Out	(Updated_PC)
 	);
 
-	// does it cover also in sequentially same NUM_INST?
-	always @ (INSTR) begin
+//	HALT
 		/*
 		if (INSTR == 32'h00c00093) begin
 			PRE_HALT = 1;
@@ -194,5 +187,5 @@ module RISCV_TOP (
 		end
 		*/
 		
-	end
+
 endmodule //

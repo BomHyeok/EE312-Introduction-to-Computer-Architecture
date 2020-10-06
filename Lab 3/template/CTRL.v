@@ -1,27 +1,22 @@
 module CTRL(
     input wire [31:0] INSTR,
-//    input wire [3:0] OP,
-//    input wire [31:0] PC, RF_RD1,
-    output wire [2:0] OP, Lfunct,   
-    output wire [31:0] RF_WD, IMM, 
+    output wire [2:0] Lfunct,   
+    output wire [31:0] IMM, 
     output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
-    output wire [3:0] D_MEM_BE,
+    output wire [3:0] OP, D_MEM_BE,
     output wire RF_WE, isItype, isLoad, isJump, D_MEM_WEN
     );
 
 
-    reg [31:0] _IMM, _RF_RA1, _RF_RA2, _RF_WD, Target, EFFECTIVE_ADDR, _OUTPUT_PORT;
-//	reg [31:0] _PC;
+    reg [31:0] _IMM, _RF_RA1, _RF_RA2, Target, EFFECTIVE_ADDR, _OUTPUT_PORT;
     reg [4:0] _RF_WA1;
     reg [3:0] _D_MEM_BE;
-//    reg [3:0] _OP;
-    reg [2:0] _OP, _Lfunct;
+    reg [3:0] _OP;
+    reg [2:0] _Lfunct;
     reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump;
 
     assign IMM = _IMM;
-//    assign PC = _PC;
     assign RF_WE = _RF_WE;
-	assign RF_WD = _RF_WD;
 	assign RF_WA1 = _RF_WA1;
 	assign RF_RA1 = _RF_RA1;
 	assign RF_RA2 = _RF_RA2;
@@ -35,9 +30,7 @@ module CTRL(
 
     initial begin
         _IMM = 0;
-    //    _PC = 0;
         _RF_WE = 0;
-        _RF_WD = 0;
         _RF_WA1 = 0;
         _RF_RA1 = 0;
         _RF_RA2 = 0;
@@ -55,7 +48,7 @@ module CTRL(
 				_IMM[11:0] = 12'h000;
 				_RF_WA1 = INSTR[11:7];
 				_RF_WE = 1;
-				_RF_WD = _IMM;
+			//	_RF_WD = _IMM;
                 _D_MEM_WEN = 1;
 			end
 					
@@ -100,7 +93,7 @@ module CTRL(
 				_IMM[12:0] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
 				_RF_RA1 = INSTR[19:15];
 				_RF_RA2 = INSTR[24:20];
-				_OP = INSTR[14:12];
+				_OP[2:0] = INSTR[14:12];
                 _D_MEM_WEN = 1;
 			end
 				
@@ -148,10 +141,12 @@ module CTRL(
 			begin
 				_IMM[11:0] = INSTR[31:20];
 				_RF_RA1 = INSTR[19:15];
-				_RF_WE = 1;
 				_RF_WA1 = INSTR[11:7];
-				_OP = INSTR[14:12];
+				_OP[2:0] = INSTR[14:12];
+				if (INSTR[30]) _OP[3] = 1;
 				_isItype = 1;
+				_isLoad = 0;
+				_RF_WE = 1;
                 _D_MEM_WEN = 1;
 			//	ALU(IMM, RF_RD1, OP, RF_WD);
 			end
@@ -161,15 +156,15 @@ module CTRL(
 			begin
 				_RF_RA1 = INSTR[19:15];
 				_RF_RA2 = INSTR[24:20];
-				_RF_WE = 1;
 				_RF_WA1 = INSTR[11:7];
-				_OP = INSTR[14:12];
+				_OP[2:0] = INSTR[14:12];
+				if (INSTR[30]) _OP[3] = 1;
 				_isItype = 0;
+				_isLoad = 0;
+				_RF_WE = 1;
                 _D_MEM_WEN = 1;
 			//	ALU(RF_RD1, RF_RD2, OP, RF_WD);
 			end
-				
-			default: _RF_WD = 0; // need to modify
 		endcase
     end
 endmodule
