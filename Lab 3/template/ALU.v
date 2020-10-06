@@ -1,34 +1,39 @@
 //`timescale 1ns / 100ps
 // change input RD1 to also effect to imm 
-module ALU(A,B,OP,C);
+module ALU(A,B,OP,Out);
 
     input wire [31:0] A;
     input wire [31:0] B;
     input wire [3:0] OP;
-    output wire reg [31:0] C;
+    output wire [31:0] Out;
+
+    reg [31:0] C;
+    assign Out = C;
 
     always @ (A, B, OP) begin
         case(OP)
-        // ADD / SUB
-            3'b000 : C = A + B;
+        // ADD
+            4'b0000 : C = A + B;
+        // SUB
+            4'b1000 : C = A - B;
         // SLL (logical left shift)
-            3'b001 : C = A << B[4:0];
-        // SLT (perform signed and unsigned compares respectively)
-        // writing 1 to rd if rs1 < rs2, 0 otherwise. 
-            3'b010 : 
+            4'b0001 : C = A << B[4:0];
+        // SLT 
+            4'b0010 : 
                 begin
-                    if (A < B) begin
+                    if ($signed(A) < $signed(B)) begin
                         C = 1;
                     end
                     else begin
-                        C = 1;
+                        C = 0;
                     end
                 end
         // SLTU
-        // rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
-            3'b011 : 
+        // SLTU rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
+        // SLTIU rd, rs1, 1 sets rd to 1 if rs1 equals zero, otherwise sets rd to 0
+            4'b0011 : 
                 begin
-                    if (B != 0) begin
+                    if (A < B) begin
                         C = 1;
                     end
                     else begin
@@ -36,16 +41,49 @@ module ALU(A,B,OP,C);
                     end
                 end
         // XOR
-            3'b100 : C = A ^ B;
+            4'b0100 : C = A ^ B;
         // SRL (logical right shift) 
-        // TODO: SRA (arithmetic right shift)
-            3'b101 : C = A >> B[4:0];
+            4'b0101 : C = A >> B[4:0];
+        // SRA (arithmetic right shift)
+            4'b1101 : C = A >>> B[4:0];
         // OR
-            3'b110 : C = A | B;
-        // AND
-            3'b111 : C = A & B;
-        
-            default : C = 0;
+            4'b0110 : C = A | B;
+        // BEQ
+            4'b1001 :
+		begin
+			if (A == B) C = 1;
+			else C = 0;
+		end
+        // BNE
+            4'b1010 :
+		begin
+			if (A != B) C = 1;
+			else C = 0;
+		end
+        // BLT
+            4'b1011 :
+		begin
+			if ($signed(A) < $signed(B)) C = 1;
+			else C = 0;
+		end
+        // BGE
+            4'b1100 :
+		begin
+			if ($signed(A) >= $signed(B)) C = 1;
+			else C = 0;
+		end
+        // BLTU
+            4'b1110 :
+		begin
+			if (A < B) C = 1;
+			else C = 0;
+		end
+        // BGEU
+            4'b1111 :
+		begin
+			if (A >= B) C = 1;
+			else C = 0;
+		end
         endcase
     end
 endmodule

@@ -1,3 +1,4 @@
+
 module TRANSLATE(
     input wire [31:0] EFFECTIVE_ADDR,
     input wire instruction_type,

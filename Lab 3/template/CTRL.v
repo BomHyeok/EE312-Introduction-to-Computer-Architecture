@@ -1,70 +1,212 @@
 module CTRL(
-	input wire [31:0] _INSTR,
+    input wire [31:0] INSTR,
+    output wire [2:0] Lfunct,   
+    output wire [31:0] IMM, 
+    output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
+    output wire [3:0] OP, OP_branch, D_MEM_BE,
+    output wire RF_WE, isItype, isLoad, isJump, isbranch, D_MEM_WEN
+    );
 
-	output wire [31:0] IMM,
-	output wire [31:0] RF_WD,
-	output wire [4:0] RF_RA1,
-	output wire [4:0] RF_RA2,
-	output wire [4:0] RF_WA,
-	output wire RF_WE,
-	output wire INSTR_TYPE,
-	output wire [3:0] OP,
-	output wire HALT
-	
-);
-	reg [31:0] _IMM, INSTR, _RF_WD;
-	reg [4:0] _RF_RA1, _RF_RA2, _RF_WA;
-	reg PRE_HALT, _HALT, _RF_WE, _INSTR_TYPE;
-	reg [3:0] _OP;
 
-	assign IMM = _IMM;
+    reg [31:0] _IMM, _RF_RA1, _RF_RA2, Target, EFFECTIVE_ADDR, _OUTPUT_PORT;
+    reg [4:0] _RF_WA1;
+    reg [3:0] _D_MEM_BE;
+    reg [3:0] _OP, _OP_branch;
+    reg [2:0] _Lfunct;
+    reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump, _isbranch;
+
+    assign IMM = _IMM;
+    assign RF_WE = _RF_WE;
+	assign RF_WA1 = _RF_WA1;
 	assign RF_RA1 = _RF_RA1;
 	assign RF_RA2 = _RF_RA2;
-	assign RF_WE = _RF_WE;
-	assign RF_WD = _RF_WD;
-	assign INSTR_TYPE = _INSTR_TYPE;
-	assign OP = _OP;
-	assign HALT = _HALT;
+    assign OP = _OP;
+    assign OP_branch = _OP_branch;
+    assign D_MEM_WEN = _D_MEM_WEN;
+    assign D_MEM_BE = _D_MEM_BE;
+    assign isItype = _isItype;
+    assign isLoad = _isLoad;
+    assign isJump = _isJump;
+    assign Lfunct = _Lfunct;
+    assign isbranch = _isbranch;
 
-	initial begin
-		PRE_HALT <= 0;
-	end
+    initial begin
+        _IMM = 0;
+        _RF_WE = 0;
+        _RF_WA1 = 0;
+        _RF_RA1 = 0;
+        _RF_RA2 = 0;
+        _OP = 0;
+        _D_MEM_WEN = 1;
+        _D_MEM_BE = 0;
+        _isItype = 0;
+	_isbranch = 0;
+    end
+    always @ (*) begin
+        case (INSTR[6:0])
+			// LUI
+			7'b0110111 :
+			begin
+				_IMM[31:12] = INSTR[31:12];
+				_IMM[11:0] = 12'h000;
+				_RF_WA1 = INSTR[11:7];
+				_RF_WE = 1;
+				_isbranch = 0;
+			//	_RF_WD = _IMM;
+                		_D_MEM_WEN = 1;
+			end
+					
+			// AUIPC
+			7'b0010111 :
+			begin
+				_IMM[31:12] = INSTR[31:12];
+				_IMM[11:0] = 0;
+				_RF_WA1 = INSTR[11:7];
+                		_D_MEM_WEN = 1;
+				_isbranch = 0;
+			end
+				
+			// JAL
+			7'b1101111 :
+			begin
+				_IMM[20:0] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
+				_RF_WA1 = INSTR[11:7];
+                		_D_MEM_WEN = 1;
+				_isbranch = 0;
+                /*
+				Target = PC + _IMM;
+				_RF_WD = PC + 4;
+				_PC = Target;
+                */
+			end
+				
+			// JALR
+			7'b1100111 :
+			begin
+				_IMM[11:0] = INSTR[31:20];
+				_RF_RA1 = INSTR[19:15];
+				_RF_WA1 = INSTR[11:7];
+               			_D_MEM_WEN = 1;
+				_isbranch = 0;
+			/*	Target = (RF_RD1 + _IMM) & 32'hfffffffe;
+				_RF_WD = PC + 4;
+				_PC = Target;
+                */
+			end
+				
+			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
+			7'b1100011 :
+			begin
+				_IMM[12:1] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
+				_IMM[0] = 0
+				if (IMM[12] == 0) IMM[31:13] = 0;
+				else IMM[31:13] = 1;
+				_RF_RA1 = INSTR[19:15];
+				_RF_RA2 = INSTR[24:20];
+				_OP[2:0] = INSTR[14:12];
+                		_D_MEM_WEN = 1;
+				_RF_WE = 0;
+				_isbranch = 1;
+				case(_OP[2:0])
+				3'b000: // BEQ
+				begin
+					_OP_branch = 4'b1001;
+				end
+				3'b001: //BNE
+				begin
+					_OP_branch = 4'b1010;
+				end
+				3'b100: //BLT
+				begin
+					_OP_branch = 4'b1011;
+				end
+				3'b101: //BGE
+				begin
+					_OP_branch = 4'b1100;
+				end
+				3'b110: //BLTU
+				begin
+					_OP_branch = 4'b1110;
+				end
+				3'b111: //BGEU
+				begin
+					_OP_branch = 4'b1111;
+				end
+				endcase
+			end
+				
 
-	always @ (*) begin
-		INSTR = _INSTR;
-		if (INSTR == 32'h00c00093) begin
-			PRE_HALT = 1;
-		end 
-		else begin
-			PRE_HALT = 0;
-		end
-		if (PRE_HALT == 1 && INSTR == 32'h00008067) begin
-			PRE_HALT = 0;
-			_HALT = 1;
-		end
-		case (INSTR[6:0])
+			// I Type Load (LB, LH, LW, LBU, LHU)
+			7'b0000011 :
+			begin
+				_IMM[11:0] = INSTR[31:20];
+				_RF_WA1 = INSTR[11:7];
+			//	EFFECTIVE_ADDR = _IMM + RF_RD1; // ALU add
+			//	_RF_WD = MEM[d_translate(EFFECTIVE_ADDR)];
+               			_OP = 0;
+                		_isItype = 1;
+                		_isLoad = 1;
+                		_Lfunct = INSTR[14:12];
+                		_RF_WE = 1;
+                		_D_MEM_WEN = 1;
+				_isbranch = 0;
+			end
+				
+			// Store (SB, SH, SW)
+			7'b0100011 :
+			begin
+				_IMM[11:5] = INSTR[31:25];
+				_IMM[4:0] = INSTR[11:7];
+                		_RF_RA1 = INSTR[19:15];
+                		_RF_RA2 = INSTR[24:20];
+                		_OP = 0;
+                		_isItype = 1;
+                		_isLoad = 0;
+                		_RF_WE = 0;
+                		_D_MEM_WEN = 0;
+				_isbranch = 0;
+                // mem address = d_translate(EFFECTIVE_ADDR)
+                // store RF_RD2 in mem address
+               			case (INSTR[14:12])
+                    			3'b000 : _D_MEM_BE = 4'b0001;
+                    			3'b001 : _D_MEM_BE = 4'b0011;
+                    			3'b010 : _D_MEM_BE = 4'b1111;
+                		endcase
+
+			end
+				
+
 			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
 			7'b0010011 :
 			begin
 				_IMM[11:0] = INSTR[31:20];
 				_RF_RA1 = INSTR[19:15];
+				_RF_WA1 = INSTR[11:7];
+				_OP[2:0] = INSTR[14:12];
+				if (_OP == 4'b0101 && INSTR[30]) _OP[3] = 1;
+				else _OP[3] = 0;
+				_isItype = 1;
+				_isLoad = 0;
 				_RF_WE = 1;
-				_RF_WA = INSTR[11:7];
-				_OP = INSTR[14:12];
-				_INSTR_TYPE = 1;
+                		_D_MEM_WEN = 1;
+				_isbranch = 0;
 			end
-		
+				
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 			7'b0110011 :
 			begin
 				_RF_RA1 = INSTR[19:15];
 				_RF_RA2 = INSTR[24:20];
+				_RF_WA1 = INSTR[11:7];
+				_OP[2:0] = INSTR[14:12];
+				if (INSTR[30]) _OP[3] = 1;
+				else _OP[3] = 0;
+				_isItype = 0;
+				_isLoad = 0;
 				_RF_WE = 1;
-				_RF_WA = INSTR[11:7];
-				_OP = INSTR[14:12];
-				_INSTR_TYPE = 0;
+                		_D_MEM_WEN = 1;
+				_isbranch = 0;
 			end
-			default: _RF_WD = 0; // need to modify
 		endcase
-	end
+    end
 endmodule

@@ -43,26 +43,28 @@ module RISCV_TOP (
 
 	// TODO: implement
 	
-	
-	reg _HALT, _RF_WE, INSTR_TYPE;
-	// INSTR_TYPE = {R, I} 이런식으로 DEFINE 같은 게 있으면 더 좋을듯
-	reg [31:0] INSTR, IMM, PC, _RF_WD, Target, EFFECTIVE_ADDR, _ALUSRC;
-	reg [4:0] _RF_RA1, _RF_RA2, _RF_WA;
-	reg [3:0] OP;
-	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] ALUSRC;
+	assign I_MEM_CSN = ~RSTn;
+	assign D_MEM_CSN = ~RSTn;
+	assign D_MEM_DOUT = RF_RD2;
 
-	assign HALT = _HALT;
-	assign RF_WE = _RF_WE;
+
+	reg [31:0] _RF_WD;
 	assign RF_WD = _RF_WD;
-	assign RF_WA1 = _RF_WA;
-	assign RF_RA1 = _RF_RA1;
-	assign RF_RA2 = _RF_RA2;
-	assign ALUSRC = _ALUSRC;
 	
-	initial begin
-		PC <= 0;
-	end
+	reg [31:0] INSTR;
+
+	wire isItype, isLoad, isbranch, branch_con;
+	wire [2:0] Lfunct;
+	wire [3:0] OP, OP_branch;
+	wire [11:0] TEMP_MEM_ADDR;
+	wire [31:0] PC, ALUSRC, Updated_PC, BRANCH_PC, branch_out, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, ;
+
+	PC pc(
+		.Updated_PC	(Updated_PC),
+		.CLK	(CLK),
+		.RSTn	(RSTn),
+		.PC		(PC)
+	);
 
 	TRANSLATE i_translate(
 		.EFFECTIVE_ADDR          (PC),
@@ -70,172 +72,128 @@ module RISCV_TOP (
 		.data_type   			 (1'b0),
 		.MEM_ADDR         		 (TEMP_MEM_ADDR)
 	);
-/*
-	TRANSLATE d_translate(
-		.EFFECTIVE_ADDR          (EFFECTIVE_ADDR),
-		.instruction_type        (0),
-		.data_type   			 (1),
-		.MEM_ADDR         		 (MEM_ADDR)
-	);
-*/
-
+	
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
+		if (isLoad) _RF_WD = DataToReg;
+		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
+		if (RF_WE) _RF_WD = ALU_RESULT;
+		// for test
+		/*
 		INSTR = I_MEM_DI;
 		$display(INSTR);
+		$display("--------------------------------------------------------------------------------");
+     	$display("Instruction: 0x%0h  IsStore: 0x%0h", INSTR, D_MEM_WEN);
+    	$display("RF_RD1: 0x%0h, ALUSRC: 0x%0h, IMM: 0x%0h, IMM_EX: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSRC, IMM, IMM_EX, ALU_RESULT);
+    	$display("PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, Updated_PC, NUM_INST);
+    	$display("RF_WE: 0x%0h, isLoad: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, isLoad, RF_WD, OUTPUT_PORT);
+		*/
 	end
 
-	assign I_MEM_CSN = ~RSTn;
-	assign D_MEM_CSN = ~RSTn;
-
 	CTRL control(
-		._INSTR (INSTR),
+		.INSTR          (I_MEM_DI),
+		.RF_RA1 		(RF_RA1),
+		.RF_RA2			(RF_RA2),
+		.RF_WA1			(RF_WA1),
+		.OP				(OP),
+		.OP_branch		(OP_branch),
+		.isItype		(isItype),
+		.isLoad			(isLoad),
+		.isJump			(isJump),
+		.isbranch		(isbranch),
+		.Lfunct			(Lfunct),
+		.RF_WE			(RF_WE),
+		.IMM			(IMM),
+		.D_MEM_WEN		(D_MEM_WEN),
+		.D_MEM_BE		(D_MEM_BE)
+	);
+
+	SIGN_EXTEND imm_sign_extend(
 		.IMM	(IMM),
-		.RF_RA1	(_RF_RA1),
-		.RF_RA2	(_RF_RA2),
-		.RF_WA	(_RF_WA),
-		.RF_WE	(_RF_WE),
-		.RF_WD	(_RF_WD),
-		._INST_TYPE	(INSTR_TYPE),
-		.OP	(OP),
-		.HALT	(_HALT)
+		.IMM_EX	(IMM_EX)
 	);
 
 	MUX alusrc(
-		.A	(RF_RD1),
-		.B	(IMM),
-		.S	(INSTR_TYPE),
+		.A	(RF_RD2),
+		.B	(IMM_EX),
+		.S	(isItype),
 		.Out	(ALUSRC)
 	);
 
 	ALU alu(
-		.A	(ALUSRC),
-		.B	(RF_RD2),
-		.OP	(OP),
-		.C	(RF_WD)
+		.A	(RF_RD1),
+		.B	(ALUSRC),
+		.OP		(OP),
+		.Out (ALU_RESULT)
 	);
 
-	/*
-	always @ (negedge CLK) begin
-		
-		if (RSTn == 1) begin
-			assign I_MEM_CSN = 0;
-			assign D_MEM_CSN = 0;
-		end
-		else begin
-			assign I_MEM_CSN = 1;
-			assign D_MEM_CSN = 1;
-		end
-		
-	end
-	*/
-	// does it cover also in sequentially same NUM_INST?
-	/*
-	always @ (INSTR) begin
-		if (INSTR == 32'h00c00093) begin
-			PRE_HALT = 1;
-		end 
-		else begin
-			PRE_HALT = 0;
-		end
-		if (PRE_HALT == 1 && INSTR == 32'h00008067) begin
-			PRE_HALT = 0;
-			_HALT = 1;
-		end
-		case (INSTR[6:0])
-			// LUI
-			7'b0110111 :
-			begin
-				IMM[31:12] = INSTR[31:12];
-				IMM[11:0] = 12'h000;
-				_RF_WA = INSTR[11:7];
-				_RF_WE = 1;
-				_RF_WD = IMM;
-			end
-					
-			// AUIPC
-			7'b0010111 :
-			begin
-				IMM[31:12] = INSTR[31:12];
-				IMM[11:0] = 0;
-				_RF_WA = INSTR[11:7];
-			end
-				
-			// JAL
-			7'b1101111 :
-			begin
-				IMM[20:0] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
-				_RF_WA = INSTR[11:7];
-				Target = PC + IMM;
-				_RF_WD = PC + 4;
-				PC = Target;
-			end
-				
-			// JALR
-			7'b1100111 :
-			begin
-				IMM[11:0] = INSTR[31:20];
-				_RF_RA1 = INSTR[19:15];
-				_RF_WA = INSTR[11:7];
-				Target = (RF_RD1 + IMM) & 32'hfffffffe;
-				_RF_WD = PC + 4;
-				PC = Target;
-			end
-				
-			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
-			7'b1100011 :
-			begin
-				IMM[12:0] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
-				_RF_RA1 = INSTR[19:15];
-				_RF_RA2 = INSTR[24:20];
-				OP = INSTR[14:12];
-			end
-				
+	LOAD load(
+		.SRC	(D_MEM_DI),
+		.Lfunct	(Lfunct),
+		.Out	(LOAD_DATA)
+	);
+	
+	MUX memtoreg(
+		.A	(ALU_RESULT),
+		.B	(LOAD_DATA),
+		.S	(isLoad),
+		.Out	(DataToReg)
+	);
 
-			// I Type Load (LB, LH, LW, LBU, LHU)
-			7'b0000011 :
-			begin
-				IMM[11:0] = INSTR[31:20];
-				_RF_WA = INSTR[11:7];
-				EFFECTIVE_ADDR = IMM + RF_RD1;
-			//	_RF_WD = MEM[d_translate(EFFECTIVE_ADDR)];
-				PC = PC + 4;
-			end
-				
-			// Store (SB, SH, SW)
-			7'b0100011 :
-			begin
-				IMM[11:5] = INSTR[31:25];
-				IMM[4:0] = INSTR[11:7];
-			end
-				
+	// SB, SH, SW
+	TRANSLATE d_translate(
+		.EFFECTIVE_ADDR          (ALU_RESULT),
+		.instruction_type        (1'b0),
+		.data_type   			 (1'b1),
+		.MEM_ADDR         		 (D_MEM_ADDR)
+	);
 
-			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
-			7'b0010011 :
-			begin
-				IMM[11:0] = INSTR[31:20];
-				_RF_RA1 = INSTR[19:15];
-				_RF_WE = 1;
-				_RF_WA = INSTR[11:7];
-				OP = INSTR[14:12];
-				INSTR_TYPE = 1;
-			//	ALU(IMM, RF_RD2, OP, RF_WD);
-			end
-				
-			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
-			7'b0110011 :
-			begin
-				_RF_RA1 = INSTR[19:15];
-				_RF_RA2 = INSTR[24:20];
-				_RF_WE = 1;
-				_RF_WA = INSTR[11:7];
-				OP = INSTR[14:12];
-				INSTR_TYPE = 0;
-			//	ALU(RF_RD1, RF_RD2, OP, RF_WD);
-			end
-				
-			default: _RF_WD = 0; // need to modify
-		endcase
-	end
+	ALU addpc(
+		.A	(PC),
+		.B	(32'h00000004),
+		.OP	(4'h0),
+		.Out (ADD_PC)
+	);
+
+	ALU branch_pc	(
+		.A	(PC),
+		.B	(IMM),
+		.OP	(4'h0),
+		.out	(BRANCH_PC)
+	);
+
+	ALU branch-alu	(
+		.A	(RF_RD1),
+		.B	(RF_RD2),
+		.OP	(OP_branch),
+		.out	(branch_out)
+	);
+
+	BRANCH_CON Branch_con	(
+		.branch_out	(branch_out),
+		.isbranch	(isbranch),
+		.branch_con	(branch_con)
+	);
+
+	MUX branch(
+		.A		(ADD_PC),
+		.B		(BRANCH_PC),
+		.S		(branch_con),
+		.Out		(Updated_PC)
+	);
+	/*
+	MUX jump(
+		.A		(BRANCH_PC),
+	//	.B		(JUMP),
+	//	.S		(isJump),
+		.B		(BRANCH_PC),
+		.S		(1'b0),
+		.Out	(Updated_PC)
+	);
 	*/
-endmodule //
+	HALT halt(
+		.INSTR	(I_MEM_DI),
+		.HALT	(HALT)	
+	);
+		
+endmodule 
