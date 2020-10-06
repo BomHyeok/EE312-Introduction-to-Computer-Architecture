@@ -171,19 +171,9 @@ module RISCV_TOP (
 		.Out	(Updated_PC)
 	);
 
-//	HALT
-		/*
-		if (INSTR == 32'h00c00093) begin
-			PRE_HALT = 1;
-		end 
-		else begin
-			PRE_HALT = 0;
-		end
-		if (PRE_HALT == 1 && INSTR == 32'h00008067) begin
-			PRE_HALT = 0;
-			_HALT = 1;
-		end
-		*/
+	HALT halt(
+		.INSTR	(I_MEM_DI),
+		.HALT	(HALT)	
+	);
 		
-
-endmodule //
+endmodule 
