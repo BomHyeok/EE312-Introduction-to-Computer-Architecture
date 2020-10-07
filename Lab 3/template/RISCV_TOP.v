@@ -30,8 +30,6 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
 	);
 
-	assign OUTPUT_PORT = _OUTPUT_PORT;
-
 	initial begin
 		NUM_INST <= 0;
 	end
@@ -58,7 +56,8 @@ module RISCV_TOP (
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
 	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM, _OUTPUT_PORT;
-
+	
+	assign OUTPUT_PORT = _OUTPUT_PORT;
 	PC pc(
 		.Updated_PC	(Updated_PC),
 		.CLK	(CLK),
@@ -92,7 +91,7 @@ module RISCV_TOP (
 		*/
 	end
 
-	OUTPUT output(
+	OUTPUT Output(
 		._RF_WD			(_RF_WD),
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
