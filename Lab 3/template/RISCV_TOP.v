@@ -30,7 +30,7 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
 	);
 
-	assign OUTPUT_PORT = RF_WD;
+	assign OUTPUT_PORT = _OUTPUT_PORT;
 
 	initial begin
 		NUM_INST <= 0;
@@ -53,11 +53,11 @@ module RISCV_TOP (
 	
 	reg [31:0] INSTR;
 
-	wire isItype, isLoad, isJump, isJAL, isJALR, isBranch, isBranchTaken;
+	wire noRA1, isItype, isAUIPC,isLoad, isJump, isJAL, isJALR, isBranch, isBranchTaken;
 	wire [2:0] Lfunct;
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM;
+	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM, _OUTPUT_PORT;
 
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -84,7 +84,6 @@ module RISCV_TOP (
 		// for test
 		/*
 		INSTR = I_MEM_DI;
-		$display(INSTR);
 		$display("--------------------------------------------------------------------------------");
      	$display("Instruction: 0x%0h  IsStore: 0x%0h", INSTR, D_MEM_WEN);
     	$display("RF_RD1: 0x%0h, ALUSRC: 0x%0h, IMM: 0x%0h, IMM_EX: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSRC, IMM, IMM_EX, ALU_RESULT);
@@ -92,6 +91,13 @@ module RISCV_TOP (
     	$display("RF_WE: 0x%0h, isLoad: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, isLoad, RF_WD, OUTPUT_PORT);
 		*/
 	end
+
+	OUTPUT output(
+		._RF_WD			(_RF_WD),
+		.isBranch		(isBranch),
+		.isBranchTaken	(isBranchTaken),
+		.OUTPUT_PORT	(_OUTPUT_PORT)
+	);
 
 	CTRL control(
 		.INSTR          (I_MEM_DI),

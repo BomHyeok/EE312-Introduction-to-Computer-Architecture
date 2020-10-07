@@ -15,6 +15,7 @@
 `include "HALT.v"
 `include "JUMP.v"
 `include "AND.v"
+`include "OUTPUT.v"
 
 module TB_RISCV_inst ();
 	//General Signals
