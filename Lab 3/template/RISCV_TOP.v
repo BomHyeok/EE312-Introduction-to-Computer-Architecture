@@ -54,19 +54,19 @@ module RISCV_TOP (
 	wire [11:0] TEMP_MEM_ADDR;
 	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM, PRE_INSTR;
 	
-	PC pc(
-		.Updated_PC	(Updated_PC),
-		.CLK	(CLK),
-		.RSTn	(RSTn),
-		.PC		(PC)
+	CLKUPDATE pc(
+		.Updated_A	(Updated_PC),
+		.CLK		(CLK),
+		.RSTn		(RSTn),
+		.A			(PC)
 	);
 
-	PC pre_instr(
-		.Updated_PC		(D_MEM_DI),
+	CLKUPDATE instr(
+		.Updated_A		(INSTR),
 		.CLK			(CLK),
 		.RSTn			(RSTn),
-		.PC				(PRE_INSTR)
-	)
+		.A				(PRE_INSTR)
+	);
 
 	TRANSLATE i_translate(
 		.EFFECTIVE_ADDR          (PC),
@@ -77,6 +77,7 @@ module RISCV_TOP (
 	
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
+		INSTR = D_MEM_DI;
 		// for test
 		/*
 		INSTR = I_MEM_DI;

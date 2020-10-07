@@ -9,7 +9,7 @@
 `include "translate.v"
 `include "MUX.v"
 `include "CTRL.v"
-`include "PC.v"
+`include "CLKUPDATE.v"
 `include "SIGN_EXTEND.v"
 `include "LOAD.v"
 `include "HALT.v"
