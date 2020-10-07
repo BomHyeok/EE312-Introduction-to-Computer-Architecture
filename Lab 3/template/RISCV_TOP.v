@@ -61,13 +61,6 @@ module RISCV_TOP (
 		.A			(PC)
 	);
 
-	CLKUPDATE instr(
-		.Updated_A		(INSTR),
-		.CLK			(CLK),
-		.RSTn			(RSTn),
-		.A				(PRE_INSTR)
-	);
-
 	TRANSLATE i_translate(
 		.EFFECTIVE_ADDR          (PC),
 		.instruction_type        (1'b1),
@@ -77,7 +70,7 @@ module RISCV_TOP (
 	
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
-		INSTR = D_MEM_DI;
+		INSTR = I_MEM_DI;
 		// for test
 		/*
 		INSTR = I_MEM_DI;
@@ -148,7 +141,7 @@ module RISCV_TOP (
 	);
 
 	ALU alu(
-		.A	(ALUSRC1), // check if JAL and LUI case, RF_RD1 = 0 
+		.A	(ALUSRC1),
 		.B	(ALUSRC2),
 		.OP		(OP),
 		.Out (ALU_RESULT)
@@ -222,6 +215,13 @@ module RISCV_TOP (
 		.B		(Target_JUMP),
 		.S		(isJump),
 		.Out	(Updated_PC)
+	);
+	
+	CLKUPDATE instr(
+		.Updated_A		(INSTR),
+		.CLK			(CLK),
+		.RSTn			(RSTn),
+		.A				(PRE_INSTR)
 	);
 
 	HALT halt(

@@ -1,15 +1,15 @@
 module CTRL(
     input wire [31:0] INSTR,
-    output wire [2:0] Lfunct,   
-    output wire [31:0] IMM, 
+	output wire [31:0] IMM, 
     output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
     output wire [3:0] OP, D_MEM_BE,
-    output wire RF_WE, noRA1, isItype, isAUIPC, isLoad, isJump, isJAL, isBranch, isJALR, D_MEM_WEN
+	output wire [2:0] Lfunct,  
+    output wire RF_WE, D_MEM_WEN, noRA1, isItype, isAUIPC, isLoad, isJump, isJAL, isBranch, isJALR
     );
 
 
-    reg [31:0] _IMM, _RF_RA1, _RF_RA2;
-    reg [4:0] _RF_WA1;
+    reg [31:0] _IMM;
+    reg [4:0] _RF_WA1, _RF_RA1, _RF_RA2;
     reg [3:0] _D_MEM_BE, _OP;
     reg [2:0] _Lfunct;
     reg _RF_WE, _D_MEM_WEN, _noRA1, _isItype, _isAUIPC, _isLoad, _isJump, _isJAL, _isBranch, _isJALR;
@@ -31,7 +31,6 @@ module CTRL(
 	assign isJALR = _isJALR;
 	assign isBranch = _isBranch;
     assign Lfunct = _Lfunct;
-	
 
     initial begin
         _IMM = 0;
@@ -107,10 +106,6 @@ module CTRL(
 				_IMM[20:1] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
 				if (_IMM[20] == 0) _IMM[31:21] = 0;
         		else _IMM[31:12] = 11'h7ff;
-				/*
-				if (INSTR[31] == 0) _IMM = {11'h000, INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21], 0};
-        		else _IMM = {11'h7ff, INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21], 0};
-				*/
 				_RF_WE = 1;
 				_RF_WA1 = INSTR[11:7];
 				_RF_RA1 = 0;
@@ -175,7 +170,7 @@ module CTRL(
 				_isBranch = 1;
 				_Lfunct = 0;
 				case(INSTR[14:12])
-					3'b000: _OP = 4'b1001; // BEQ
+					3'b000: _OP = 4'b1001; //BEQ
 					3'b001: _OP = 4'b1010; //BNE
 					3'b100: _OP = 4'b1011; //BLT
 					3'b101: _OP = 4'b1100; //BGE
@@ -218,9 +213,9 @@ module CTRL(
                 _OP = 0;
 				_D_MEM_WEN = 0;
                 case (INSTR[14:12])
-                    3'b000 : _D_MEM_BE = 4'b0001;
-                    3'b001 : _D_MEM_BE = 4'b0011;
-                    3'b010 : _D_MEM_BE = 4'b1111;
+                    3'b000 : _D_MEM_BE = 4'b0001; // SB
+                    3'b001 : _D_MEM_BE = 4'b0011; // SH
+                    3'b010 : _D_MEM_BE = 4'b1111; // SW
                 endcase
 				_noRA1 = 0;
                 _isItype = 1;
