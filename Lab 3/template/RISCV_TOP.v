@@ -57,7 +57,7 @@ module RISCV_TOP (
 	wire [2:0] Lfunct;
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH;
+	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM;
 
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -79,6 +79,8 @@ module RISCV_TOP (
 		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
 		if (RF_WE && ~isJump) _RF_WD = ALU_RESULT;
 		if (isJump) _RF_WD = ADD_PC;
+		if (noRA1 && ~isJump && ~isAUIPC) _RF_WD = ALU_RESULT;
+		if (isAUIPC) _RF_WD = ADD_PC_IMM;
 		// for test
 		/*
 		INSTR = I_MEM_DI;
@@ -97,7 +99,9 @@ module RISCV_TOP (
 		.RF_RA2			(RF_RA2),
 		.RF_WA1			(RF_WA1),
 		.OP				(OP),
+		.noRA1			(noRA1),
 		.isItype		(isItype),
+		.isAUIPC		(isAUIPC),
 		.isLoad			(isLoad),
 		.isJump			(isJump),
 		.isJAL			(isJAL),
@@ -110,22 +114,29 @@ module RISCV_TOP (
 		.D_MEM_BE		(D_MEM_BE)
 	);
 
+	MUX alusrc1(
+		.A	(RF_RD1),
+		.B	(32'h00000000),
+		.S	(noRA1),
+		.Out	(ALUSRC1)
+	);
+
 	SIGN_EXTEND imm_sign_extend(
 		.IMM	(IMM),
 		.isJAL	(isJAL),
 		.IMM_EX	(IMM_EX)
 	);
 
-	MUX alusrc(
+	MUX alusrc2(
 		.A	(RF_RD2),
 		.B	(IMM_EX),
 		.S	(isItype),
-		.Out	(ALUSRC)
+		.Out	(ALUSRC2)
 	);
 
 	ALU alu(
-		.A	(RF_RD1),
-		.B	(ALUSRC),
+		.A	(ALUSRC1), // check if JAL and LUI case, RF_RD1 = 0 
+		.B	(ALUSRC2),
 		.OP		(OP),
 		.Out (ALU_RESULT)
 	);
@@ -158,15 +169,22 @@ module RISCV_TOP (
 		.Out (ADD_PC)
 	);
 
+	ALU add_pc_imm(
+		.A	(PC),
+		.B	(ALU_RESULT),
+		.OP	(4'h0),
+		.Out (ADD_PC_IMM)
+	);
+
 	JUMP jump(
-		.PC				(PC),
+		.ADD_PC_IMM		(ADD_PC_IMM),
 		.ALU_RESULT		(ALU_RESULT),
 		.isJAL			(isJAL),
 		.isJALR			(isJALR),
 		.Target_JUMP	(Target_JUMP)
 	);
 
-	ALU branch_pc	(
+	ALU branch_pc(
 		.A	(PC),
 		.B	(IMM),
 		.OP	(4'h0),

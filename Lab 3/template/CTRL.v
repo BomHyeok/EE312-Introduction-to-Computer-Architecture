@@ -4,7 +4,7 @@ module CTRL(
     output wire [31:0] IMM, 
     output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
     output wire [3:0] OP, D_MEM_BE,
-    output wire RF_WE, isItype, isLoad, isJump, isJAL, isBranch, isJALR, D_MEM_WEN
+    output wire RF_WE, noRA1, isItype, isAUIPC, isLoad, isJump, isJAL, isBranch, isJALR, D_MEM_WEN
     );
 
 
@@ -13,7 +13,7 @@ module CTRL(
     reg [3:0] _D_MEM_BE;
     reg [3:0] _OP;
     reg [2:0] _Lfunct;
-    reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump, _isJAL, _isBranch, _isJALR;
+    reg _RF_WE, _D_MEM_WEN, _noRA1, _isItype, _isAUIPC, _isLoad, _isJump, _isJAL, _isBranch, _isJALR;
 
     assign IMM = _IMM;
     assign RF_WE = _RF_WE;
@@ -23,7 +23,9 @@ module CTRL(
     assign OP = _OP;
     assign D_MEM_WEN = _D_MEM_WEN;
     assign D_MEM_BE = _D_MEM_BE;
+	assign noRA1 = _noRA1;
     assign isItype = _isItype;
+	assign isAUIPC = _isAUIPC;
     assign isLoad = _isLoad;
     assign isJump = _isJump;
 	assign isJAL = _isJAL;
@@ -41,7 +43,9 @@ module CTRL(
         _OP = 0;
         _D_MEM_WEN = 1;
         _D_MEM_BE = 0;
+		_noRA1 = 0;
         _isItype = 0;
+		_isAUIPC = 0;
 		_isLoad = 0;
 		_isJump = 0;
 		_isJAL = 0;
@@ -63,26 +67,38 @@ module CTRL(
         		_OP = 0;
                 _D_MEM_WEN = 1;
 				_D_MEM_BE = 0;
+				_noRA1 = 1;
                 _isItype = 1;
-                _isLoad = 1; //why?
+				_isAUIPC = 0;
+                _isLoad = 0; 
 				_isJump = 0;
 				_isJAL = 0;
 				_isJALR = 0;
 				_isBranch = 0;
-               	_Lfunct = 3'b010; //why?
+               	_Lfunct = 0; 
 			end
 					
 			// AUIPC
 			7'b0010111 :
 			begin
 				_IMM[31:12] = INSTR[31:12];
-				_IMM[11:0] = 0;
+				_IMM[11:0] = 12'h000;
+				_RF_WE = 1;
 				_RF_WA1 = INSTR[11:7];
+				_RF_RA1 = 0;
+        		_RF_RA2 = 0;
+				_OP = 0;
                 _D_MEM_WEN = 1;
-				_isBranch = 1; //why?
+				_D_MEM_BE = 0;
+				_noRA1 = 1;
+                _isItype = 1;
+				_isAUIPC = 1;
+                _isLoad = 0; 
+				_isJump = 0;
+				_isJAL = 0;
 				_isJALR = 0;
-				_RF_WE = 0;
-				_OP = 4'b1001; //why?
+				_isBranch = 0;
+               	_Lfunct = 0; 
 			end
 				
 			// JAL
@@ -103,7 +119,9 @@ module CTRL(
 				_OP = 0;
 				_D_MEM_WEN = 1;
 				_D_MEM_BE = 0;
+				_noRA1 = 1;
 				_isItype = 1;
+				_isAUIPC = 0;
 				_isLoad = 0;
 				_isJump = 1;
 				_isJAL = 1;
@@ -124,7 +142,9 @@ module CTRL(
 				_OP = 0;
 				_D_MEM_WEN = 1;
 				_D_MEM_BE = 0;
+				_noRA1 = 0;
 				_isItype = 1;
+				_isAUIPC = 0;
 				_isLoad = 0;
 				_isJump = 1;
 				_isJAL = 0;
@@ -144,7 +164,10 @@ module CTRL(
 				_RF_RA1 = INSTR[19:15];
 				_RF_RA2 = INSTR[24:20];
                 _D_MEM_WEN = 1;
+				_D_MEM_BE = 0;
+				_noRA1 = 0;
 				_isItype = 0;
+				_isAUIPC = 0;
 				_isLoad = 0;
 				_isJump = 0;
 				_isJAL = 0;
@@ -172,7 +195,9 @@ module CTRL(
                 _OP = 0;
 				_D_MEM_WEN = 1;
      		   	_D_MEM_BE = 0;
+				_noRA1 = 0;
                 _isItype = 1;
+				_isAUIPC = 0;
                 _isLoad = 1;
 				_isJump = 0;
 				_isJAL = 0;
@@ -197,7 +222,9 @@ module CTRL(
                     3'b001 : _D_MEM_BE = 4'b0011;
                     3'b010 : _D_MEM_BE = 4'b1111;
                 endcase
+				_noRA1 = 0;
                 _isItype = 1;
+				_isAUIPC = 0;
                 _isLoad = 0;
 				_isJump = 0;
 				_isJAL = 0;
@@ -220,7 +247,9 @@ module CTRL(
 				else _OP[3] = 0;
 				_D_MEM_WEN = 1;
 				_D_MEM_BE = 0;
+				_noRA1 = 0;
 				_isItype = 1;
+				_isAUIPC = 0;
 				_isLoad = 0;
 				_isJump = 0;
 				_isJAL = 0;
@@ -243,7 +272,9 @@ module CTRL(
 				else _OP[3] = 0;
 				_D_MEM_WEN = 1;
       			_D_MEM_BE = 0;
+				_noRA1 = 0;
 				_isItype = 0;
+				_isAUIPC = 0;
 				_isLoad = 0;
 				_isJump = 0;
 				_isJAL = 0;
