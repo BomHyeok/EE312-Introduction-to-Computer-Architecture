@@ -7,6 +7,7 @@ module TRANSLATE(
 
     reg [11:0] TEMP_ADDR;
     assign MEM_ADDR = TEMP_ADDR;
+    initial TEMP_ADDR = 0;
     
     always @ (*) begin
         if (instruction_type == 1) begin

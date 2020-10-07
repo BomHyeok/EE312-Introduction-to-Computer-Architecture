@@ -6,6 +6,7 @@ module SIGN_EXTEND(
 
     reg [31:0] TEMP;
     assign IMM_EX = TEMP;
+    initial TEMP = 0;
     
     always @ (*) begin
         if (isJAL) TEMP = IMM;

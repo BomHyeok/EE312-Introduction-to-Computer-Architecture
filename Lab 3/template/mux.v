@@ -7,13 +7,10 @@ module MUX(
 
     reg [31:0] TEMP;
     assign Out = TEMP;
+    initial TEMP = 0;
     
     always @ (*) begin
-        if (S == 0) begin
-            TEMP = A;
-        end
-        else if (S == 1) begin
-            TEMP = B;
-        end
+        if (S == 0) TEMP = A;
+        else TEMP = B;
     end
 endmodule

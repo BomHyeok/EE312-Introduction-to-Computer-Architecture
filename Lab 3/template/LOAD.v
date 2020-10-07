@@ -6,6 +6,7 @@ module LOAD(
 
     reg [31:0] TEMP;
     assign Out = TEMP;
+    initial TEMP = 0;
 
     always @ (SRC, Lfunct, Out) begin
         case(Lfunct)
