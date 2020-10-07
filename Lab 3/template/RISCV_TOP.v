@@ -52,7 +52,7 @@ module RISCV_TOP (
 	wire [2:0] Lfunct;
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM;
+	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM, PRE_INSTR;
 	
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -60,6 +60,13 @@ module RISCV_TOP (
 		.RSTn	(RSTn),
 		.PC		(PC)
 	);
+
+	PC pre_instr(
+		.Updated_PC		(D_MEM_DI),
+		.CLK			(CLK),
+		.RSTn			(RSTn),
+		.PC				(PRE_INSTR)
+	)
 
 	TRANSLATE i_translate(
 		.EFFECTIVE_ADDR          (PC),
@@ -89,7 +96,7 @@ module RISCV_TOP (
 		.RF_WE			(RF_WE),
 		.D_MEM_WEN		(D_MEM_WEN),
 		.noRA1			(noRA1),
-		.isAUIPC		(isAUIPC)
+		.isAUIPC		(isAUIPC),
 		.isJump			(isJump),
 		.isLoad			(isLoad),
 		.isBranch		(isBranch),
@@ -217,8 +224,9 @@ module RISCV_TOP (
 	);
 
 	HALT halt(
-		.INSTR	(I_MEM_DI),
-		.HALT	(HALT)	
+		.INSTR		(I_MEM_DI),
+		.PRE_INSTR	(PRE_INSTR),
+		.HALT		(HALT)	
 	);
 		
 endmodule 
