@@ -21,24 +21,16 @@ module ALU(A,B,OP,Out);
         // SLT 
             4'b0010 : 
                 begin
-                    if ($signed(A) < $signed(B)) begin
-                        C = 1;
-                    end
-                    else begin
-                        C = 0;
-                    end
+                    if ($signed(A) < $signed(B)) C = 1;
+                    else C = 0;
                 end
         // SLTU
         // SLTU rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
         // SLTIU rd, rs1, 1 sets rd to 1 if rs1 equals zero, otherwise sets rd to 0
             4'b0011 : 
                 begin
-                    if (A < B) begin
-                        C = 1;
-                    end
-                    else begin
-                        C = 0;
-                    end
+                    if (A < B) C = 1;
+                    else C = 0;
                 end
         // XOR
             4'b0100 : C = A ^ B;
@@ -50,6 +42,42 @@ module ALU(A,B,OP,Out);
             4'b0110 : C = A | B;
         // AND
             4'b0111 : C = A & B;
+        // BEQ
+            4'b1001 :
+		begin
+			if (A == B) C = 1;
+			else C = 0;
+		end
+        // BNE
+            4'b1010 :
+		begin
+			if (A != B) C = 1;
+			else C = 0;
+		end
+        // BLT
+            4'b1011 :
+		begin
+			if ($signed(A) < $signed(B)) C = 1;
+			else C = 0;
+		end
+        // BGE
+            4'b1100 :
+		begin
+			if ($signed(A) >= $signed(B)) C = 1;
+			else C = 0;
+		end
+        // BLTU
+            4'b1110 :
+		begin
+			if (A < B) C = 1;
+			else C = 0;
+		end
+        // BGEU
+            4'b1111 :
+		begin
+			if (A >= B) C = 1;
+			else C = 0;
+		end
         endcase
     end
 endmodule

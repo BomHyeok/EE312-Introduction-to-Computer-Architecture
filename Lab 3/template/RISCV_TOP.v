@@ -53,11 +53,11 @@ module RISCV_TOP (
 	
 	reg [31:0] INSTR;
 
-	wire isItype, isLoad;
+	wire isItype, isLoad, isJump, isJAL, isJALR, isBranch, isBranchTaken;
 	wire [2:0] Lfunct;
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA;
+	wire [31:0] PC, ALUSRC, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH;
 
 	PC pc(
 		.Updated_PC	(Updated_PC),
@@ -77,7 +77,8 @@ module RISCV_TOP (
 		I_MEM_ADDR = TEMP_MEM_ADDR;
 		if (isLoad) _RF_WD = DataToReg;
 		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
-		if (RF_WE) _RF_WD = ALU_RESULT;
+		if (RF_WE && ~isJump) _RF_WD = ALU_RESULT;
+		if (isJump) _RF_WD = ADD_PC;
 		// for test
 		/*
 		INSTR = I_MEM_DI;
@@ -99,6 +100,9 @@ module RISCV_TOP (
 		.isItype		(isItype),
 		.isLoad			(isLoad),
 		.isJump			(isJump),
+		.isJAL			(isJAL),
+		.isJALR			(isJALR),
+		.isBranch		(isBranch),
 		.Lfunct			(Lfunct),
 		.RF_WE			(RF_WE),
 		.IMM			(IMM),
@@ -108,6 +112,7 @@ module RISCV_TOP (
 
 	SIGN_EXTEND imm_sign_extend(
 		.IMM	(IMM),
+		.isJAL	(isJAL),
 		.IMM_EX	(IMM_EX)
 	);
 
@@ -146,28 +151,45 @@ module RISCV_TOP (
 		.MEM_ADDR         		 (D_MEM_ADDR)
 	);
 
-	ALU addpc(
+	ALU add_pc(
 		.A	(PC),
 		.B	(32'h00000004),
 		.OP	(4'h0),
 		.Out (ADD_PC)
 	);
 
-	MUX branch(
+	JUMP jump(
+		.PC				(PC),
+		.ALU_RESULT		(ALU_RESULT),
+		.isJAL			(isJAL),
+		.isJALR			(isJALR),
+		.Target_JUMP	(Target_JUMP)
+	);
+
+	ALU branch_pc	(
+		.A	(PC),
+		.B	(IMM),
+		.OP	(4'h0),
+		.Out	(Target_BRANCH)
+	);
+	
+	AND Branch_taken(
+		.A	(ALU_RESULT),
+		.B	(isBranch),
+		.Out	(isBranchTaken)
+	);
+
+	MUX mux_branch(
 		.A		(ADD_PC),
-	//	.B		(BRANCH),
-	//	.S		(isBranchTaken),
-		.B		(ADD_PC),
-		.S		(1'b0),
+		.B		(Target_BRANCH),
+		.S		(isBranchTaken),
 		.Out	(BRANCH_PC)
 	);
 
-	MUX jump(
+	MUX mux_jump(
 		.A		(BRANCH_PC),
-	//	.B		(JUMP),
-	//	.S		(isJump),
-		.B		(BRANCH_PC),
-		.S		(1'b0),
+		.B		(Target_JUMP),
+		.S		(isJump),
 		.Out	(Updated_PC)
 	);
 
