@@ -44,10 +44,6 @@ module RISCV_TOP (
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
 	assign D_MEM_DOUT = RF_RD2;
-
-
-	reg [31:0] _RF_WD;
-	assign RF_WD = _RF_WD;
 	
 	reg [31:0] INSTR;
 
@@ -58,6 +54,7 @@ module RISCV_TOP (
 	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM, _OUTPUT_PORT;
 	
 	assign OUTPUT_PORT = _OUTPUT_PORT;
+
 	PC pc(
 		.Updated_PC	(Updated_PC),
 		.CLK	(CLK),
@@ -74,12 +71,6 @@ module RISCV_TOP (
 	
 	always@ (*) begin
 		I_MEM_ADDR = TEMP_MEM_ADDR;
-		if (isLoad) _RF_WD = DataToReg;
-		if (~D_MEM_WEN) _RF_WD = ALU_RESULT;
-		if (RF_WE && ~isJump) _RF_WD = ALU_RESULT;
-		if (isJump) _RF_WD = ADD_PC;
-		if (noRA1 && ~isJump && ~isAUIPC) _RF_WD = ALU_RESULT;
-		if (isAUIPC) _RF_WD = ADD_PC_IMM;
 		// for test
 		/*
 		INSTR = I_MEM_DI;
@@ -91,10 +82,19 @@ module RISCV_TOP (
 		*/
 	end
 
-	OUTPUT Output(
-		._RF_WD			(_RF_WD),
+	OUTPUT out(
+		.ALU_RESULT		(ALU_RESULT),
+		.ADD_PC_IMM		(ADD_PC_IMM),
+		.ADD_PC			(ADD_PC),
+		.DataToReg		(DataToReg),
+		.RF_WE			(RF_WE),
+		.D_MEM_WEN		(D_MEM_WEN),
+		.noRA1			(noRA1),
+		.isJump			(isJump),
+		.isLoad			(isLoad),
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
+		.RF_WD			(RF_WD),
 		.OUTPUT_PORT	(_OUTPUT_PORT)
 	);
 
@@ -146,6 +146,14 @@ module RISCV_TOP (
 		.Out (ALU_RESULT)
 	);
 
+	// Load and Store 
+	TRANSLATE d_translate(
+		.EFFECTIVE_ADDR          (ALU_RESULT),
+		.instruction_type        (1'b0),
+		.data_type   			 (1'b1),
+		.MEM_ADDR         		 (D_MEM_ADDR)
+	);
+
 	LOAD load(
 		.SRC	(D_MEM_DI),
 		.Lfunct	(Lfunct),
@@ -159,13 +167,7 @@ module RISCV_TOP (
 		.Out	(DataToReg)
 	);
 
-	// SB, SH, SW
-	TRANSLATE d_translate(
-		.EFFECTIVE_ADDR          (ALU_RESULT),
-		.instruction_type        (1'b0),
-		.data_type   			 (1'b1),
-		.MEM_ADDR         		 (D_MEM_ADDR)
-	);
+	
 
 	ALU add_pc(
 		.A	(PC),

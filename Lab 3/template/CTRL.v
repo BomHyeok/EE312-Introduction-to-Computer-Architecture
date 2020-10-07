@@ -190,7 +190,7 @@ module CTRL(
 				_IMM[11:0] = INSTR[31:20];
 				_RF_WE = 1;
 				_RF_WA1 = INSTR[11:7];
-				_RF_RA1 = 0;
+				_RF_RA1 = INSTR[19:15];
     		    _RF_RA2 = 0;
                 _OP = 0;
 				_D_MEM_WEN = 1;
