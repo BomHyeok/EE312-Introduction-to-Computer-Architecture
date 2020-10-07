@@ -109,7 +109,7 @@ module CTRL(
 				_isJAL = 1;
 				_isJALR = 0;
 				_isBranch = 0;
-				
+				_Lfunct = 0;				
 			end
 		
 				
@@ -131,10 +131,6 @@ module CTRL(
 				_isJALR = 1;
 				_isBranch = 0;
 				_Lfunct = 0;
-			/*	Target = (RF_RD1 + _IMM) & 32'hfffffffe;
-				_RF_WD = PC + 4;
-				_PC = Target;
-                */
 			end
 				
 			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
