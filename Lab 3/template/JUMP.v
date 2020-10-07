@@ -6,6 +6,7 @@ module JUMP(
 
     reg [31:0] _Target;
     assign Target_JUMP = _Target;
+    initial _Target = 0;
     
     always @ (*) begin
         if (isJAL) _Target = ADD_PC_IMM;

@@ -44,6 +44,7 @@ module RISCV_TOP (
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
 	assign D_MEM_DOUT = RF_RD2;
+	initial I_MEM_ADDR = 0;
 	
 	reg [31:0] INSTR;
 
@@ -51,10 +52,8 @@ module RISCV_TOP (
 	wire [2:0] Lfunct;
 	wire [3:0] OP;
 	wire [11:0] TEMP_MEM_ADDR;
-	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM, _OUTPUT_PORT;
+	wire [31:0] PC, ALUSRC1, ALUSRC2, Updated_PC, IMM, IMM_EX, ALU_RESULT, DataToReg, ADD_PC, BRANCH_PC, LOAD_DATA, Target_JUMP, Target_BRANCH, ADD_PC_IMM;
 	
-	assign OUTPUT_PORT = _OUTPUT_PORT;
-
 	PC pc(
 		.Updated_PC	(Updated_PC),
 		.CLK	(CLK),
@@ -76,7 +75,7 @@ module RISCV_TOP (
 		INSTR = I_MEM_DI;
 		$display("--------------------------------------------------------------------------------");
      	$display("Instruction: 0x%0h  IsStore: 0x%0h", INSTR, D_MEM_WEN);
-    	$display("RF_RD1: 0x%0h, ALUSRC: 0x%0h, IMM: 0x%0h, IMM_EX: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSRC, IMM, IMM_EX, ALU_RESULT);
+    	$display("RF_RD1: 0x%0h, ALUSRC1: 0x%0h, IMM: 0x%0h, IMM_EX: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSRC1, IMM, IMM_EX, ALU_RESULT);
     	$display("PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, Updated_PC, NUM_INST);
     	$display("RF_WE: 0x%0h, isLoad: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, isLoad, RF_WD, OUTPUT_PORT);
 		*/
@@ -90,12 +89,13 @@ module RISCV_TOP (
 		.RF_WE			(RF_WE),
 		.D_MEM_WEN		(D_MEM_WEN),
 		.noRA1			(noRA1),
+		.isAUIPC		(isAUIPC)
 		.isJump			(isJump),
 		.isLoad			(isLoad),
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
 		.RF_WD			(RF_WD),
-		.OUTPUT_PORT	(_OUTPUT_PORT)
+		.OUTPUT_PORT	(OUTPUT_PORT)
 	);
 
 	CTRL control(
@@ -166,8 +166,6 @@ module RISCV_TOP (
 		.S	(isLoad),
 		.Out	(DataToReg)
 	);
-
-	
 
 	ALU add_pc(
 		.A	(PC),

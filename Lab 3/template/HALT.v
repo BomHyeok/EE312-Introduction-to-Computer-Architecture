@@ -3,10 +3,14 @@ module HALT(
     output wire HALT
     );
 
-    reg _HALT;
-    reg PRE_HALT;
+    reg _HALT, PRE_HALT;
     assign HALT = _HALT;
     
+    initial begin
+        _HALT = 0;
+        PRE_HALT = 0;
+    end
+
     always @ (*) begin
         if (INSTR == 32'h00c00093) PRE_HALT = 1;
         else PRE_HALT = 0;

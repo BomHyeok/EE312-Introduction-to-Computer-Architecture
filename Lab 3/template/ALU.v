@@ -9,6 +9,8 @@ module ALU(A,B,OP,Out);
 
     reg [31:0] C;
     assign Out = C;
+    
+    initial C = 0;
 
     always @ (A, B, OP) begin
         case(OP)

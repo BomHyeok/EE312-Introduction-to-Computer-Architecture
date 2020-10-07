@@ -7,6 +7,7 @@ module MUX(
 
     reg [31:0] TEMP;
     assign Out = TEMP;
+    initial TEMP = 0;
     
     always @ (*) begin
         if (S == 0) begin

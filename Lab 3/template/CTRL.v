@@ -10,8 +10,7 @@ module CTRL(
 
     reg [31:0] _IMM, _RF_RA1, _RF_RA2;
     reg [4:0] _RF_WA1;
-    reg [3:0] _D_MEM_BE;
-    reg [3:0] _OP;
+    reg [3:0] _D_MEM_BE, _OP;
     reg [2:0] _Lfunct;
     reg _RF_WE, _D_MEM_WEN, _noRA1, _isItype, _isAUIPC, _isLoad, _isJump, _isJAL, _isBranch, _isJALR;
 
@@ -156,7 +155,8 @@ module CTRL(
 			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
 			7'b1100011 :
 			begin
-				_IMM[12:0] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
+				_IMM[12:1] = {INSTR[31], INSTR[7], INSTR[30:25], INSTR[11:8]};
+				_IMM[0] = 0;
 				if (_IMM[12] == 0) _IMM[31:13] = 0;
         		else _IMM[31:13] = 19'h7ffff;
 				_RF_WE = 0;

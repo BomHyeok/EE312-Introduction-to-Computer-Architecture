@@ -8,6 +8,11 @@ module OUTPUT(
    assign RF_WD = _RF_WD;
    assign OUTPUT_PORT = _OUTPUT_PORT;
 
+   initial begin
+        _RF_WD = 0;
+        _OUTPUT_PORT = 0;
+    end
+
    always @ (*) begin
       // LUI
 		if (noRA1 && ~isJump && ~isAUIPC) _RF_WD = ALU_RESULT;
@@ -18,7 +23,7 @@ module OUTPUT(
       // load
       if (isLoad) _RF_WD = DataToReg;
       // store and others
-		if (~D_MEM_WEN || (RF_WE && ~isJump)) _RF_WD = ALU_RESULT;
+		else if (~D_MEM_WEN || (RF_WE && ~isJump)) _RF_WD = ALU_RESULT;
       // branch
       if (isBranch == 1 && isBranchTaken == 1) _OUTPUT_PORT = 32'h00000001;
       else if (isBranch == 1 && isBranchTaken == 0) _OUTPUT_PORT = 32'h00000000;
