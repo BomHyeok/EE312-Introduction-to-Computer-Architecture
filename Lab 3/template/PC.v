@@ -8,9 +8,7 @@ module PC(
     reg [31:0] reg_PC;
     assign PC = reg_PC;
     
-    initial begin
-		reg_PC = 0;
-	end
+    initial	reg_PC = 0;
 
     always @ (posedge CLK) begin
 		if (~RSTn) reg_PC = 0;
