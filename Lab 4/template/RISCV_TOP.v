@@ -29,5 +29,7 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT
 	);
 
+	//test
+
 	// TODO: implement multi-cycle CPU
 endmodule //
