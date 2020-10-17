@@ -39,15 +39,17 @@ module RISCV_TOP (
 	assign D_MEM_CSN = ~RSTn;
 	assign D_MEM_DOUT = RF_RD2;
 
-	always @ (negedge CLK && IF) begin
-		if (RSTn) NUM_INST <= NUM_INST + 1;
+	always @ (negedge CLK) begin
+		if (RSTn) begin
+			uPC = Updated_uPC;
+			if (IF) NUM_INST <= NUM_INST + 1;
+		end
 	end
 
-	CLKUPDATE pc(
-		.Updated_A	(Updated_PC),
-		.CLK		(CLK),
-		.RSTn		(RSTn),
-		.A			(PC)
+	UPDATE pc(
+		.Updated_A			(Updated_PC),
+		.Update_Sign		(PCUpdate),
+		.A					(PC)
 	);
 
 	TRANSLATE i_mem_read(
@@ -67,16 +69,16 @@ module RISCV_TOP (
 	);
 
 	MUX ALUSrcA(
-		.A	(PC),
-		.B	(RF_RD1),
-		.S	(ALUSrcA),
+		.A		(PC),
+		.B		(RF_RD1),
+		.S		(ALUSrcA),
 		.Out	(ALUSrcA_Out)
 	);
 
 	MUX ALUSrcA(
-		.A	(RF_RD2),
-		.B	(IMM),
-		.S	(ALUSrcA),
+		.A		(RF_RD2),
+		.B		(IMM),
+		.S		(ALUSrcA),
 		.Out	(ALUSrcB_Out)
 	);
 
@@ -90,13 +92,6 @@ module RISCV_TOP (
 		.Branch_Cond	(Branch_Cond)
 	);
 
-	MUX PCSrc(
-		.A	(ALU_RESULT),
-		.B	(ALUOut),
-		.S	(PCSrc),
-		.Out	(PCSrc_Out)
-	);
-
 	TRANSLATE d_mem_read(
 		.EFFECTIVE_ADDR          (ALU_RESULT),
 		.MemRead				 (MemRead),
@@ -108,6 +103,38 @@ module RISCV_TOP (
 		.A	(PC),
 		.B	(32'h00000004),
 		.Out (ADD_PC)
+	);
+
+	AND branch_taken(
+		.A		(Branch_Cond),
+		.B		(isBranch),
+		.Out	(isBranchTaken)
+	);
+
+	OR pcupdate(
+		.A		(isBranchTaken),
+		.B		(PCWrite),
+		.Out	(PCUpdate)
+	);
+
+	PCSRC pcsrc(
+		.ADD_PC			(ADD_PC),
+		.ALU_RESULT		(ALU_RESULT),
+		.isBranchTaken	(isBranchTaken),
+		.PCSrc			(PCSrc),
+		.Updated_PC		(Updated_PC)
+	);
+
+	UPDATE instr(
+		.Updated_A		(INSTR),
+		.Update_Sign	(IRWrite),
+		.A				(PRE_INSTR)
+	);
+
+	HALT halt(
+		.INSTR		(I_MEM_DI),
+		.PRE_INSTR	(PRE_INSTR),
+		.HALT		(HALT)	
 	);
 
 endmodule 

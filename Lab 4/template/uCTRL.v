@@ -53,33 +53,36 @@ module uCTRL(
 				_PCWrite = 1; // PC Update
 				_MemRead = 1;
 				_IorD = 0;
-				
-				PCadd
 				uPCadd
+				_Updated_uPC = uPC + 1;
 			end
 			3'b001 : // ID
 			begin
 				_IRWrite = 1;
 				uPCadd
+				_Updated_uPC = uPC + 1;
 			end
 			3'b010 : // EX
 			begin
 				_ALUSrcA = 1; // 0: PC, 1: RA1
 				_ALUSrcB = 1; // 0: RA2, 1: IMM
 				_ALUOp = 0;
+				_PCSrc = 2'b00; // PC = PC + 4
 				case (INSTR[6:0])
 					7'b1101111 : // JALbegin
 						_ALUSrcA = 0;
 						// _ALUSrcB = 1;
 						// _ALUOp = 0;
-						uPCadd+2
+						_PCSrc = 2'b01; // PC = ALU_RESULT
+						_Updated_uPC = uPC + 2;
 					end
 					7'b1100111 : // JALR
 					begin
 						// _ALUSrcA = 1; 
 						// _ALUSrcB = 1;
 						// _ALUOp = 0;
-						uPCadd+2
+						_PCSrc = 2'b10; // PC = ALU_RESULT & 32'hfffffffe
+						_Updated_uPC = uPC + 2;
 					end
 					7'b1100011 : // B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
 					begin
@@ -93,22 +96,24 @@ module uCTRL(
 							3'b110: _ALUOp = 4'b1110; //BLTU
 							3'b111: _ALUOp = 4'b1111; //BGEU
 						endcase	
-
-						uPCadd??
+						_PCSrc = 2'b11; // PC depends on branch cond
+						_Updated_uPC = 0;
 					end
 					7'b0000011 : // I Type Load LW
 					begin
 						// _ALUSrcA = 1;
 						// _ALUSrcB = 1;
 						// _ALUOp = 0;
-						uPCadd
+						// _PCSrc = 2'b00; // PC = PC + 4
+						_Updated_uPC = uPC + 1;
 					end
 					7'b0100011 : // SW
 					begin
 						// _ALUSrcA = 1;
 						// _ALUSrcB = 1;
 						// _ALUOp = 0;
-						uPCadd
+						// _PCSrc = 2'b00; // PC = PC + 4
+						_Updated_uPC = uPC + 1;
 					end
 					7'b0010011 : // I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
 					begin
@@ -117,7 +122,8 @@ module uCTRL(
 						_ALUOp[2:0] = INSTR[14:12];
 						if (_ALUOp == 4'b0101 && INSTR[30]) _ALUOp[3] = 1;
 						else _ALUOp[3] = 0;
-						uPCadd+2
+						// _PCSrc = 2'b00; // PC = PC + 4
+						_Updated_uPC = uPC + 2;
 					end
 					7'b0110011 : // R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 					begin
@@ -126,7 +132,8 @@ module uCTRL(
 						_ALUOp[2:0] = INSTR[14:12];
 						if (INSTR[30]) _ALUOp[3] = 1;
 						else _ALUOp[3] = 0;
-						uPCadd+2
+						// _PCSrc = 2'b00; // PC = PC + 4
+						_Updated_uPC = uPC + 2;
 					end
 				endcase
 			end
@@ -134,91 +141,31 @@ module uCTRL(
 			begin
 				_MemRead = 1;
 				_IorD = 1;
-				uPCadd+1
-				if (INSTR[6:0] == 7'b0100011) begin
+				_Updated_uPC = uPC + 1;
+				if (INSTR[6:0] == 7'b0100011) begin //SW
 					_D_MEM_WEN = 0;
 					_D_MEM_BE = 4'b1111;
-					uPC = 0;
+					_Updated_uPC = 0;
 					if (INSTR[14:12] != 3'b010) $display("Invalid Instruction: Only deal with SW");
 				end
 			end
 			3'b100 : // WB
 			begin
 				_RF_WE = 1;
-				uPC = 0;
+				// JAL and JALR
+				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
+					_RWSrc = 0; // PC + 4
+				end
+				// LW
+				else if (INSTR[6:0] ==7'b0000011)  begin
+					_RWSrc = 1; // D_MEM_DI
+				end
+				// I-type and R-type
+				else begin
+					_RWSrc = 2; // ALU_RESULT
+				end
+				_Updated_uPC = 0;
 			end
-
-
-
-		endcase
-
-        case (INSTR[6:0])
-			// JAL
-			7'b1101111 :
-			begin
-				_isJump = 1;
-				_isJAL = 1;
-				_isJALR = 0;
-				_isBranch = 0;				
-			end
-		
-				
-			// JALR
-			7'b1100111 :
-			begin
-				_isJump = 1;
-				_isJAL = 0;
-				_isJALR = 1;
-				_isBranch = 0;
-			end
-				
-			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
-			7'b1100011 :
-			begin
-				_isJump = 0;
-				_isJAL = 0;
-				_isJALR = 0;
-				_isBranch = 1;
-					
-			end
-				
-			// I Type Load (LB, LH, LW, LBU, LHU)
-			7'b0000011 :
-			begin 
-				_isJump = 0;
-				_isJAL = 0;
-				_isJALR = 0;
-				_isBranch = 0;
-			end
-
-			// Store (SB, SH, SW)
-			7'b0100011 :
-			begin
-				_isJump = 0;
-				_isJAL = 0;
-				_isJALR = 0;
-				_isBranch = 0;
-			end
-				
-
-			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
-			7'b0010011 :
-			begin
-				_isJump = 0;
-				_isJAL = 0;
-				_isJALR = 0;
-				_isBranch = 0;
-                
-			end
-		
-			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
-			7'b0110011 :
-			begin
-				_isJump = 0;
-				_isJAL = 0;
-				_isJALR = 0;
-				_isBranch = 0;
-			end		
 		endcase
     end
 endmodule
