@@ -66,7 +66,8 @@ module uCTRL(
 				_ALUOp = 0;
 				_PCSrc = 2'b00; // PC = PC + 4
 				case (INSTR[6:0])
-					7'b1101111 : // JALbegin
+					7'b1101111 : // JAL
+					begin
 						_ALUSrcA = 0;
 						// _ALUSrcB = 1;
 						// _ALUOp = 0;

@@ -7,7 +7,7 @@ module ADDER(
     
     initial C = 0;
 
-    always @ (A, B, OP) begin
+    always @ (*) begin
         C = A + B;
     end
 endmodule

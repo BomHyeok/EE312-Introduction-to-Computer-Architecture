@@ -30,24 +30,42 @@ module RISCV_TOP (
 	);
 
 	// TODO: implement multi-cycle CPU
-	initial begin
-		NUM_INST <= 0;
-		I_MEM_ADDR = 0;
-	end
-
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
 	assign D_MEM_DOUT = RF_RD2;
 
-	always @ (negedge CLK) begin
-		if (RSTn) begin
-			uPC = Updated_uPC;
-			if (PCUpdate) NUM_INST <= NUM_INST + 1;
-		end
+	reg [31:0] INSTR;
+	wire [31:0] PC, Updated_PC, IMM, ADD_PC, PRE_INSTR, ALUSrcA_Out, ALUSrcB_Out, ALU_RESULT;
+	wire [11:0] _I_MEM_ADDR;
+	wire [3:0] ALUOp;
+	wire [2:0] uPC, Updated_uPC;
+	wire [1:0] PCSrc, RWSrc;
+	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB;
+
+	initial begin
+		NUM_INST <= 0;
+		I_MEM_ADDR = 0;
+		INSTR = 0;
 	end
 
+	always @ (negedge CLK) begin
+		if (RSTn && PCUpdate) NUM_INST <= NUM_INST + 1;
+	end
+
+	always@ (*) begin
+		I_MEM_ADDR = _I_MEM_ADDR;
+		INSTR = I_MEM_DI;
+	end
+
+	CLKUPDATE upc(
+		.Updated_A	(Updated_uPC),
+		.CLK		(CLK),
+		.RSTn		(RSTn),
+		.A			(uPC)
+	);
+
 	uCTRL ucontroller(
-		.INSTR          (ALU_RESULT),
+		.INSTR          (I_MEM_DI),
 		.uPC			(uPC),
 		.ALUOp     		(ALUOp),
 		.D_MEM_BE       (D_MEM_BE),
@@ -60,7 +78,7 @@ module RISCV_TOP (
 		.IRWrite     	(IRWrite),
 		.ALUSrcA        (ALUSrcA),
 		.ALUSrcB        (ALUSrcB),
-		.Updated_uPC    (Updated_uPC),
+		.Updated_uPC    (Updated_uPC)
 	);
 
 	UPDATE pc(
@@ -73,7 +91,7 @@ module RISCV_TOP (
 		.EFFECTIVE_ADDR          (PC),
 		.MemRead				 (MemRead),
 		.IorD     				 (IorD),
-		.MEM_ADDR         		 (I_MEM_ADDR)
+		.MEM_ADDR         		 (_I_MEM_ADDR)
 	);
 
 	ID id(
@@ -85,17 +103,17 @@ module RISCV_TOP (
 		.IMM			(IMM)
 	);
 
-	MUX ALUSrcA(
+	MUX mux_ALUSrcA(
 		.A		(PC),
 		.B		(RF_RD1),
 		.S		(ALUSrcA),
 		.Out	(ALUSrcA_Out)
 	);
 
-	MUX ALUSrcA(
+	MUX mux_ALUSrcB(
 		.A		(RF_RD2),
 		.B		(IMM),
-		.S		(ALUSrcA),
+		.S		(ALUSrcB),
 		.Out	(ALUSrcB_Out)
 	);
 

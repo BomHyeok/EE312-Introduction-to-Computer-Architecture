@@ -2,10 +2,10 @@ module PCSRC(
     input wire [31:0] ADD_PC, ALU_RESULT,
     input wire [1:0] PCSrc,
     input wire isBranchTaken,
-    output wire Updated_PC
+    output wire [31:0] Updated_PC
     );
 
-    reg TEMP;
+    reg [31:0] TEMP;
     assign Updated_PC = TEMP;
     
     initial TEMP = 0;

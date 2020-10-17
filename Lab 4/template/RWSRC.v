@@ -2,10 +2,10 @@ module RWSRC(
     input wire [31:0] ADD_PC, D_MEM_DI, ALU_RESULT,
     input wire [1:0] RWSrc,
     input wire RF_WE,
-    output wire RF_WD
+    output wire [31:0] RF_WD
     );
 
-    reg TEMP;
+    reg [31:0] TEMP;
     assign RF_WD = TEMP;
     
     initial TEMP = 0;
