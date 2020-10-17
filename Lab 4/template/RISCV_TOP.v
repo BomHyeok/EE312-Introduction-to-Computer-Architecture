@@ -30,4 +30,84 @@ module RISCV_TOP (
 	);
 
 	// TODO: implement multi-cycle CPU
-endmodule //
+	initial begin
+		NUM_INST <= 0;
+		I_MEM_ADDR = 0;
+	end
+
+	assign I_MEM_CSN = ~RSTn;
+	assign D_MEM_CSN = ~RSTn;
+	assign D_MEM_DOUT = RF_RD2;
+
+	always @ (negedge CLK && IF) begin
+		if (RSTn) NUM_INST <= NUM_INST + 1;
+	end
+
+	CLKUPDATE pc(
+		.Updated_A	(Updated_PC),
+		.CLK		(CLK),
+		.RSTn		(RSTn),
+		.A			(PC)
+	);
+
+	TRANSLATE i_mem_read(
+		.EFFECTIVE_ADDR          (PC),
+		.MemRead				 (MemRead),
+		.IorD     				 (IorD),
+		.MEM_ADDR         		 (I_MEM_ADDR)
+	);
+
+	ID id(
+		.IRWrite		(IRWrite),
+		.INSTR			(I_MEM_DI),
+		.RF_RA1 		(RF_RA1),
+		.RF_RA2			(RF_RA2),
+		.RF_WA1			(RF_WA1),
+		.IMM			(IMM)
+	);
+
+	MUX ALUSrcA(
+		.A	(PC),
+		.B	(RF_RD1),
+		.S	(ALUSrcA),
+		.Out	(ALUSrcA_Out)
+	);
+
+	MUX ALUSrcA(
+		.A	(RF_RD2),
+		.B	(IMM),
+		.S	(ALUSrcA),
+		.Out	(ALUSrcB_Out)
+	);
+
+	ALU alu(
+		.A				(ALUSrcA_Out),
+		.B				(ALUSrcB_Out),
+		.OP				(ALUOp),
+		.Out 			(ALU_RESULT),
+		.Branch_A		(RF_RD1),
+		.Branch_B		(RF_RD2),
+		.Branch_Cond	(Branch_Cond)
+	);
+
+	MUX PCSrc(
+		.A	(ALU_RESULT),
+		.B	(ALUOut),
+		.S	(PCSrc),
+		.Out	(PCSrc_Out)
+	);
+
+	TRANSLATE d_mem_read(
+		.EFFECTIVE_ADDR          (ALU_RESULT),
+		.MemRead				 (MemRead),
+		.IorD     				 (IorD),
+		.MEM_ADDR         		 (D_MEM_ADDR)
+	);
+
+	ADDER add_pc(
+		.A	(PC),
+		.B	(32'h00000004),
+		.Out (ADD_PC)
+	);
+
+endmodule 
