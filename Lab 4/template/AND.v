@@ -1,6 +1,5 @@
 module AND(
-    input wire A,
-    input wire B,
+    input wire A,B,
     output wire Out
     );
 

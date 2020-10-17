@@ -1,13 +1,10 @@
-module ALU(A,B,OP,Out,Branch_A,Branch_B,Branch_Cond);
-
-    input wire [31:0] A;
-    input wire [31:0] B;
-    input wire [3:0] OP;
-    output wire [31:0] Out;
-    input wire [31:0] Branch_A;
-    input wire [31:0] Branch_B;
-    output wire Branch_Cond;
-
+module ALU(
+    input wire [31:0] A, B,
+    input wire [3:0] OP,
+    output wire [31:0] Out,
+    input wire [31:0] Branch_A, Branch_B,
+    output wire Branch_Cond
+    );
     reg [31:0] C;
     reg _Branch_Cond;
     assign Out = C;

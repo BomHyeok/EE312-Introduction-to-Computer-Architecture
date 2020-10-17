@@ -1,9 +1,7 @@
-module ADDER(A,B,Out);
-
-    input wire [31:0] A;
-    input wire [31:0] B;
-    output wire [31:0] Out;
-
+module ADDER(
+    input wire [31:0] A, B,
+    output wire [31:0] Out
+    );
     reg [31:0] C;
     assign Out = C;
     

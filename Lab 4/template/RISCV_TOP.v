@@ -42,9 +42,26 @@ module RISCV_TOP (
 	always @ (negedge CLK) begin
 		if (RSTn) begin
 			uPC = Updated_uPC;
-			if (IF) NUM_INST <= NUM_INST + 1;
+			if (PCUpdate) NUM_INST <= NUM_INST + 1;
 		end
 	end
+
+	uCTRL ucontroller(
+		.INSTR          (ALU_RESULT),
+		.uPC			(uPC),
+		.ALUOp     		(ALUOp),
+		.D_MEM_BE       (D_MEM_BE),
+		.RF_WE          (RF_WE),
+		.D_MEM_WEN		(D_MEM_WEN),
+		.PCWrite     	(PCWrite),
+		.isBranch       (isBranch),
+		.MemRead        (MemRead),
+		.IorD			(IorD),
+		.IRWrite     	(IRWrite),
+		.ALUSrcA        (ALUSrcA),
+		.ALUSrcB        (ALUSrcB),
+		.Updated_uPC    (Updated_uPC),
+	);
 
 	UPDATE pc(
 		.Updated_A			(Updated_PC),
@@ -103,6 +120,15 @@ module RISCV_TOP (
 		.A	(PC),
 		.B	(32'h00000004),
 		.Out (ADD_PC)
+	);
+
+	RWSRC rwsrc(
+		.ADD_PC			(ADD_PC),
+		.D_MEM_DI		(D_MEM_DI),
+		.ALU_RESULT		(ALU_RESULT),
+		.RWSrc			(RWSrc),
+		.RF_WE			(RF_WE),
+		.RF_WD			(RF_WD)
 	);
 
 	AND branch_taken(

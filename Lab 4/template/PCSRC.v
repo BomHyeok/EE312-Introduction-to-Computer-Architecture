@@ -1,4 +1,4 @@
-module OR(
+module PCSRC(
     input wire [31:0] ADD_PC, ALU_RESULT,
     input wire [1:0] PCSrc,
     input wire isBranchTaken,

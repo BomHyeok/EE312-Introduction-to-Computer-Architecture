@@ -1,50 +1,49 @@
 module uCTRL(
     input wire [31:0] INSTR,
-	output wire [31:0] IMM, 
-    output wire [4:0] RF_RA1, RF_RA2, RF_WA1,
-    output wire [3:0] OP, D_MEM_BE,
-    output wire RF_WE, D_MEM_WEN, isItype, isLoad, isJump, isJAL, isBranch, isJALR
+	input wire [2:0] uPC,
+    output wire [3:0] ALUOp, D_MEM_BE,
+	output wire [2:0] Updated_uPC,
+	output wire [1:0] PCSrc, RWSrc, 
+    output wire RF_WE, D_MEM_WEN, PCWrite, isBranch, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB
     );
 
+    reg [3:0] _ALUOp, _D_MEM_BE;
+	reg [2:0] _Updated_uPC;
+	reg [1:0] _PCSrc, _RWSrc;
+    reg _RF_WE, _D_MEM_WEN, _PCWrite, _isBranch;
+	reg _MemRead, _IorD, _IRWrite, _ALUSrcA, _ALUSrcB;
 
-    reg [31:0] _IMM;
-    reg [4:0] _RF_WA1, _RF_RA1, _RF_RA2;
-    reg [3:0] _D_MEM_BE, _OP;
-    reg _RF_WE, _D_MEM_WEN, _isItype, _isLoad, _isJump, _isJAL, _isBranch, _isJALR;
-
-	reg [3:0] _ALUOp;
-	reg _PCWriteCond, _PCWrite, _IorD, _MemRead, _MemWrite, _MemtoReg, _IRWrite, _PCSource, _ALUSrcB, _ALUSrcA, _RegWrite, _RegDst;
-
-    assign IMM = _IMM;
+	assign Updated_uPC = _Updated_uPC;
     assign RF_WE = _RF_WE;
-	assign RF_WA1 = _RF_WA1;
-	assign RF_RA1 = _RF_RA1;
-	assign RF_RA2 = _RF_RA2;
-    assign OP = _OP;
+    assign ALUOp = _ALUOp;
     assign D_MEM_WEN = _D_MEM_WEN;
     assign D_MEM_BE = _D_MEM_BE;
-    assign isItype = _isItype;
-    assign isLoad = _isLoad;
-    assign isJump = _isJump;
-	assign isJAL = _isJAL;
-	assign isJALR = _isJALR;
+	assign PCWrite = _PCWrite;
 	assign isBranch = _isBranch;
+	assign MemRead = _MemRead;
+	assign IorD = _IorD;
+	assign IRWrite = _IRWrite;
+	assign PCSrc = _PCSrc;
+	assign RWSrc = _RWSrc;
+	assign ALUSrcA = _ALUSrcA;
+	assign ALUSrcB = _ALUSrcB;
+
 
     initial begin
-        _IMM = 0;
+		_Updated_uPC = 0;
         _RF_WE = 0;
-        _RF_WA1 = 0;
-        _RF_RA1 = 0;
-        _RF_RA2 = 0;
-        _OP = 0;
+        _ALUOp = 0;
         _D_MEM_WEN = 1;
         _D_MEM_BE = 0;
-        _isItype = 0;
-		_isLoad = 0;
-		_isJump = 0;
-		_isJAL = 0;
-		_isJALR = 0;
+		_PCWrite = 0;
 		_isBranch = 0;
+		_MemRead = 0;
+		_IorD = 0;
+		_IRWrite = 0;
+		_PCSrc = 0;
+		_RWSrc = 0;
+		_ALUSrcA = 0;
+		_ALUSrcB = 0;
     end
     always @ (*) begin
 		case (uPC)
@@ -53,13 +52,11 @@ module uCTRL(
 				_PCWrite = 1; // PC Update
 				_MemRead = 1;
 				_IorD = 0;
-				uPCadd
 				_Updated_uPC = uPC + 1;
 			end
 			3'b001 : // ID
 			begin
 				_IRWrite = 1;
-				uPCadd
 				_Updated_uPC = uPC + 1;
 			end
 			3'b010 : // EX
@@ -97,6 +94,7 @@ module uCTRL(
 							3'b111: _ALUOp = 4'b1111; //BGEU
 						endcase	
 						_PCSrc = 2'b11; // PC depends on branch cond
+						_isBranch = 1;
 						_Updated_uPC = 0;
 					end
 					7'b0000011 : // I Type Load LW
@@ -154,15 +152,15 @@ module uCTRL(
 				_RF_WE = 1;
 				// JAL and JALR
 				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
-					_RWSrc = 0; // PC + 4
+					_RWSrc = 2'b00; // PC + 4
 				end
 				// LW
 				else if (INSTR[6:0] ==7'b0000011)  begin
-					_RWSrc = 1; // D_MEM_DI
+					_RWSrc = 2'b01; // D_MEM_DI
 				end
 				// I-type and R-type
 				else begin
-					_RWSrc = 2; // ALU_RESULT
+					_RWSrc = 2'b10; // ALU_RESULT
 				end
 				_Updated_uPC = 0;
 			end
