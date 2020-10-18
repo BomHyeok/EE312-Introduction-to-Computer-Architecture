@@ -180,7 +180,7 @@ module RISCV_TOP (
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
 		.OUTPUT_PORT	(OUTPUT_PORT)
-   );
+   	);
 
 
 	HALT halt(

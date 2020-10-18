@@ -49,22 +49,53 @@ module uCTRL(
 		case (uPC)
 			3'b000 : // IF
 			begin
-				_PCWrite = 1; // PC Update
-				_MemRead = 1;
-				_IorD = 0;
 				_Updated_uPC = uPC + 1;
+				_RF_WE = 0;
+				_ALUOp = 0;
+				_D_MEM_WEN = 1;
+				_D_MEM_BE = 0;
+				_PCWrite = 1; // PC Update
+				_isBranch = 0;
+				_MemRead = 1; // read i_mem 
+				_IorD = 0;
+				_IRWrite = 0;
+				_PCSrc = 0;
+				_RWSrc = 0;
+				_ALUSrcA = 0;
+				_ALUSrcB = 0;
 			end
 			3'b001 : // ID
 			begin
-				_IRWrite = 1;
 				_Updated_uPC = uPC + 1;
+				_RF_WE = 0;
+				_ALUOp = 0;
+				_D_MEM_WEN = 1;
+				_D_MEM_BE = 0;
+				_PCWrite = 0;
+				_isBranch = 0;
+				_MemRead = 0;
+				_IorD = 0;
+				_IRWrite = 1; // ID
+				_PCSrc = 0;
+				_RWSrc = 0;
+				_ALUSrcA = 0;
+				_ALUSrcB = 0;
 			end
 			3'b010 : // EX
 			begin
+				_RF_WE = 0;
+				_ALUOp = 0; // default: Add
+				_D_MEM_WEN = 1;
+				_D_MEM_BE = 0;
+				_PCWrite = 0;
+				_isBranch = 0;
+				_MemRead = 0;
+				_IorD = 0;
+				_IRWrite = 0;
+				_PCSrc = 2'b00; // PC = PC + 4
+				_RWSrc = 0;
 				_ALUSrcA = 1; // 0: PC, 1: RA1
 				_ALUSrcB = 1; // 0: RA2, 1: IMM
-				_ALUOp = 0;
-				_PCSrc = 2'b00; // PC = PC + 4
 				case (INSTR[6:0])
 					7'b1101111 : // JAL
 					begin
@@ -138,9 +169,20 @@ module uCTRL(
 			end
 			3'b011 : // MEM
 			begin
-				_MemRead = 1;
-				_IorD = 1;
 				_Updated_uPC = uPC + 1;
+				_RF_WE = 0;
+				_ALUOp = 0;
+				_D_MEM_WEN = 1;
+				_D_MEM_BE = 0;
+				_PCWrite = 0;
+				_isBranch = 0;
+				_MemRead = 1; // read d_mem
+				_IorD = 1;
+				_IRWrite = 0;
+				_PCSrc = 0;
+				_RWSrc = 0;
+				_ALUSrcA = 0;
+				_ALUSrcB = 0;
 				if (INSTR[6:0] == 7'b0100011) begin //SW
 					_D_MEM_WEN = 0;
 					_D_MEM_BE = 4'b1111;
@@ -150,7 +192,19 @@ module uCTRL(
 			end
 			3'b100 : // WB
 			begin
+				_Updated_uPC = 0; // return to IF
 				_RF_WE = 1;
+				_ALUOp = 0;
+				_D_MEM_WEN = 1;
+				_D_MEM_BE = 0;
+				_PCWrite = 0;
+				_isBranch = 0;
+				_MemRead = 0;
+				_IorD = 0;
+				_IRWrite = 0;
+				_PCSrc = 0;
+				_ALUSrcA = 0;
+				_ALUSrcB = 0;
 				// JAL and JALR
 				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
 					_RWSrc = 2'b00; // PC + 4
@@ -163,7 +217,6 @@ module uCTRL(
 				else begin
 					_RWSrc = 2'b10; // ALU_RESULT
 				end
-				_Updated_uPC = 0;
 			end
 		endcase
     end
