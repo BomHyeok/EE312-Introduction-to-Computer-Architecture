@@ -40,7 +40,7 @@ module RISCV_TOP (
 	wire [3:0] ALUOp;
 	wire [2:0] uPC, Updated_uPC;
 	wire [1:0] PCSrc, RWSrc;
-	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, PCUpdate;
+	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, PCUpdate, NUM_INST_Update;
 
 	initial begin
 		NUM_INST <= 0;
@@ -49,7 +49,7 @@ module RISCV_TOP (
 	end
 
 	always @ (negedge CLK) begin
-		if (RSTn && PCUpdate) NUM_INST <= NUM_INST + 1;
+		if (RSTn && NUM_INST_Update) NUM_INST <= NUM_INST + 1;
 	end
 
 	always@ (*) begin
@@ -68,16 +68,19 @@ module RISCV_TOP (
 		.INSTR          (I_MEM_DI),
 		.uPC			(uPC),
 		.ALUOp     		(ALUOp),
-		.D_MEM_BE       (D_MEM_BE),
 		.RF_WE          (RF_WE),
 		.D_MEM_WEN		(D_MEM_WEN),
+		.D_MEM_BE       (D_MEM_BE),
 		.PCWrite     	(PCWrite),
 		.isBranch       (isBranch),
 		.MemRead        (MemRead),
 		.IorD			(IorD),
 		.IRWrite     	(IRWrite),
+		.PCSrc			(PCSrc),
+		.RWSrc			(RWSrc),
 		.ALUSrcA        (ALUSrcA),
 		.ALUSrcB        (ALUSrcB),
+		.NUM_INST_Update (NUM_INST_Update),
 		.Updated_uPC    (Updated_uPC)
 	);
 
@@ -171,7 +174,7 @@ module RISCV_TOP (
 
 	UPDATE instr(
 		.Updated_A		(INSTR),
-		.Update_Sign	(IRWrite),
+		.Update_Sign	(PCUpdate),
 		.A				(PRE_INSTR)
 	);
 

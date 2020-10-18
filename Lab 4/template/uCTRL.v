@@ -4,14 +4,14 @@ module uCTRL(
     output wire [3:0] ALUOp, D_MEM_BE,
 	output wire [2:0] Updated_uPC,
 	output wire [1:0] PCSrc, RWSrc, 
-    output wire RF_WE, D_MEM_WEN, PCWrite, isBranch, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB
+    output wire RF_WE, D_MEM_WEN, PCWrite, isBranch, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, NUM_INST_Update
     );
 
     reg [3:0] _ALUOp, _D_MEM_BE;
 	reg [2:0] _Updated_uPC;
 	reg [1:0] _PCSrc, _RWSrc;
     reg _RF_WE, _D_MEM_WEN, _PCWrite, _isBranch;
-	reg _MemRead, _IorD, _IRWrite, _ALUSrcA, _ALUSrcB;
+	reg _MemRead, _IorD, _IRWrite, _ALUSrcA, _ALUSrcB, _NUM_INST_Update;
 
 	assign Updated_uPC = _Updated_uPC;
     assign RF_WE = _RF_WE;
@@ -27,6 +27,7 @@ module uCTRL(
 	assign RWSrc = _RWSrc;
 	assign ALUSrcA = _ALUSrcA;
 	assign ALUSrcB = _ALUSrcB;
+	assign NUM_INST_Update = _NUM_INST_Update;
 
 
     initial begin
@@ -44,6 +45,7 @@ module uCTRL(
 		_RWSrc = 0;
 		_ALUSrcA = 0;
 		_ALUSrcB = 0;
+		_NUM_INST_Update = 0;
     end
     always @ (*) begin
 		case (uPC)
@@ -63,6 +65,7 @@ module uCTRL(
 				_RWSrc = 0;
 				_ALUSrcA = 0;
 				_ALUSrcB = 0;
+				_NUM_INST_Update = 0;
 			end
 			3'b001 : // ID
 			begin
@@ -80,6 +83,7 @@ module uCTRL(
 				_RWSrc = 0;
 				_ALUSrcA = 0;
 				_ALUSrcB = 0;
+				_NUM_INST_Update = 0;
 			end
 			3'b010 : // EX
 			begin
@@ -96,6 +100,7 @@ module uCTRL(
 				_RWSrc = 0;
 				_ALUSrcA = 1; // 0: PC, 1: RA1
 				_ALUSrcB = 1; // 0: RA2, 1: IMM
+				_NUM_INST_Update = 0;
 				case (INSTR[6:0])
 					7'b1101111 : // JAL
 					begin
@@ -128,6 +133,7 @@ module uCTRL(
 						_PCSrc = 2'b11; // PC depends on branch cond
 						_isBranch = 1;
 						_Updated_uPC = 0;
+						_NUM_INST_Update = 1; // instruction end
 					end
 					7'b0000011 : // I Type Load LW
 					begin
@@ -179,14 +185,16 @@ module uCTRL(
 				_MemRead = 1; // read d_mem
 				_IorD = 1;
 				_IRWrite = 0;
-				_PCSrc = 0;
+			//	_PCSrc = 0;
 				_RWSrc = 0;
 				_ALUSrcA = 0;
 				_ALUSrcB = 0;
+				_NUM_INST_Update = 0;
 				if (INSTR[6:0] == 7'b0100011) begin //SW
 					_D_MEM_WEN = 0;
 					_D_MEM_BE = 4'b1111;
 					_Updated_uPC = 0;
+					_NUM_INST_Update = 1; // instruction end
 					if (INSTR[14:12] != 3'b010) $display("Invalid Instruction: Only deal with SW");
 				end
 			end
@@ -202,9 +210,10 @@ module uCTRL(
 				_MemRead = 0;
 				_IorD = 0;
 				_IRWrite = 0;
-				_PCSrc = 0;
+			//	_PCSrc = 0;
 				_ALUSrcA = 0;
 				_ALUSrcB = 0;
+				_NUM_INST_Update = 1; // instruction end
 				// JAL and JALR
 				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
 					_RWSrc = 2'b00; // PC + 4

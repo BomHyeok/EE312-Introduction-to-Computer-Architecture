@@ -23,8 +23,8 @@ module ID(
     always @ (*) begin
         if (IRWrite) begin
             _IMM[11:0] = INSTR[31:20];
-            if (INSTR[31]) _IMM[31:12] = 0;
-            else _IMM[31:12] = 20'hfffff;
+            if (INSTR[31]) _IMM[31:12] = 20'hfffff;
+            else _IMM[31:12] = 0;
             _RF_WA1 = INSTR[11:7];
             _RF_RA1 = INSTR[19:15];
             _RF_RA2 = INSTR[24:20];
