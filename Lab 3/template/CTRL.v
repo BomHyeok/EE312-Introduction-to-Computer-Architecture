@@ -105,7 +105,7 @@ module CTRL(
 				_IMM[0] = 0;
 				_IMM[20:1] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
 				if (_IMM[20] == 0) _IMM[31:21] = 0;
-        		else _IMM[31:12] = 11'h7ff;
+        		else _IMM[31:21] = 11'h7ff;
 				_RF_WE = 1;
 				_RF_WA1 = INSTR[11:7];
 				_RF_RA1 = 0;
