@@ -40,7 +40,7 @@ module RISCV_TOP (
 	wire [3:0] ALUOp;
 	wire [2:0] uPC, Updated_uPC;
 	wire [1:0] PCSrc, RWSrc;
-	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB;
+	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, PCUpdate;
 
 	initial begin
 		NUM_INST <= 0;
@@ -174,6 +174,14 @@ module RISCV_TOP (
 		.Update_Sign	(IRWrite),
 		.A				(PRE_INSTR)
 	);
+
+	OUTPUT out(
+		.RF_WD			(RF_WD),
+		.isBranch		(isBranch),
+		.isBranchTaken	(isBranchTaken),
+		.OUTPUT_PORT	(OUTPUT_PORT)
+   );
+
 
 	HALT halt(
 		.INSTR		(I_MEM_DI),

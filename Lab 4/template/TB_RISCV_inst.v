@@ -18,6 +18,8 @@
 `include "ADDER.v"
 `include "PCSRC.v"
 `include "RWSRC.v"
+`include "OUTPUT.v"
+
 
 module TB_RISCV ();
 	//General Signals
