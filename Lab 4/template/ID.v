@@ -23,8 +23,8 @@ module ID(
     always @ (*) begin
         if (IRWrite) begin
             _IMM[11:0] = INSTR[31:20];
-            if (INSTR[31]) _IMM[31:12] = 20'hfffff;
-            else _IMM[31:12] = 0;
+            // if (INSTR[31]) _IMM[31:12] = 20'hfffff;
+            // else _IMM[31:12] = 0;
             _RF_WA1 = INSTR[11:7];
             _RF_RA1 = INSTR[19:15];
             _RF_RA2 = INSTR[24:20];
@@ -34,8 +34,8 @@ module ID(
                 begin
                     _IMM[0] = 0;
                     _IMM[20:1] = {INSTR[31], INSTR[19:12], INSTR[20], INSTR[30:21]};
-                    if (IMM[31] == 0) _IMM[31:21] = 0;
-                    else _IMM[31:12] = 11'h7ff;
+                    // if (IMM[31] == 0) _IMM[31:21] = 0;
+                    // else _IMM[31:21] = 11'h7ff;
                 //    _RF_WA1 = INSTR[11:7];
                     _RF_RA1 = 0;
                     _RF_RA2 = 0;
@@ -43,8 +43,6 @@ module ID(
                 7'b1100111 : // JALR
                 begin
                 //    _IMM[11:0] = INSTR[31:20];
-                //    if (INSTR[31]) _IMM[31:12] = 0;
-                //    else _IMM[31:12] = 20'hfffff;
                 //    _RF_WA1 = INSTR[11:7];
                 //    _RF_RA1 = INSTR[19:15];
                     _RF_RA2 = 0;
@@ -61,8 +59,6 @@ module ID(
                 7'b0000011 : // I Type Load LW
                 begin
                 //    _IMM[11:0] = INSTR[31:20];
-                //    if (INSTR[31]) _IMM[31:12] = 0;
-                //    else _IMM[31:12] = 20'hfffff;
                 //    _RF_WA1 = INSTR[11:7];
                 //    _RF_RA1 = INSTR[19:15];
                     _RF_RA2 = 0;
@@ -80,8 +76,6 @@ module ID(
                 7'b0010011 : // I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
                 begin
                 //    _IMM[11:0] = INSTR[31:20];
-                //    if (INSTR[31]) _IMM[31:12] = 0;
-                //    else _IMM[31:12] = 20'hfffff;
                 //    _RF_WA1 = INSTR[11:7];
                 //    _RF_RA1 = INSTR[19:15];
                     _RF_RA2 = 0;

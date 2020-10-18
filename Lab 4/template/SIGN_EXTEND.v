@@ -1,6 +1,5 @@
 module SIGN_EXTEND(
     input wire [31:0] IMM,
-    input wire isJAL,
     output wire [31:0] IMM_EX
     );
 
@@ -9,11 +8,9 @@ module SIGN_EXTEND(
     initial TEMP = 0;
     
     always @ (*) begin
-        if (isJAL) TEMP = IMM;
-        else begin
-            TEMP[11:0] = IMM[11:0];
-            if (IMM[11] == 0) TEMP[31:12] = 0;
-            else TEMP[31:12] = 20'hfffff;
-        end
+        TEMP = IMM;
+        if (IMM[20]) TEMP[31:21] = 11'h7ff;
+        if (~IMM[20] && IMM[12]) TEMP[31:13] = 19'h7ffff;
+        if (~IMM[20] && ~IMM[12] && IMM[11]) TEMP[31:12] = 20'hfffff;
     end
 endmodule

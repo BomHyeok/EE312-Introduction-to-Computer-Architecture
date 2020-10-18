@@ -19,7 +19,7 @@
 `include "PCSRC.v"
 `include "RWSRC.v"
 `include "OUTPUT.v"
-
+`include "SIGN_EXTEND.v"
 
 module TB_RISCV ();
 	//General Signals

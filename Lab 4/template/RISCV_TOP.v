@@ -106,6 +106,11 @@ module RISCV_TOP (
 		.IMM			(IMM)
 	);
 
+	SIGN_EXTEND sign_extend(
+		.IMM		(IMM),
+		.IMM_EX		(IMM)
+	);
+
 	MUX mux_ALUSrcA(
 		.A		(PC),
 		.B		(RF_RD1),

@@ -187,8 +187,8 @@ module uCTRL(
 				_IRWrite = 0;
 			//	_PCSrc = 0;
 				_RWSrc = 0;
-				_ALUSrcA = 0;
-				_ALUSrcB = 0;
+			//	_ALUSrcA = 0;
+			//	_ALUSrcB = 0;
 				_NUM_INST_Update = 0;
 				if (INSTR[6:0] == 7'b0100011) begin //SW
 					_D_MEM_WEN = 0;
@@ -211,8 +211,8 @@ module uCTRL(
 				_IorD = 0;
 				_IRWrite = 0;
 			//	_PCSrc = 0;
-				_ALUSrcA = 0;
-				_ALUSrcB = 0;
+			//	_ALUSrcA = 0;
+			//	_ALUSrcB = 0;
 				_NUM_INST_Update = 1; // instruction end
 				// JAL and JALR
 				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
