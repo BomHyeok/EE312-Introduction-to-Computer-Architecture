@@ -32,10 +32,11 @@ module RISCV_TOP (
 	// TODO: implement multi-cycle CPU
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
+//	assign D_MEM_DOUT = RF_RD2;
 	
 
 	reg [31:0] INSTR, _PRE_INSTR, _PC;
-	wire [31:0] PC, Updated_PC, IMM, ADD_PC, PRE_INSTR, ALUSrcA_Out, ALUSrcB_Out, ALU_RESULT, ALU_OUT, Updated_RF_RD2;
+	wire [31:0] PC, Updated_PC, IMM, ADD_PC, PRE_INSTR, ALUSrcA_Out, ALUSrcB_Out, ALU_RESULT, ALU_OUT, Updated_OUTPUT_PORT;
 	wire [11:0] _I_MEM_ADDR;
 	wire [3:0] ALUOp;
 	wire [2:0] uPC, Updated_uPC;
@@ -52,10 +53,10 @@ module RISCV_TOP (
 
 	assign PC = _PC;
 	assign PRE_INSTR = _PRE_INSTR;
-	assign D_MEM_DOUT = Updated_RF_RD2;
+	
 
 	always @ (negedge CLK) begin
-		if (RSTn && PCUpdate) begin
+		if (RSTn && PCUpdate && uPC == 0) begin
 			NUM_INST <= NUM_INST + 1;
 			_PC <= Updated_PC;
 			_PRE_INSTR <= INSTR;
@@ -159,6 +160,12 @@ module RISCV_TOP (
 		.MEM_ADDR         		 (D_MEM_ADDR)
 	);
 
+	UPDATE d_mem_write(
+		.Updated_A		(D_MEM_DOUT),
+		.Update_Sign	(~D_MEM_WEN),
+		.A				(RF_RD2)
+	);
+
 	ADDER add_pc(
 		.A	(PC),
 		.B	(32'h00000004),
@@ -203,19 +210,20 @@ module RISCV_TOP (
 	OUTPUT out(
 		.RF_WD			(RF_WD),
 		.ALU_RESULT		(ALU_OUT),
+		.D_MEM_ADDR		(D_MEM_ADDR),
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
 		.D_MEM_WEN		(D_MEM_WEN),
-		.OUTPUT_PORT	(OUTPUT_PORT)
-	//	.OUTPUT_PORT	(Updated_OUTPUT_PORT)
+	//	.OUTPUT_PORT	(OUTPUT_PORT)
+		.OUTPUT_PORT	(Updated_OUTPUT_PORT)
    	);
-/*
+
 	UPDATE output_port(
 		.Updated_A		(Updated_OUTPUT_PORT),
 		.Update_Sign	(NUM_INST_Update),
 		.A				(OUTPUT_PORT)
 	);
-*/
+
 	HALT halt(
 		.INSTR		(I_MEM_DI),
 		.PRE_INSTR	(PRE_INSTR),

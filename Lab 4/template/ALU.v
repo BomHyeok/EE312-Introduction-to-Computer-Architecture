@@ -51,7 +51,7 @@ module ALU(
         // BEQ
             4'b1001 : 
             begin
-                if (A == B) begin
+                if (Branch_A == Branch_B) begin
                     _Branch_Cond = 1;
                     C = A + B;
                 end
@@ -59,7 +59,7 @@ module ALU(
         // BNE
             4'b1010 : 
             begin
-                if (A != B) begin
+                if (Branch_A != Branch_B) begin
                     _Branch_Cond = 1;
                     C = A + B;
                 end
@@ -67,7 +67,7 @@ module ALU(
         // BLT
             4'b1011 : 
             begin
-                if ($signed(A) < $signed(B)) begin
+                if ($signed(Branch_A) < $signed(Branch_B)) begin
                     _Branch_Cond = 1;
                     C = A + B;
                 end
@@ -75,7 +75,7 @@ module ALU(
         // BGE
             4'b1100 :
             begin
-                if ($signed(A) >= $signed(B)) begin
+                if ($signed(Branch_A) >= $signed(Branch_B)) begin
                     _Branch_Cond = 1;
                     C = A + B;
                 end
@@ -83,7 +83,7 @@ module ALU(
         // BLTU
             4'b1110 :
             begin
-                if (A < B) begin
+                if (Branch_A < Branch_B) begin
                     _Branch_Cond = 1;
                     C = A + B;
                 end
@@ -91,7 +91,7 @@ module ALU(
         // BGEU
             4'b1111 :
             begin
-                if (A >= B) begin
+                if (Branch_A >= Branch_B) begin
                     _Branch_Cond = 1;
                     C = A + B;
                 end

@@ -58,7 +58,7 @@ module uCTRL(
 			//	_ALUOp = 0;
 			//	_D_MEM_WEN = 1;
 			//	_D_MEM_BE = 0;
-				_PCWrite = 0; // PC Update
+			//	_PCWrite = 0; // PC Update
 			//	_isBranch = 0;
 				_MemRead = 1; // read i_mem 
 				_IorD = 0;
@@ -209,7 +209,7 @@ module uCTRL(
 				_Updated_uPC = 0; // return to IF
 				_RF_WE = 1;
 			//	_ALUOp = 0;
-			//	_D_MEM_WEN = 1;
+				_D_MEM_WEN = 1;
 			//	_D_MEM_BE = 0;
 				_PCWrite = 0;
 			//	_isBranch = 0;
@@ -219,8 +219,8 @@ module uCTRL(
 			//	_PCSrc = 0;
 			//	_ALUSrcA = 0;
 			//	_ALUSrcB = 0;
-				_NUM_INST_Update = 1; // instruction end
 				_ALUWrite = 0;
+				_NUM_INST_Update = 1; // instruction end
 				// JAL and JALR
 				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
 					_RWSrc = 2'b00; // PC + 4
