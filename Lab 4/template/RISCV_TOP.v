@@ -34,7 +34,7 @@ module RISCV_TOP (
 	assign D_MEM_CSN = ~RSTn;
 	
 
-	reg [31:0] INSTR, _PRE_INSTR;
+	reg [31:0] INSTR, _PRE_INSTR, _PC;
 	wire [31:0] PC, Updated_PC, IMM, ADD_PC, PRE_INSTR, ALUSrcA_Out, ALUSrcB_Out, ALU_RESULT, ALU_OUT, Updated_RF_RD2;
 	wire [11:0] _I_MEM_ADDR;
 	wire [3:0] ALUOp;
@@ -206,7 +206,6 @@ module RISCV_TOP (
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
 		.D_MEM_WEN		(D_MEM_WEN),
-		.Update 		(ALUWrite),
 		.OUTPUT_PORT	(OUTPUT_PORT)
 	//	.OUTPUT_PORT	(Updated_OUTPUT_PORT)
    	);
