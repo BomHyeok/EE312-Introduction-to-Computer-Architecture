@@ -9,8 +9,7 @@ module UPDATE(
     initial	TEMP = 0;
 
     always @ (*) begin
-		  if (Update_Sign) TEMP = Updated_A;
-      else TEMP = 0;
-	  end
+		if (Update_Sign) TEMP = Updated_A;
+	end
 
 endmodule

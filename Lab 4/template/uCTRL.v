@@ -4,14 +4,14 @@ module uCTRL(
     output wire [3:0] ALUOp, D_MEM_BE,
 	output wire [2:0] Updated_uPC,
 	output wire [1:0] PCSrc, RWSrc, 
-    output wire RF_WE, D_MEM_WEN, PCWrite, isBranch, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, NUM_INST_Update
+    output wire RF_WE, D_MEM_WEN, PCWrite, isBranch, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, NUM_INST_Update, ALUWrite
     );
 
     reg [3:0] _ALUOp, _D_MEM_BE;
 	reg [2:0] _Updated_uPC;
 	reg [1:0] _PCSrc, _RWSrc;
     reg _RF_WE, _D_MEM_WEN, _PCWrite, _isBranch;
-	reg _MemRead, _IorD, _IRWrite, _ALUSrcA, _ALUSrcB, _NUM_INST_Update;
+	reg _MemRead, _IorD, _IRWrite, _ALUSrcA, _ALUSrcB, _NUM_INST_Update, _ALUWrite;
 
 	assign Updated_uPC = _Updated_uPC;
     assign RF_WE = _RF_WE;
@@ -28,6 +28,7 @@ module uCTRL(
 	assign ALUSrcA = _ALUSrcA;
 	assign ALUSrcB = _ALUSrcB;
 	assign NUM_INST_Update = _NUM_INST_Update;
+	assign ALUWrite = _ALUWrite;
 
 
     initial begin
@@ -46,6 +47,7 @@ module uCTRL(
 		_ALUSrcA = 0;
 		_ALUSrcB = 0;
 		_NUM_INST_Update = 0;
+		_ALUWrite = 0;
     end
     always @ (*) begin
 		case (uPC)
@@ -53,19 +55,20 @@ module uCTRL(
 			begin
 				_Updated_uPC = uPC + 1;
 				_RF_WE = 0;
-				_ALUOp = 0;
-				_D_MEM_WEN = 1;
-				_D_MEM_BE = 0;
-				_PCWrite = 1; // PC Update
-				_isBranch = 0;
+			//	_ALUOp = 0;
+			//	_D_MEM_WEN = 1;
+			//	_D_MEM_BE = 0;
+				_PCWrite = 0; // PC Update
+			//	_isBranch = 0;
 				_MemRead = 1; // read i_mem 
 				_IorD = 0;
 				_IRWrite = 0;
-				_PCSrc = 0;
-				_RWSrc = 0;
-				_ALUSrcA = 0;
-				_ALUSrcB = 0;
-				_NUM_INST_Update = 0;
+			//	_PCSrc = 0;
+			//	_RWSrc = 0;
+			//	_ALUSrcA = 0;
+			//	_ALUSrcB = 0;
+				if (_NUM_INST_Update) _PCWrite = 1;
+				_ALUWrite = 0;
 			end
 			3'b001 : // ID
 			begin
@@ -84,6 +87,7 @@ module uCTRL(
 				_ALUSrcA = 0;
 				_ALUSrcB = 0;
 				_NUM_INST_Update = 0;
+				_ALUWrite = 0;
 			end
 			3'b010 : // EX
 			begin
@@ -101,6 +105,7 @@ module uCTRL(
 				_ALUSrcA = 1; // 0: PC, 1: RA1
 				_ALUSrcB = 1; // 0: RA2, 1: IMM
 				_NUM_INST_Update = 0;
+				_ALUWrite = 1;
 				case (INSTR[6:0])
 					7'b1101111 : // JAL
 					begin
@@ -177,7 +182,7 @@ module uCTRL(
 			begin
 				_Updated_uPC = uPC + 1;
 				_RF_WE = 0;
-				_ALUOp = 0;
+			//	_ALUOp = 0;
 				_D_MEM_WEN = 1;
 				_D_MEM_BE = 0;
 				_PCWrite = 0;
@@ -189,6 +194,7 @@ module uCTRL(
 				_RWSrc = 0;
 			//	_ALUSrcA = 0;
 			//	_ALUSrcB = 0;
+				_ALUWrite = 0;
 				_NUM_INST_Update = 0;
 				if (INSTR[6:0] == 7'b0100011) begin //SW
 					_D_MEM_WEN = 0;
@@ -202,11 +208,11 @@ module uCTRL(
 			begin
 				_Updated_uPC = 0; // return to IF
 				_RF_WE = 1;
-				_ALUOp = 0;
-				_D_MEM_WEN = 1;
-				_D_MEM_BE = 0;
+			//	_ALUOp = 0;
+			//	_D_MEM_WEN = 1;
+			//	_D_MEM_BE = 0;
 				_PCWrite = 0;
-				_isBranch = 0;
+			//	_isBranch = 0;
 				_MemRead = 0;
 				_IorD = 0;
 				_IRWrite = 0;
@@ -214,6 +220,7 @@ module uCTRL(
 			//	_ALUSrcA = 0;
 			//	_ALUSrcB = 0;
 				_NUM_INST_Update = 1; // instruction end
+				_ALUWrite = 0;
 				// JAL and JALR
 				if (INSTR[6:0] == 7'b1101111 || INSTR[6:0] == 7'b1100111) begin
 					_RWSrc = 2'b00; // PC + 4
