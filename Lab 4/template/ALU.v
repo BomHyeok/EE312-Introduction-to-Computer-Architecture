@@ -16,7 +16,7 @@ module ALU(
     end
 
     always @ (A, B, OP) begin
-        _Branch_Cond = 0;
+	_Branch_Cond = 0;
         case(OP)
         // ADD
             4'b0000 : C = A + B;
