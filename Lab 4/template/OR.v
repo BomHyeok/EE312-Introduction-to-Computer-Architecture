@@ -1,5 +1,6 @@
-module AND(
-    input wire A,B,
+module OR(
+    input wire A,
+    input wire B,
     output wire Out
     );
 
@@ -9,7 +10,7 @@ module AND(
     initial TEMP = 0;
     
     always @ (*) begin
-        if (A == 1 && B == 1) TEMP = 1;
-        else TEMP = 0;
+        if (A == 0 && B == 0) TEMP = 0;
+        else TEMP = 1;
     end
 endmodule
