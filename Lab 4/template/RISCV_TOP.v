@@ -37,12 +37,12 @@ module RISCV_TOP (
 	
 
 	reg [31:0] INSTR, _PC, _PRE_INSTR;
-	wire [31:0] PC, Updated_PC, IMM, ADD_PC, PRE_INSTR, ALUSrcA_Out, ALUSrcB_Out, ALU_RESULT, ALU_OUT, Updated_OUTPUT_PORT, IMM_EX;
+	wire [31:0] PC, Updated_PC, IMM, ADD_PC, PRE_INSTR, ALUSrcA_Out, ALUSrcB_Out, ALU_RESULT, ALU_OUT;
 	wire [11:0] _I_MEM_ADDR;
 	wire [3:0] ALUOp;
 	wire [2:0] uPC, Updated_uPC;
 	wire [1:0] PCSrc, RWSrc;
-	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, PCUpdate, NUM_INST_Update, ALUWrite;
+	wire isBranch, isBranchTaken, PCWrite, MemRead, IorD, IRWrite, ALUSrcA, ALUSrcB, PCUpdate, INSTR_FINISH, ALUWrite;
 	
 	initial begin
 		NUM_INST <= 0;
@@ -56,9 +56,7 @@ module RISCV_TOP (
 
 	always @ (negedge CLK) begin
 		if (RSTn && PCUpdate && uPC == 0) begin
-		//if (RSTn && NUM_INST_Update) begin
 			NUM_INST <= NUM_INST + 1;
-		//if (RSTn && PCUpdate) begin
 			_PC <= Updated_PC;
 			_PRE_INSTR <= INSTR;
 		end
@@ -67,16 +65,15 @@ module RISCV_TOP (
 	always@ (*) begin
 		I_MEM_ADDR = _I_MEM_ADDR;
 		INSTR = I_MEM_DI;
-		//if (PC == 12) $finish();
-
-	$display("--------------------------------------------------------------------------------");
+/*
+		$display("--------------------------------------------------------------------------------");
      	$display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
-    	$display("RF_RD1: 0x%0h, ALUSrcA: (0x%0h) 0x%0h, ALUSrcB: (0x%0h) 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h, ALU_OUT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcA_Out, ALUSrcB, ALUSrcB_Out, IMM_EX, ALUOp, ALU_RESULT, ALU_OUT);
+    	$display("RF_RD1: 0x%0h, ALUSrcA: (0x%0h) 0x%0h, ALUSrcB: (0x%0h) 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h, ALU_OUT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcA_Out, ALUSrcB, ALUSrcB_Out, IMM, ALUOp, ALU_RESULT, ALU_OUT);
     	$display("PC: 0x%0h, PCSrc: 0x%0h, ADD_PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, PCSrc, ADD_PC, Updated_PC, NUM_INST);
-	$display("uPC: 0x%0h, Updated_uPC: 0x%0h, PCWrite: 0x%0h, PCUpdate: 0x%0h", uPC, Updated_uPC, PCWrite, PCUpdate);
-	$display("isBranch: 0x%0h, isBranchTaken: 0x%0h", isBranch, isBranchTaken);
-	$display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
-
+		$display("uPC: 0x%0h, Updated_uPC: 0x%0h, PCWrite: 0x%0h, PCUpdate: 0x%0h", uPC, Updated_uPC, PCWrite, PCUpdate);
+		$display("isBranch: 0x%0h, isBranchTaken: 0x%0h", isBranch, isBranchTaken);
+		$display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
+*/
 	end
 
 	CLKUPDATE upc(
@@ -98,21 +95,15 @@ module RISCV_TOP (
 		.MemRead        (MemRead),
 		.IorD			(IorD),
 		.IRWrite     	(IRWrite),
-		.PCSrc		(PCSrc),
-		.RWSrc		(RWSrc),
+		.PCSrc			(PCSrc),
+		.RWSrc			(RWSrc),
 		.ALUSrcA        (ALUSrcA),
 		.ALUSrcB        (ALUSrcB),
-		.NUM_INST_Update (NUM_INST_Update),
-		.ALUWrite	(ALUWrite),
+		.INSTR_FINISH 	(INSTR_FINISH),
+		.ALUWrite		(ALUWrite),
 		.Updated_uPC    (Updated_uPC)
 	);
-/*
-	UPDATE pc(
-		.Updated_A			(Updated_PC),
-		.Update_Sign		(PCUpdate),
-		.A					(PC)
-	);
-*/
+
 	TRANSLATE i_mem_read(
 		.EFFECTIVE_ADDR          (PC),
 		.MemRead				 (MemRead),
@@ -200,13 +191,7 @@ module RISCV_TOP (
 		.PCSrc			(PCSrc),
 		.Updated_PC		(Updated_PC)
 	);
-/*
-	UPDATE instr(
-		.Updated_A		(INSTR),
-		.Update_Sign	(PCUpdate),
-		.A				(PRE_INSTR)
-	);
-*/
+
 	OUTPUT out(
 		.RF_WD			(RF_WD),
 		.ALU_RESULT			(ALU_OUT),
@@ -214,16 +199,9 @@ module RISCV_TOP (
 		.isBranch		(isBranch),
 		.isBranchTaken	(isBranchTaken),
 		.D_MEM_WEN	(D_MEM_WEN),
-	//	.OUTPUT_PORT	(Updated_OUTPUT_PORT)
 		.OUTPUT_PORT	(OUTPUT_PORT)
   	);
-/*
-	UPDATE output_port(
-		.Updated_A		(Updated_OUTPUT_PORT),
-		.Update_Sign	(NUM_INST_Update),
-		.A				(OUTPUT_PORT)
-	);
-*/
+
 	HALT halt(
 		.INSTR		(I_MEM_DI),
 		.PRE_INSTR	(PRE_INSTR),

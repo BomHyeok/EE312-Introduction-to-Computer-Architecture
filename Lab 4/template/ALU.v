@@ -31,8 +31,6 @@ module ALU(
                     else C = 0;
                 end
         // SLTU
-        // SLTU rd, x0, rs2 sets rd to 1 if rs2 is not equal to zero, otherwise sets rd to zero
-        // SLTIU rd, rs1, 1 sets rd to 1 if rs1 equals zero, otherwise sets rd to 0
             4'b0011 : 
                 begin
                     if (A < B) C = 1;
