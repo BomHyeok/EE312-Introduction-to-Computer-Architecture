@@ -146,6 +146,12 @@ module RISCV_TOP (
 		.Branch_Cond	(Branch_Cond)
 	);
 
+	UPDATE aluout(
+		.Updated_A	(ALU_RESULT),
+		.Update_Sign	(ALUWrite),
+		.A		(ALU_OUT)
+	);
+
 	TRANSLATE d_mem_read(
 		.EFFECTIVE_ADDR          (ALU_OUT),
 		.MemRead				 (MemRead),
@@ -157,12 +163,6 @@ module RISCV_TOP (
 		.A	(PC),
 		.B	(32'h00000004),
 		.Out (ADD_PC)
-	);
-
-	UPDATE aluout(
-		.Updated_A	(ALU_RESULT),
-		.Update_Sign	(ALUWrite),
-		.A		(ALU_OUT)
 	);
 
 	RWSRC rwsrc(
