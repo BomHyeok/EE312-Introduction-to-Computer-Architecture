@@ -1,7 +1,7 @@
-module MUX(
-    input wire [31:0] A, B, ALUOUT_EXMEM, ADD_PC, isJump, RF_WD,
+module MUX_ALU(
+    input wire [31:0] A, B, ALUOUT_EXMEM, ADD_PC_EXMEM, RF_WD,
     input wire [1:0] Forward,
-    input wire S, 
+    input wire S, isJump, 
     output wire [31:0] Out
     );
 
@@ -18,7 +18,7 @@ module MUX(
             end
             2'b01 : 
             begin
-                if (isJump) TEMP = ADD_PC;
+                if (isJump) TEMP = ADD_PC_EXMEM;
                 else TEMP = ALUOUT_EXMEM;
             end
             2'b10 : TEMP = RF_WD;
