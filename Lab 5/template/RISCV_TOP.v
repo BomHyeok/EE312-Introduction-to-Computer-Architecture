@@ -84,8 +84,8 @@ module RISCV_TOP (
    ADDER add_pc(
       .A      (PC),
       .B      (32'h00000004),
-      .Out    (Updated_PC)
-      // .Out    (ADD_PC)
+    //   .Out    (Updated_PC)
+      .Out    (ADD_PC)
    );
 
    ID id(
@@ -107,5 +107,51 @@ module RISCV_TOP (
    pipeCTRL controller(
       
    );
+
+   FORWARD forwarding_unit(
+		.RegWrite_EXMEM   (RegWrite_EXMEM),
+		.RegWrite_MEMWB   (RegWrite_MEMWB),
+		.isLoad     	 (isLoad),
+		.RF_RA1      	(RF_RA1),
+		.RF_RA2      	(RF_RA2),
+		.WA_EXMEM      (WA_EXMEM),
+		.WA_MEMWB      (WA_MEMWB),
+		.ForwardA      (ForwardA),
+		.ForwardB      (ForwardB),
+   );
+
+   MUX_ALU mux_ALUSrcA(
+		.A				(PC),
+		.B				(RF_RD1),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC			(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.Forward		(Forward),
+		.S				(ALUSrcA),
+		.isJump			(isJump),
+		.Out			(ALUSrcA_Out)
+   );
+
+   MUX_ALU mux_ALUSrcB(
+		.A				(RF_RD2),
+		.B				(IMM),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC			(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.Forward		(Forward),
+		.S				(ALUSrcB),
+		.isJump			(isJump),
+		.Out			(ALUSrcB_Out)
+   );
+
+   ALU alu(
+		.A				(ALUSrcA_Out),
+		.B				(ALUSrcB_Out),
+		.OP				(ALUOp),
+		.Out 			(ALU_RESULT),
+		.Branch_A		(RF_RD1),
+		.Branch_B		(RF_RD2),
+		.Branch_Cond	(Branch_Cond)
+	);
 
 endmodule 
