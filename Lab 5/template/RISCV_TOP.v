@@ -50,6 +50,7 @@ module RISCV_TOP (
 
    assign PC = _PC;
    assign PRE_INSTR = _PRE_INSTR;
+   assign RF_WA1 = WA_MEMWB;  // check later
 
    // Only allow for NUM_INST
    always @ (negedge CLK) begin
@@ -66,8 +67,6 @@ module RISCV_TOP (
       .IorD               (0),
       .I_MEM_ADDR            (_I_MEM_ADDR)
    );
-
-   
 
    always@ (*) begin
       I_MEM_ADDR = _I_MEM_ADDR;
@@ -93,19 +92,16 @@ module RISCV_TOP (
       .INSTR      (INSTR),
       .RF_RA1      (RF_RA1),
       .RF_RA2      (RF_RA2),
-      .RF_WA1      (RF_WA1),
-      .IMM      (_IMM)
+      .RF_WA1      (WA_IFID),
+      .IMM      (IMM)
    );
-
-   
-
-   always@ (*) begin
-      IMM = _IMM;
-      WA_IDEX = RF_WA1;
-   end
 
    pipeCTRL controller(
       
+   );
+
+   PR_IDEX pr_idex(
+
    );
 
    FORWARD forwarding_unit(
@@ -152,6 +148,56 @@ module RISCV_TOP (
 		.Branch_A		(RF_RD1_OUT),
 		.Branch_B		(RF_RD2_OUT),
 		.Branch_Cond	(Branch_Cond)
+	);
+
+	PR_EXMEM pr_exmem(
+		.D_MEM_BE_IDEX		(D_MEM_BE_IDEX),
+		.D_MEM_WEN_IDEX		(D_MEM_WEN_IDEX),
+		.D_MemRead_IDEX		(D_MemRead_IDEX),
+		.D_MEM_BE 			(D_MEM_BE),
+		.D_MEM_WEN			(D_MEM_WEN),
+		.D_MemRead			(D_MemRead),
+		.RWSrc_IDEX			(RWSrc_IDEX),
+		.RF_WE_IDEX			(RF_WE_IDEX),
+		.RWSrc_EXMEM		(RWSrc_EXMEM),
+		.RF_WE_EXMEM		(RF_WE_EXMEM),
+		.ALU_RESULT 		(ALU_RESULT),
+		.ADD_PC_IDEX		(ADD_PC_IDEX),
+		.WA_IDEX			(WA_IDEX),
+		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
+		.WA_EXMEM			(WA_EXMEM)
+	);
+
+	TRANSLATE d_mem_read(
+		.EFFECTIVE_ADDR          (ALUOUT_EXMEM),
+		.MemRead				 (D_MemRead),
+		.IorD     				 (1),
+		.MEM_ADDR         		 (D_MEM_ADDR)
+	);
+
+	PR_MEMWB pr_memwb(
+		.RWSrc_EXMEM		(RWSrc_EXMEM),
+		.RF_WE_EXMEM		(RF_WE_EXMEM),
+		.RWSrc 				(RWSrc),
+		.RF_WE				(RF_WE),
+		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
+		.D_MEM_DI			(D_MEM_DI),
+		.WA_EXMEM			(WA_EXMEM),
+		.ALUOUT_MEMWB		(ALUOUT_MEMWB),
+		.ADD_PC_MEMWB		(ADD_PC_MEMWB),
+		.D_MEM_DI_OUT		(D_MEM_DI_OUT),
+		.WA_MEMWB			(WA_MEMWB)
+	);
+
+	RWSRC rwsrc(
+		.ADD_PC			(ADD_PC_MEMWB),
+		.D_MEM_DI		(D_MEM_DI_OUT),
+		.ALU_RESULT		(ALUOUT_MEMWB),
+		.RWSrc			(RWSrc),
+		.RF_WE			(RF_WE),
+		.RF_WD			(RF_WD)
 	);
 
 endmodule 
