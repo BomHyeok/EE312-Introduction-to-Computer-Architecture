@@ -69,7 +69,7 @@ module RISCV_TOP (
 
    
 
-   always@ () begin
+   always@ (*) begin
       I_MEM_ADDR = _I_MEM_ADDR;
       INSTR = I_MEM_DI;
    end
@@ -89,17 +89,17 @@ module RISCV_TOP (
    );
 
    ID id(
-      .IRWrite   (1)
-      .INSTR      (INSTR)
-      .RF_RA1      (RF_RA1)
-      .RF_RA2      (RF_RA2)
-      .RF_WA1      (RF_WA1)
+      .IRWrite   (1),
+      .INSTR      (INSTR),
+      .RF_RA1      (RF_RA1),
+      .RF_RA2      (RF_RA2),
+      .RF_WA1      (RF_WA1),
       .IMM      (_IMM)
    );
 
    
 
-   always@ () begin
+   always@ (*) begin
       IMM = _IMM;
       WA_ID/EX = RF_WA1;
    end
