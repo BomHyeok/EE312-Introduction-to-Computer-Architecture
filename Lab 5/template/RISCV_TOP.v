@@ -101,7 +101,7 @@ module RISCV_TOP (
 
    always@ (*) begin
       IMM = _IMM;
-      WA_ID/EX = RF_WA1;
+      WA_IDEX = RF_WA1;
    end
 
    pipeCTRL controller(
