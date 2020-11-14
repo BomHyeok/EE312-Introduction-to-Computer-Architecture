@@ -29,6 +29,8 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT
 	);
 
+	//test
+
 	// TODO: implement multi-cycle CPU
 	assign I_MEM_CSN = ~RSTn;
 	assign D_MEM_CSN = ~RSTn;
