@@ -36,10 +36,17 @@ module RISCV_TOP (
    assign D_MEM_CSN = ~RSTn;
    // assign D_MEM_DOUT = RF_RD2;
 
-   reg [31:0] INSTR, _PC, _PRE_INSTR;
-   wire [31:0] PC, _IMM, IMM;
-   wire [11:0] _I_MEM_ADDR;
-
+	reg [31:0] INSTR, _PC, _PRE_INSTR;
+	wire [31:0] PRE_INSTR, PC, Updated_PC, ADD_PC, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
+	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT;
+	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
+	wire [11:0] _I_MEM_ADDR;
+	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
+	wire [3:0] ALUOp_IFID, D_MEM_BE_IFID, D_MEM_BE_IDEX, ALUOp;
+	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, RWSrc, ForwardA, ForwardB;
+	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
+	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
+	wire RegWrite_EXMEM, RegWrite_MEMWB, Branch_Cond, isLoad, isJump;
    initial begin
       NUM_INST <= 0;
       I_MEM_ADDR = 0;
@@ -188,6 +195,8 @@ module RISCV_TOP (
 	);
 
 	PR_EXMEM pr_exmem(
+		.CLK		(CLK),
+		.RSTn		(RSTn),
 		.D_MEM_BE_IDEX		(D_MEM_BE_IDEX),
 		.D_MEM_WEN_IDEX		(D_MEM_WEN_IDEX),
 		.D_MemRead_IDEX		(D_MemRead_IDEX),
@@ -214,6 +223,8 @@ module RISCV_TOP (
 	);
 
 	PR_MEMWB pr_memwb(
+		.CLK		(CLK),
+		.RSTn		(RSTn),
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
 		.RF_WE_EXMEM		(RF_WE_EXMEM),
 		.RWSrc 				(RWSrc),
