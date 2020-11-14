@@ -112,8 +112,8 @@ module RISCV_TOP (
 		.RegWrite_EXMEM   (RegWrite_EXMEM),
 		.RegWrite_MEMWB   (RegWrite_MEMWB),
 		.isLoad     	 (isLoad),
-		.RF_RA1      	(RF_RA1),
-		.RF_RA2      	(RF_RA2),
+		.RF_RA1      	(RF_RA1_OUT),
+		.RF_RA2      	(RF_RA2_OUT),
 		.WA_EXMEM      (WA_EXMEM),
 		.WA_MEMWB      (WA_MEMWB),
 		.ForwardA      (ForwardA),
@@ -121,36 +121,36 @@ module RISCV_TOP (
    );
 
    MUX_ALU mux_ALUSrcA(
-		.A				(PC),
-		.B				(RF_RD1),
+		.A				(PC),	// should change
+		.B				(RF_RD1_OUT),
 		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
 		.ADD_PC			(ADD_PC_EXMEM),
 		.RF_WD			(RF_WD),
-		.Forward		(Forward),
+		.Forward		(ForwardA),
 		.S				(ALUSrcA),
 		.isJump			(isJump),
-		.Out			(ALUSrcA_Out)
+		.Out			(ALU_A)
    );
 
    MUX_ALU mux_ALUSrcB(
-		.A				(RF_RD2),
-		.B				(IMM),
+		.A				(RF_RD2_OUT),
+		.B				(IMM_OUT),
 		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
 		.ADD_PC			(ADD_PC_EXMEM),
 		.RF_WD			(RF_WD),
-		.Forward		(Forward),
+		.Forward		(ForwardB),
 		.S				(ALUSrcB),
 		.isJump			(isJump),
-		.Out			(ALUSrcB_Out)
+		.Out			(ALU_B)
    );
 
    ALU alu(
-		.A				(ALUSrcA_Out),
-		.B				(ALUSrcB_Out),
+		.A				(ALU_A),
+		.B				(ALU_B),
 		.OP				(ALUOp),
 		.Out 			(ALU_RESULT),
-		.Branch_A		(RF_RD1),
-		.Branch_B		(RF_RD2),
+		.Branch_A		(RF_RD1_OUT),
+		.Branch_B		(RF_RD2_OUT),
 		.Branch_Cond	(Branch_Cond)
 	);
 
