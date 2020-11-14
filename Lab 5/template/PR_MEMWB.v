@@ -1,4 +1,6 @@
 module PR_MEMWB(
+	input wire CLK,
+	input wire RSTn,
    // WB
    input wire [1:0] RWSrc_EXMEM,
    input wire RF_WE_EXMEM,
