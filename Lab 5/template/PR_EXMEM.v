@@ -1,4 +1,6 @@
 module PR_EXMEM(
+	input wire CLK,
+	input wire RSTn,
    // MEM
    input wire [3:0] D_MEM_BE_IDEX, 
    input wire D_MEM_WEN_IDEX, D_MemRead_IDEX,
