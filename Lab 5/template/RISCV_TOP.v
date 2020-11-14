@@ -29,17 +29,65 @@ module RISCV_TOP (
 	output wire [31:0] OUTPUT_PORT      // equal RF_WD this port is used for test
 	);
 
-	assign OUTPUT_PORT = RF_WD;
+//	assign OUTPUT_PORT = RF_WD;
+
+	// TODO: implement
+	assign I_MEM_CSN = ~RSTn;
+	assign D_MEM_CSN = ~RSTn;
+	// assign D_MEM_DOUT = RF_RD2;
+
+	reg [31:0] INSTR, _PC, _PRE_INSTR;
+	wire [31:0] PC;
+	wire [11:0] _I_MEM_ADDR;
 
 	initial begin
 		NUM_INST <= 0;
+		I_MEM_ADDR = 0;
+		INSTR = 0;
+		_PC = 0;
+		_PRE_INSTR = 0;
 	end
+
+	assign PC = _PC;
+	assign PRE_INSTR = _PRE_INSTR;
 
 	// Only allow for NUM_INST
 	always @ (negedge CLK) begin
 		if (RSTn) NUM_INST <= NUM_INST + 1;
+		/*
+			_PC <= Updated_PC;
+			_PRE_INSTR <= INSTR;
+			*/
 	end
 
-	// TODO: implement
+	TRANSLATE i_mem_read(
+		.EFFECTIVE_ADDR			(PC),
+		.i_mem_read				(1),
+		.IorD					(0),
+		.I_MEM_ADDR				(_I_MEM_ADDR)
+	);
 
-endmodule //
+	always@ (*) begin
+		I_MEM_ADDR = _I_MEM_ADDR;
+		INSTR = I_MEM_DI;
+	end
+
+	CLKUPDATE pc(
+		.Updated_A		(Updated_PC),
+		.CLK			(CLK),
+		.RSTn			(RSTn),
+		.A				(PC)
+	);
+
+	ADDER add_pc(
+		.A		(PC),
+		.B		(32'h00000004),
+		.Out 	(Updated_PC)
+		// .Out 	(ADD_PC)
+	);
+
+	pipeCTRL controller(
+		
+	);
+
+endmodule 
