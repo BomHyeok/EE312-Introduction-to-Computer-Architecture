@@ -1,4 +1,4 @@
-module IDEX_PR(
+module PR_IDEX(
 	input wire CLK,
 
 	// IMM & Register
