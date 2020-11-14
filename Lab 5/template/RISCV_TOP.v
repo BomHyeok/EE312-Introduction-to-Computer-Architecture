@@ -96,13 +96,50 @@ module RISCV_TOP (
       .IMM      (IMM)
    );
 
-   pipeCTRL controller(
-      
+	pipeCTRL controller(
+		.INSTR      	(INSTR),
+		.ALUOp_IFID	(ALUOp_IFID),
+		.ALUSrcA_IFID	(ALUSrcA_IFID),
+		.ALUSrcB_IFID	(ALUSrcB_IFID),
+		.D_MEM_BE_IFID	(D_MEM_BE_IFID),
+		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
+		.D_MemRead_IFI	(D_MemRead_IFID),
+		.RWSrc_IFID	(RWSrc_IFID),
+		.RF_WE_IFID	(RF_WE_IFID)
    );
 
-   PR_IDEX pr_idex(
-
-   );
+	PR_IDEX pr_idex(
+		.CLK		(CLK),
+		.RSTn		(RSTn),
+		.IMM		(IMM),
+		.RF_RA1		(RF_RA1),
+		.RF_RA2		(RF_RA2),
+		.RF_WA1		(RF_WA1),
+		.RF_RD1		(RF_RD1),
+		.RF_RD2		(RF_RD2),
+		.ALUOp_IFID	(ALUOp_IFID),
+		.ALUSrcA_IFID	(ALUSrcA_IFID),
+		.ALUSrcB_IFID	(ALUSrcB_IFID),
+		.D_MEM_BE_IFID	(D_MEM_BE_IFID),
+		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
+		.D_MemRead_IFID	(D_MemRead_IFID),
+		.RWSrc_IFID	(RWSrc_IFID),
+		.RF_WE_IFID	(RF_WE_IFID),
+		.IMM_OUT	(IMM_OUT),
+		.RF_RA1_OUT	(RF_RA1_OUT),
+		.RF_RA2_OUT	(RF_RA2_OUT),
+		.WA_IDEX	(WA_IDEX),
+		.RF_RD1_OUT	(RF_RD1_OUT),
+		.RF_RD2_OUT	(RF_RD2_OUT),
+		.ALUOp		(ALUOp),
+		.ALUSrcA	(ALUSrcA),
+		.ALUSrcB	(ALUSrcB),
+		.D_MEM_BE_IDEX	(D_MEM_BE_IDEX),
+		.D_MEM_WEN_IDEX	(D_MEM_WEN_IDEX),
+		.D_MemRead_IDEX	(D_MemRead_IDEX),
+		.RWSrc_IDEX	(RWSrc_IDEX),
+		.RF_WE_IDEX	(RF_WE_IDEX)
+	);
 
    FORWARD forwarding_unit(
 		.RegWrite_EXMEM   (RegWrite_EXMEM),
@@ -113,7 +150,7 @@ module RISCV_TOP (
 		.WA_EXMEM      (WA_EXMEM),
 		.WA_MEMWB      (WA_MEMWB),
 		.ForwardA      (ForwardA),
-		.ForwardB      (ForwardB),
+		.ForwardB      (ForwardB)
    );
 
    MUX_ALU mux_ALUSrcA(
