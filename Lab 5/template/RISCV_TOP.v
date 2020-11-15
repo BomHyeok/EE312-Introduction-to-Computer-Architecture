@@ -57,7 +57,7 @@ module RISCV_TOP (
       _PRE_INSTR = 0;
    end
 
-   assign PC = _PC;
+//   assign PC = _PC;
    assign PRE_INSTR = _PRE_INSTR;
    assign RF_WA1 = WA_MEMWB;  // check later
 
@@ -65,7 +65,7 @@ module RISCV_TOP (
    always @ (negedge CLK) begin
    //   if (RSTn) NUM_INST <= NUM_INST + 1;
 		if (RSTn) begin
-        	_PC <= Updated_PC;
+        //	_PC <= Updated_PC;
         	_PRE_INSTR <= INSTR;
 		end 
    end
@@ -195,7 +195,7 @@ module RISCV_TOP (
    );
 
    MUX_ALU mux_ALUSrcA(
-		.A				(PC),	// should change
+		.A				(ADD_PC_IDEX - 32'h00000004),	// should change
 		.B				(RF_RD1_OUT),
 		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
