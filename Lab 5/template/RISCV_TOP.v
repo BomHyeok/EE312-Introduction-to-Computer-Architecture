@@ -46,7 +46,7 @@ module RISCV_TOP (
 	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, RWSrc, ForwardA, ForwardB;
 	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
-	wire RegWrite_EXMEM, RegWrite_MEMWB, Branch_Cond, isLoad, isJump;
+	wire RegWrite_EXMEM, RegWrite_MEMWB, Branch_Cond, isLoad_IFID, isJump_IFID, isLoad, isJump;
 
    initial begin
       NUM_INST <= 0;
@@ -119,6 +119,7 @@ module RISCV_TOP (
    );
 
 	PR_IDEX pr_idex(
+		//input
 		.CLK		(CLK),
 		.RSTn		(RSTn),
 		.ADD_PC		(ADD_PC),
@@ -138,6 +139,7 @@ module RISCV_TOP (
 		.D_MemRead_IFID	(D_MemRead_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID),
+		//output
 		.ADD_PC_IDEX	(ADD_PC_IDEX),
 		.IMM_OUT	(IMM_OUT),
 		.RF_RA1_OUT	(RF_RA1_OUT),
