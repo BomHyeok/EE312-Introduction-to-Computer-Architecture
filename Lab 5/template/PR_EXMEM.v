@@ -14,15 +14,15 @@ module PR_EXMEM(
    // except signals
    input wire [31:0] ALU_RESULT, ADD_PC_IDEX,
    input wire [4:0] WA_IDEX,
-   input wire Branch_Cond,
+   input wire HALT_IDEX, Branch_Cond,
    output wire [31:0] ALUOUT_EXMEM, ADD_PC_EXMEM,
    output wire [4:0] WA_EXMEM,
-   output wire Branch_Cond_EXMEM
+   output wire HALT_EXMEM, Branch_Cond_EXMEM
 );
 
     reg [3:0] _D_MEM_BE;
     reg [1:0] _RWSrc_EXMEM, _OPSrc_EXMEM;
-    reg _D_MEM_WEN, _D_MemRead, _RF_WE_EXMEM, _Branch_Cond_EXMEM, _NUM_CHECK_EXMEM, _isJump, _isLoad;
+    reg _D_MEM_WEN, _D_MemRead, _RF_WE_EXMEM, _HALT_EXMEM, _Branch_Cond_EXMEM, _NUM_CHECK_EXMEM, _isJump, _isLoad;
     reg [31:0] _ALUOUT_EXMEM, _ADD_PC_EXMEM;
     reg [4:0] _WA_EXMEM;
 
@@ -38,6 +38,7 @@ module PR_EXMEM(
     assign ALUOUT_EXMEM = _ALUOUT_EXMEM;
     assign ADD_PC_EXMEM = _ADD_PC_EXMEM;
     assign WA_EXMEM = _WA_EXMEM;
+    assign HALT_EXMEM = _HALT_EXMEM;
     assign Branch_Cond_EXMEM = _Branch_Cond_EXMEM;
 
     initial begin
@@ -53,6 +54,7 @@ module PR_EXMEM(
         _ALUOUT_EXMEM = 0;
         _ADD_PC_EXMEM = 0;
         _WA_EXMEM = 0;
+        _HALT_EXMEM = 0;
         _Branch_Cond_EXMEM = 0;
     end
 
@@ -70,6 +72,7 @@ module PR_EXMEM(
             _ALUOUT_EXMEM = ALU_RESULT;
             _ADD_PC_EXMEM = ADD_PC_IDEX;
             _WA_EXMEM = WA_IDEX;
+            _HALT_EXMEM = HALT_IDEX;
             _Branch_Cond_EXMEM = Branch_Cond;
         end
     end
