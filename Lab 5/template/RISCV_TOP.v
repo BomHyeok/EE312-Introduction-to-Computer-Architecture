@@ -62,7 +62,7 @@ module RISCV_TOP (
    assign RF_WA1 = WA_MEMWB;  // check later
 
    // Only allow for NUM_INST
-   always @ (negedge CLK) begin
+   always @ (posedge CLK) begin
    //   if (RSTn) NUM_INST <= NUM_INST + 1;
 		if (RSTn) begin
         //	_PC <= Updated_PC;
