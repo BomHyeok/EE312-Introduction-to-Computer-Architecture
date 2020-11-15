@@ -115,6 +115,7 @@ module RISCV_TOP (
 		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
 		.D_MemRead_IFID	(D_MemRead_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
+		.OPSrc_IFID	(OPSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID)
    );
 
@@ -138,6 +139,7 @@ module RISCV_TOP (
 		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
 		.D_MemRead_IFID	(D_MemRead_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
+		.OPSrc_IFID	(OPSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID),
 		//output
 		.ADD_PC_IDEX	(ADD_PC_IDEX),
@@ -150,12 +152,13 @@ module RISCV_TOP (
 		.ALUOp		(ALUOp),
 		.ALUSrcA	(ALUSrcA),
 		.ALUSrcB	(ALUSrcB),
-		.isJump		(isJump),
-		.isLoad		(isLoad),
+		.isJump_IDEX	(isJump_IDEX),
+		.isLoad_IDEX	(isLoad_IDEX),
 		.D_MEM_BE_IDEX	(D_MEM_BE_IDEX),
 		.D_MEM_WEN_IDEX	(D_MEM_WEN_IDEX),
 		.D_MemRead_IDEX	(D_MemRead_IDEX),
 		.RWSrc_IDEX	(RWSrc_IDEX),
+		.OPSrc_IDEX	(OPSrc_IDEX),
 		.RF_WE_IDEX	(RF_WE_IDEX)
 	);
 
@@ -215,15 +218,19 @@ module RISCV_TOP (
 		.D_MEM_WEN			(D_MEM_WEN),
 		.D_MemRead			(D_MemRead),
 		.RWSrc_IDEX			(RWSrc_IDEX),
+		.OPSrc_IDEX			(OPSrc_IDEX),
 		.RF_WE_IDEX			(RF_WE_IDEX),
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
+		.OPSrc_EXMEM		(OPSrc_EXMEM),
 		.RF_WE_EXMEM		(RF_WE_EXMEM),
 		.ALU_RESULT 		(ALU_RESULT),
 		.ADD_PC_IDEX		(ADD_PC_IDEX),
 		.WA_IDEX			(WA_IDEX),
+		.Branch_Cond		(Branch_Cond),
 		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
-		.WA_EXMEM			(WA_EXMEM)
+		.WA_EXMEM			(WA_EXMEM),
+		.Branch_Cond_EXMEM	(Branch_Cond_EXMEM)
 	);
 
 	TRANSLATE d_mem_read(
@@ -237,17 +244,21 @@ module RISCV_TOP (
 		.CLK		(CLK),
 		.RSTn		(RSTn),
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
+		.OPSrc_EXMEM		(OPSrc_EXMEM),
 		.RF_WE_EXMEM		(RF_WE_EXMEM),
 		.RWSrc 				(RWSrc),
+		.OPSrc				(OPSrc),
 		.RF_WE				(RF_WE),
 		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
 		.D_MEM_DI			(D_MEM_DI),
 		.WA_EXMEM			(WA_EXMEM),
+		.Branch_Cond_EXMEM	(Branch_Cond_EXMEM),
 		.ALUOUT_MEMWB		(ALUOUT_MEMWB),
 		.ADD_PC_MEMWB		(ADD_PC_MEMWB),
 		.D_MEM_DI_OUT		(D_MEM_DI_OUT),
-		.WA_MEMWB			(WA_MEMWB)
+		.WA_MEMWB			(WA_MEMWB),
+		.Branch_Cond_MEMWB	(Branch_Cond_MEMWB)
 	);
 
 	RWSRC rwsrc(
@@ -257,6 +268,16 @@ module RISCV_TOP (
 		.RWSrc			(RWSrc),
 		.RF_WE			(RF_WE),
 		.RF_WD			(RF_WD)
+	);
+
+	OUTPUT out(
+		.RF_WD			(RF_WD),
+		.ALUOUT			(ALUOUT_MEMWB),
+		.OPSrc			(OPSrc),
+		// check later
+	//	.isBranch		(isBranch_MEMWB),	
+	//	.Branch_Cond	(Branch_Cond_MEMWB),
+		.OUTPUT_PORT	(OUTPUT_PORT)
 	);
 
 endmodule 

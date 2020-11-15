@@ -7,12 +7,12 @@ module pipeCTRL(
 	output wire [3:0] D_MEM_BE_IFID, 
 	output wire D_MEM_WEN_IFID, D_MemRead_IFID,
 	// WB
-	output wire [1:0] RWSrc_IFID,
+	output wire [1:0] RWSrc_IFID, OPSrc_IFID,
 	output wire RF_WE_IFID
 	);
 
     reg [3:0] _ALUOp, _D_MEM_BE;
-    reg [1:0] _RWSrc;
+    reg [1:0] _RWSrc, _OPSrc;
     reg _ALUSrcA, _ALUSrcB, _D_MEM_WEN, _D_MemRead, _RF_WE, _isJump, _isLoad;
 
     assign ALUOp_IFID = _ALUOp;
@@ -24,6 +24,7 @@ module pipeCTRL(
     assign D_MEM_WEN_IFID = _D_MEM_WEN;
     assign D_MemRead_IFID = _D_MemRead;
     assign RWSrc_IFID = _RWSrc;
+	assign OPSrc_IFID = _OPSrc;
     assign RF_WE_IFID = _RF_WE;
 
     initial begin
@@ -36,6 +37,7 @@ module pipeCTRL(
         _D_MEM_WEN = 1;
         _D_MemRead = 0;
         _RWSrc = 0;
+		_OPSrc = 0;
         _RF_WE = 0;
     end
 
@@ -53,6 +55,7 @@ module pipeCTRL(
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
 				_RWSrc = 2'b00;
+				_OPSrc = 2'b00;
 				_RF_WE = 1;
 			end
 			// JALR
@@ -67,6 +70,7 @@ module pipeCTRL(
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
 				_RWSrc = 2'b00;
+				_OPSrc = 2'b00;
 				_RF_WE = 1;
 			end
 			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
@@ -80,7 +84,8 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
-				_RWSrc = 0;
+				_RWSrc = 2'b00;
+				_OPSrc = 2'b10;
 				_RF_WE = 0;
 			end
 			// I Type Load LW
@@ -95,6 +100,7 @@ module pipeCTRL(
 				_D_MEM_WEN = 1;
 				_D_MemRead = 1;
 				_RWSrc = 2'b01;
+				_OPSrc = 2'b00;
 				_RF_WE = 1;
 			end
 			// SW
@@ -108,7 +114,8 @@ module pipeCTRL(
 				_D_MEM_BE = 4'b1111;
 				_D_MEM_WEN = 0;
 				_D_MemRead = 1;
-				_RWSrc = 0;
+				_RWSrc = 2'b00;
+				_OPSrc = 2'b01;
 				_RF_WE = 0;
 			end
 			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
@@ -123,6 +130,7 @@ module pipeCTRL(
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
 				_RWSrc = 2'b10;
+				_OPSrc = 2'b00;
 				_RF_WE = 1;
 			end
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
@@ -137,6 +145,7 @@ module pipeCTRL(
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
 				_RWSrc = 2'b10;
+				_OPSrc = 2'b00;
 				_RF_WE = 1;
 			end
 		endcase
