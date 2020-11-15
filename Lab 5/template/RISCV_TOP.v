@@ -61,13 +61,13 @@ module RISCV_TOP (
    assign RF_WA1 = WA_MEMWB;  // check later
 
    // Only allow for NUM_INST
-   always @ (negedge CLK) begin
-      if (RSTn) NUM_INST <= NUM_INST + 1;
+   //always @ (negedge CLK) begin
+   //   if (RSTn) NUM_INST <= NUM_INST + 1;
       /*
          _PC <= Updated_PC;
          _PRE_INSTR <= INSTR;
          */
-   end
+   //end
 
    TRANSLATE i_mem_read(
       .EFFECTIVE_ADDR         (PC),
@@ -116,7 +116,8 @@ module RISCV_TOP (
 		.D_MemRead_IFID	(D_MemRead_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
 		.OPSrc_IFID	(OPSrc_IFID),
-		.RF_WE_IFID	(RF_WE_IFID)
+		.RF_WE_IFID	(RF_WE_IFID),
+		.NUM_CHECK_IFID	(NUM_CHECK_IFID)
    );
 
 	PR_IDEX pr_idex(
@@ -141,6 +142,7 @@ module RISCV_TOP (
 		.RWSrc_IFID	(RWSrc_IFID),
 		.OPSrc_IFID	(OPSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID),
+		.NUM_CHECK_IFID	(NUM_CHECK_IFID),
 		//output
 		.ADD_PC_IDEX	(ADD_PC_IDEX),
 		.IMM_OUT	(IMM_OUT),
@@ -159,7 +161,8 @@ module RISCV_TOP (
 		.D_MemRead_IDEX	(D_MemRead_IDEX),
 		.RWSrc_IDEX	(RWSrc_IDEX),
 		.OPSrc_IDEX	(OPSrc_IDEX),
-		.RF_WE_IDEX	(RF_WE_IDEX)
+		.RF_WE_IDEX	(RF_WE_IDEX),
+		.NUM_CHECK_IDEX	(NUM_CHECK_IDEX)
 	);
 
    FORWARD forwarding_unit(
@@ -214,15 +217,21 @@ module RISCV_TOP (
 		.D_MEM_BE_IDEX		(D_MEM_BE_IDEX),
 		.D_MEM_WEN_IDEX		(D_MEM_WEN_IDEX),
 		.D_MemRead_IDEX		(D_MemRead_IDEX),
+		.isJump_IDEX		(isJump_IDEX),
+		.isLoad_IDEX		(isLoad_IDEX),
 		.D_MEM_BE 			(D_MEM_BE),
 		.D_MEM_WEN			(D_MEM_WEN),
 		.D_MemRead			(D_MemRead),
+		.isJump			(isJump),
+		.isLoad			(isLoad),
 		.RWSrc_IDEX			(RWSrc_IDEX),
 		.OPSrc_IDEX			(OPSrc_IDEX),
 		.RF_WE_IDEX			(RF_WE_IDEX),
+		.NUM_CHECK_IDEX		(NUM_CHECK_IDEX),
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
 		.OPSrc_EXMEM		(OPSrc_EXMEM),
 		.RF_WE_EXMEM		(RF_WE_EXMEM),
+		.NUM_CHECK_EXMEM	(NUM_CHECK_EXMEM),
 		.ALU_RESULT 		(ALU_RESULT),
 		.ADD_PC_IDEX		(ADD_PC_IDEX),
 		.WA_IDEX			(WA_IDEX),
@@ -246,9 +255,11 @@ module RISCV_TOP (
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
 		.OPSrc_EXMEM		(OPSrc_EXMEM),
 		.RF_WE_EXMEM		(RF_WE_EXMEM),
+		.NUM_CHECK_EXMEM	(NUM_CHECK_EXMEM),
 		.RWSrc 				(RWSrc),
 		.OPSrc				(OPSrc),
 		.RF_WE				(RF_WE),
+		.NUM_CHECK		(NUM_CHECK),
 		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
 		.D_MEM_DI			(D_MEM_DI),
@@ -260,6 +271,12 @@ module RISCV_TOP (
 		.WA_MEMWB			(WA_MEMWB),
 		.Branch_Cond_MEMWB	(Branch_Cond_MEMWB)
 	);
+
+	always @ (negedge CLK) begin
+		if (RSTn && NUM_CHECK) begin
+			NUM_INST <= NUM_INST + 1;
+		end
+	end
 
 	RWSRC rwsrc(
 		.ADD_PC			(ADD_PC_MEMWB),
