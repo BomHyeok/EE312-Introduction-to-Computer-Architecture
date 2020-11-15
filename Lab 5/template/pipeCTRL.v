@@ -2,7 +2,7 @@ module pipeCTRL(
 	input wire [31:0] INSTR,
 	// EX
 	output wire [3:0] ALUOp_IFID, 
-	output wire ALUSrcA_IFID, ALUSrcB_IFID,
+	output wire ALUSrcA_IFID, ALUSrcB_IFID, isJump_IFID, isLoad_IFID,
 	// MEM
 	output wire [3:0] D_MEM_BE_IFID, 
 	output wire D_MEM_WEN_IFID, D_MemRead_IFID,
@@ -13,11 +13,13 @@ module pipeCTRL(
 
     reg [3:0] _ALUOp, _D_MEM_BE;
     reg [1:0] _RWSrc;
-    reg _ALUSrcA, _ALUSrcB, _D_MEM_WEN, _D_MemRead, _RF_WE;
+    reg _ALUSrcA, _ALUSrcB, _D_MEM_WEN, _D_MemRead, _RF_WE, _isJump, _isLoad;
 
     assign ALUOp_IFID = _ALUOp;
     assign ALUSrcA_IFID = _ALUSrcA;
 	assign ALUSrcB_IFID = _ALUSrcB;
+	assign isJump_IFID = _isJump;
+	assign isLoad_IFID = _isLoad;
     assign D_MEM_BE_IFID = _D_MEM_BE;
     assign D_MEM_WEN_IFID = _D_MEM_WEN;
     assign D_MemRead_IFID = _D_MemRead;
@@ -28,6 +30,8 @@ module pipeCTRL(
         _ALUOp = 0;
         _ALUSrcA = 0;
 	_ALUSrcB = 0;
+	_isJump = 0;
+	_isLoad = 0;
         _D_MEM_BE = 0;
         _D_MEM_WEN = 1;
         _D_MemRead = 0;
@@ -43,6 +47,8 @@ module pipeCTRL(
 				_ALUOp = 0;
 				_ALUSrcA = 0;
 				_ALUSrcB = 1;
+				_isJump = 1;
+				_isLoad = 0;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
@@ -55,6 +61,8 @@ module pipeCTRL(
 				_ALUOp = 0;
 				_ALUSrcA = 1;
 				_ALUSrcB = 1;
+				_isJump = 1;
+				_isLoad = 0;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
@@ -67,6 +75,8 @@ module pipeCTRL(
 				_ALUOp = INSTR[14:12];
 				_ALUSrcA = 0;
 				_ALUSrcB = 1;
+				_isJump = ;
+				_isLoad = 0;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
@@ -79,6 +89,8 @@ module pipeCTRL(
 				_ALUOp = 0;
 				_ALUSrcA = 1;
 				_ALUSrcB = 1;
+				_isJump = 0;
+				_isLoad = 1;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 1;
@@ -91,6 +103,8 @@ module pipeCTRL(
 				_ALUOp = 0;
 				_ALUSrcA = 1;
 				_ALUSrcB = 1;
+				_isJump = 0;
+				_isLoad = 0;
 				_D_MEM_BE = 4'b1111;
 				_D_MEM_WEN = 0;
 				_D_MemRead = 1;
@@ -103,6 +117,8 @@ module pipeCTRL(
 				_ALUOp = INSTR[14:12];
 				_ALUSrcA = 1;
 				_ALUSrcB = 1;
+				_isJump = 0;
+				_isLoad = 0;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
@@ -115,6 +131,8 @@ module pipeCTRL(
 				_ALUOp = INSTR[14:12];
 				_ALUSrcA = 1;
 				_ALUSrcB = 0;
+				_isJump = 0;
+				_isLoad = 0;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
