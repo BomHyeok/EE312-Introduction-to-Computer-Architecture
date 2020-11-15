@@ -81,7 +81,14 @@ module pipeCTRL(
 			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
 			7'b1100011 :
 			begin
-				_ALUOp = INSTR[14:12];
+				case(INSTR[14:12])
+					3'b000: _ALUOp = 4'b1001; //BEQ
+					3'b001: _ALUOp = 4'b1010; //BNE
+					3'b100: _ALUOp = 4'b1011; //BLT
+					3'b101: _ALUOp = 4'b1100; //BGE
+					3'b110: _ALUOp = 4'b1110; //BLTU
+					3'b111: _ALUOp = 4'b1111; //BGEU
+				endcase	
 				_ALUSrcA = 0;
 				_ALUSrcB = 1;
 				_isJump = 0;
@@ -129,7 +136,9 @@ module pipeCTRL(
 			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
 			7'b0010011 :
 			begin
-				_ALUOp = INSTR[14:12];
+				_ALUOp[2:0] = INSTR[14:12];
+				if (_ALUOp == 4'b0101 && INSTR[30]) _ALUOp[3] = 1;
+				else _ALUOp[3] = 0;
 				_ALUSrcA = 1;
 				_ALUSrcB = 1;
 				_isJump = 0;
@@ -145,7 +154,9 @@ module pipeCTRL(
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 			7'b0110011 :
 			begin
-				_ALUOp = INSTR[14:12];
+				_ALUOp[2:0] = INSTR[14:12];
+				if (INSTR[30]) _ALUOp[3] = 1;
+				else _ALUOp[3] = 0;
 				_ALUSrcA = 1;
 				_ALUSrcB = 0;
 				_isJump = 0;

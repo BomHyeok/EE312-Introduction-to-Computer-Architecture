@@ -44,7 +44,7 @@ module PR_MEMWB(
         _Branch_Cond_MEMWB = 0;
     end
 
-    always @ (negedge CLK) begin
+    always @ (posedge CLK) begin
         if (RSTn) begin
             _RWSrc = RWSrc_EXMEM;
             _OPSrc = OPSrc_EXMEM;

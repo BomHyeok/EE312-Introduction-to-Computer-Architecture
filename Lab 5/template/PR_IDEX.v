@@ -87,7 +87,7 @@ module PR_IDEX(
 		NUM_CHECK_TEMP = 0;
 	end
 
-	always @ (negedge CLK) begin
+	always @ (posedge CLK) begin
 		if (RSTn) begin
 			ADD_PC_TEMP = ADD_PC;
 			HALT_IDEX_TEMP = HALT_IFID;
