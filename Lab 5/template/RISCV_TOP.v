@@ -47,6 +47,7 @@ module RISCV_TOP (
 	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
 	wire RegWrite_EXMEM, RegWrite_MEMWB, Branch_Cond, isLoad, isJump;
+
    initial begin
       NUM_INST <= 0;
       I_MEM_ADDR = 0;
@@ -70,9 +71,9 @@ module RISCV_TOP (
 
    TRANSLATE i_mem_read(
       .EFFECTIVE_ADDR         (PC),
-      .i_mem_read            (1),
-      .IorD               (0),
-      .I_MEM_ADDR            (_I_MEM_ADDR)
+      .MemRead            (1'b1),
+      .IorD               (1'b0),
+      .MEM_ADDR            (_I_MEM_ADDR)
    );
 
    always@ (*) begin
@@ -95,7 +96,7 @@ module RISCV_TOP (
    );
 
    ID id(
-      .IRWrite   (1),
+      .IRWrite   (1'b1),
       .INSTR      (INSTR),
       .RF_RA1      (RF_RA1),
       .RF_RA2      (RF_RA2),
@@ -110,7 +111,7 @@ module RISCV_TOP (
 		.ALUSrcB_IFID	(ALUSrcB_IFID),
 		.D_MEM_BE_IFID	(D_MEM_BE_IFID),
 		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
-		.D_MemRead_IFI	(D_MemRead_IFID),
+		.D_MemRead_IFID	(D_MemRead_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID)
    );
@@ -164,7 +165,7 @@ module RISCV_TOP (
 		.A				(PC),	// should change
 		.B				(RF_RD1_OUT),
 		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
-		.ADD_PC			(ADD_PC_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
 		.RF_WD			(RF_WD),
 		.Forward		(ForwardA),
 		.S				(ALUSrcA),
@@ -176,7 +177,7 @@ module RISCV_TOP (
 		.A				(RF_RD2_OUT),
 		.B				(IMM_OUT),
 		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
-		.ADD_PC			(ADD_PC_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
 		.RF_WD			(RF_WD),
 		.Forward		(ForwardB),
 		.S				(ALUSrcB),
@@ -218,7 +219,7 @@ module RISCV_TOP (
 	TRANSLATE d_mem_read(
 		.EFFECTIVE_ADDR          (ALUOUT_EXMEM),
 		.MemRead				 (D_MemRead),
-		.IorD     				 (1),
+		.IorD     				 (1'b1),
 		.MEM_ADDR         		 (D_MEM_ADDR)
 	);
 
