@@ -1,11 +1,11 @@
 module CLKUPDATE(
-    input wire [2:0] Updated_A,
+    input wire [31:0] Updated_A,
     input wire CLK,
     input wire RSTn,
-    output wire [2:0] A
+    output wire [31:0] A
     );
 
-    reg [2:0] TEMP;
+    reg [31:0] TEMP;
     assign A = TEMP;
     initial	TEMP = 0;
 
