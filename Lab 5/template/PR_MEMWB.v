@@ -9,14 +9,14 @@ module PR_MEMWB(
    // except signals
    input wire [31:0] ALUOUT_EXMEM, ADD_PC_EXMEM, D_MEM_DI,
    input wire [4:0] WA_EXMEM,
-   input wire Branch_Cond_EXMEM,
+   input wire HALT_EXMEM, Branch_Cond_EXMEM,
    output wire [31:0] ALUOUT_MEMWB, ADD_PC_MEMWB, D_MEM_DI_OUT,
    output wire [4:0] WA_MEMWB,
-   output wire Branch_Cond_MEMWB
+   output wire HALT, Branch_Cond_MEMWB
 );
 
     reg [1:0] _RWSrc, _OPSrc;
-    reg _RF_WE, _Branch_Cond_MEMWB, _NUM_CHECK;
+    reg _RF_WE, _Branch_Cond_MEMWB, _NUM_CHECK, _HALT;
     reg [31:0] _ALUOUT_MEMWB, _ADD_PC_MEMWB, _D_MEM_DI_OUT;
     reg [4:0] _WA_MEMWB;
 
@@ -28,6 +28,7 @@ module PR_MEMWB(
     assign ADD_PC_MEMWB = _ADD_PC_MEMWB;
     assign D_MEM_DI_OUT = _D_MEM_DI_OUT;
     assign WA_MEMWB = _WA_MEMWB;
+    assign HALT = _HALT;
     assign Branch_Cond_MEMWB = _Branch_Cond_MEMWB;
 
     initial begin
@@ -39,6 +40,7 @@ module PR_MEMWB(
         _ADD_PC_MEMWB = 0;
         _D_MEM_DI_OUT = 0;
         _WA_MEMWB = 0;
+        _HALT = 0;
         _Branch_Cond_MEMWB = 0;
     end
 
@@ -52,6 +54,7 @@ module PR_MEMWB(
             _ADD_PC_MEMWB = ADD_PC_EXMEM;
             _D_MEM_DI_OUT = D_MEM_DI;
             _WA_MEMWB = WA_EXMEM;
+            _HALT = HALT_EXMEM;
             _Branch_Cond_MEMWB = Branch_Cond_EXMEM;
         end
     end

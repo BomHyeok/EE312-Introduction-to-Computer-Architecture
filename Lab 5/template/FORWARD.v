@@ -21,7 +21,8 @@ module FORWARD(
         if (RegWrite_EXMEM) begin
             if (RF_RA1 != 0 && RF_RA1 == WA_EXMEM) begin
                 if (isLoad) begin
-                    STALL;
+                //    STALL;
+                    _ForwardA = 2'b11;
                 end
                 else begin
                     _ForwardA = 2'b01;
@@ -29,7 +30,8 @@ module FORWARD(
             end
             if (RF_RA2 != 0 && RF_RA2 == WA_EXMEM) begin
                 if (isLoad) begin
-                    STALL;
+                //    STALL;
+                    _ForwardB = 2'b11;
                 end
                 else begin
                     _ForwardB = 2'b01;
