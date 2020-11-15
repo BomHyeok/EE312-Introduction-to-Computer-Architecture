@@ -1,19 +1,19 @@
 module pipeCTRL(
 	input wire [31:0] INSTR,
 	// EX
-	output wire [3:0] ALUOp_IFID, 
+	output wire [3:0] ALUOp_IFID,
 	output wire ALUSrcA_IFID, ALUSrcB_IFID, isJump_IFID, isLoad_IFID,
 	// MEM
-	output wire [3:0] D_MEM_BE_IFID, 
+	output wire [3:0] D_MEM_BE_IFID,
 	output wire D_MEM_WEN_IFID, D_MemRead_IFID,
 	// WB
 	output wire [1:0] RWSrc_IFID, OPSrc_IFID,
-	output wire RF_WE_IFID
+	output wire RF_WE_IFID, NUM_CHECK_IFID
 	);
 
     reg [3:0] _ALUOp, _D_MEM_BE;
     reg [1:0] _RWSrc, _OPSrc;
-    reg _ALUSrcA, _ALUSrcB, _D_MEM_WEN, _D_MemRead, _RF_WE, _isJump, _isLoad;
+    reg _ALUSrcA, _ALUSrcB, _D_MEM_WEN, _D_MemRead, _RF_WE, _isJump, _isLoad, _NUM_CHECK;
 
     assign ALUOp_IFID = _ALUOp;
     assign ALUSrcA_IFID = _ALUSrcA;
@@ -26,6 +26,7 @@ module pipeCTRL(
     assign RWSrc_IFID = _RWSrc;
 	assign OPSrc_IFID = _OPSrc;
     assign RF_WE_IFID = _RF_WE;
+	assign NUM_CHECK_IFID = _NUM_CHECK;
 
     initial begin
         _ALUOp = 0;
@@ -37,11 +38,13 @@ module pipeCTRL(
         _D_MEM_WEN = 1;
         _D_MemRead = 0;
         _RWSrc = 0;
-		_OPSrc = 0;
+	_OPSrc = 0;
         _RF_WE = 0;
+	_NUM_CHECK = 0;
     end
 
 	always@ (*) begin
+		_NUM_CHECK = 0;
 		case (INSTR[6:0])
 			// JAL
 			7'b1101111 :
@@ -57,6 +60,7 @@ module pipeCTRL(
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
+				_NUM_CHECK = 1;
 			end
 			// JALR
 			7'b1100111 :
@@ -72,6 +76,7 @@ module pipeCTRL(
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
+				_NUM_CHECK = 1;
 			end
 			// B(BRANCH) Type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
 			7'b1100011 :
@@ -87,6 +92,7 @@ module pipeCTRL(
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b10;
 				_RF_WE = 0;
+				_NUM_CHECK = 1;
 			end
 			// I Type Load LW
 			7'b0000011 :
@@ -102,6 +108,7 @@ module pipeCTRL(
 				_RWSrc = 2'b01;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
+				_NUM_CHECK = 1;
 			end
 			// SW
 			7'b0100011 :
@@ -117,6 +124,7 @@ module pipeCTRL(
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b01;
 				_RF_WE = 0;
+				_NUM_CHECK = 1;
 			end
 			// I Type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
 			7'b0010011 :
@@ -132,6 +140,7 @@ module pipeCTRL(
 				_RWSrc = 2'b10;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
+				_NUM_CHECK = 1;
 			end
 			// R Type (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 			7'b0110011 :
@@ -147,6 +156,7 @@ module pipeCTRL(
 				_RWSrc = 2'b10;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
+				_NUM_CHECK = 1;
 			end
 		endcase
 	end
