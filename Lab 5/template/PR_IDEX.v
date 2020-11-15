@@ -14,7 +14,7 @@ module PR_IDEX(
 	input wire D_MEM_WEN_IFID, D_MemRead_IFID,
 	// WB
 	input wire [1:0] RWSrc_IFID, OPSrc_IFID,
-	input wire RF_WE_IFID,
+	input wire RF_WE_IFID, NUM_CHECK_IFID,
 	
 	output wire [31:0] ADD_PC_IDEX,
 	// IMM & Register
@@ -29,14 +29,14 @@ module PR_IDEX(
 	output wire D_MEM_WEN_IDEX, D_MemRead_IDEX,
 	// WB
 	output wire [1:0] RWSrc_IDEX, OPSrc_IDEX,
-	output wire RF_WE_IDEX
+	output wire RF_WE_IDEX, NUM_CHECK_IDEX
 );
 	
 	reg [31:0] ADD_PC_TEMP, IMM_TEMP, RF_RD1_TEMP, RF_RD2_TEMP;
 	reg [4:0] RF_WA1_TEMP, RF_RA1_TEMP, RF_RA2_TEMP;
 	reg [3:0] ALUOp_TEMP, D_MEM_BE_TEMP;
 	reg [1:0] RWSrc_TEMP, OPSrc_TEMP;
-	reg ALUSrcA_TEMP, ALUSrcB_TEMP, D_MEM_WEN_TEMP, D_MemRead_TEMP, RF_WE_TEMP, isJump_TEMP, isLoad_TEMP;
+	reg ALUSrcA_TEMP, ALUSrcB_TEMP, D_MEM_WEN_TEMP, D_MemRead_TEMP, RF_WE_TEMP, isJump_TEMP, isLoad_TEMP, NUM_CHECK_TEMP;
 
 	assign ADD_PC_IDEX = ADD_PC_TEMP;
 	assign IMM_OUT = IMM_TEMP;
@@ -59,6 +59,7 @@ module PR_IDEX(
 	assign RWSrc_IDEX = RWSrc_TEMP;
 	assign OPSrc_IDEX = OPSrc_TEMP;
 	assign RF_WE_IDEX = RF_WE_TEMP;
+	assign NUM_CHECK_IDEX = NUM_CHECK_TEMP;
 
 	initial begin
 		ADD_PC_TEMP = 0;
@@ -79,6 +80,7 @@ module PR_IDEX(
 		RWSrc_TEMP = 0;
 		OPSrc_TEMP = 0;
 		RF_WE_TEMP = 0;
+		NUM_CHECK_TEMP = 0;
 	end
 
 	always @ (negedge CLK) begin
@@ -105,6 +107,7 @@ module PR_IDEX(
 			RWSrc_TEMP = RWSrc_IFID;
 			OPSrc_TEMP = OPSrc_IFID;
 			RF_WE_TEMP = RF_WE_IFID;
+			NUM_CHECK_TEMP = NUM_CHECK_IFID;
 		end
 	end
 		
