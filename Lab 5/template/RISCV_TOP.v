@@ -46,14 +46,14 @@ module RISCV_TOP (
 	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, RWSrc, OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc, ForwardA, ForwardB;
 	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
-	wire RegWrite_EXMEM, RegWrite_MEMWB, Branch_Cond, isLoad_IFID, isJump_IFID, isLoad, isJump;
+	wire Branch_Cond, isLoad_IFID, isJump_IFID, isLoad, isJump;
 	wire NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK, HALT_IFID, HALT_IDEX, HALT_EXMEM;
 
    initial begin
       NUM_INST <= 0;
       I_MEM_ADDR = 0;
       INSTR = 0;
-      _PC = 0;
+//      _PC = 0;
       _PRE_INSTR = 0;
    end
 
@@ -82,11 +82,12 @@ module RISCV_TOP (
       INSTR = I_MEM_DI;
 	  $display("--------------------------------------------------------------------------------");
      	$display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
-    	$display("RF_RD1: 0x%0h, ALUSrcA: (0x%0h) 0x%0h, ALUSrcB: (0x%0h) 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h, ALU_OUT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcA_Out, ALUSrcB, ALUSrcB_Out, IMM, ALUOp, ALU_RESULT, ALU_OUT);
-    	$display("PC: 0x%0h, PCSrc: 0x%0h, ADD_PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, PCSrc, ADD_PC, Updated_PC, NUM_INST);
+    	$display("RF_RD1: 0x%0h, ALUSrcA: 0x%0h, ALUSrcB: 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcB, IMM, ALUOp, ALU_RESULT);
+    	$display("PC: 0x%0h, ADD_PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, ADD_PC, Updated_PC, NUM_INST);
 	//	$display("uPC: 0x%0h, Updated_uPC: 0x%0h, PCWrite: 0x%0h, PCUpdate: 0x%0h", uPC, Updated_uPC, PCWrite, PCUpdate);
 	//	$display("isBranch: 0x%0h, isBranchTaken: 0x%0h", isBranch, isBranchTaken);
 		$display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
+		$display("NUM_CHECK_IFID: 0x%0h, NUM_CHECK_IDEX: 0x%0h, NUM_CHECK_EXMEM: 0x%0h, NUM_CHECK: 0x%0h", NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK);
    end
 
    CLKUPDATE pc(
@@ -144,7 +145,7 @@ module RISCV_TOP (
 		.IMM		(IMM),
 		.RF_RA1		(RF_RA1),
 		.RF_RA2		(RF_RA2),
-		.RF_WA1		(RF_WA1),
+		.RF_WA1		(WA_IFID), // check the PR_IDEX module
 		.RF_RD1		(RF_RD1),
 		.RF_RD2		(RF_RD2),
 		.ALUOp_IFID	(ALUOp_IFID),
@@ -183,8 +184,8 @@ module RISCV_TOP (
 	);
 
    FORWARD forwarding_unit(
-		.RegWrite_EXMEM   (RegWrite_EXMEM),
-		.RegWrite_MEMWB   (RegWrite_MEMWB),
+		.RegWrite_EXMEM   (RF_WE_EXMEM),
+		.RegWrite_MEMWB   (RF_WE_MEMWB),
 		.isLoad     	 (isLoad),
 		.RF_RA1      	(RF_RA1_OUT),
 		.RF_RA2      	(RF_RA2_OUT),
@@ -195,7 +196,7 @@ module RISCV_TOP (
    );
 
    MUX_ALU mux_ALUSrcA(
-		.A				(ADD_PC_IDEX - 32'h00000004),	// should change
+		.A				(ADD_PC_IDEX - 32'h00000004),	// check later
 		.B				(RF_RD1_OUT),
 		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
@@ -295,8 +296,8 @@ module RISCV_TOP (
 		.Branch_Cond_MEMWB	(Branch_Cond_MEMWB)
 	);
 
-	always @ (negedge CLK) begin
-		if (RSTn && NUM_CHECK) begin
+	always @ (posedge CLK) begin
+		if (RSTn && NUM_CHECK_EXMEM) begin
 			NUM_INST <= NUM_INST + 1;
 		end
 	end

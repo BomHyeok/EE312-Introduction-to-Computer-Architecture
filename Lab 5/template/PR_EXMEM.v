@@ -58,7 +58,7 @@ module PR_EXMEM(
         _Branch_Cond_EXMEM = 0;
     end
 
-    always @ (negedge CLK) begin
+    always @ (posedge CLK) begin
         if (RSTn) begin
             _D_MEM_BE = D_MEM_BE_IDEX;
             _D_MEM_WEN = D_MEM_WEN_IDEX;
