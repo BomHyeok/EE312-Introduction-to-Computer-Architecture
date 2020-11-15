@@ -80,6 +80,13 @@ module RISCV_TOP (
    always@ (*) begin
       I_MEM_ADDR = _I_MEM_ADDR;
       INSTR = I_MEM_DI;
+	  $display("--------------------------------------------------------------------------------");
+     	$display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
+    	$display("RF_RD1: 0x%0h, ALUSrcA: (0x%0h) 0x%0h, ALUSrcB: (0x%0h) 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h, ALU_OUT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcA_Out, ALUSrcB, ALUSrcB_Out, IMM, ALUOp, ALU_RESULT, ALU_OUT);
+    	$display("PC: 0x%0h, PCSrc: 0x%0h, ADD_PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, PCSrc, ADD_PC, Updated_PC, NUM_INST);
+	//	$display("uPC: 0x%0h, Updated_uPC: 0x%0h, PCWrite: 0x%0h, PCUpdate: 0x%0h", uPC, Updated_uPC, PCWrite, PCUpdate);
+	//	$display("isBranch: 0x%0h, isBranchTaken: 0x%0h", isBranch, isBranchTaken);
+		$display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
    end
 
    CLKUPDATE pc(

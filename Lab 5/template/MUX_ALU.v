@@ -1,8 +1,10 @@
 module MUX_ALU(
-    input wire [31:0] A, B, ALUOUT_EXMEM, ADD_PC_EXMEM, RF_WD, D_MEM_DI,
+    input wire [31:0] A, B, ALUOUT_EXMEM, ADD_PC_EXMEM, RF_WD, 
     input wire [1:0] Forward,
     input wire S, isJump, 
-    output wire [31:0] Out
+    output wire [31:0] Out,
+    // instead of stall
+    input wire [31:0] D_MEM_DI
     );
 
     reg [31:0] TEMP;
