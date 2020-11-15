@@ -75,7 +75,7 @@ module pipeCTRL(
 				_ALUOp = INSTR[14:12];
 				_ALUSrcA = 0;
 				_ALUSrcB = 1;
-				_isJump = ;
+				_isJump = 0;
 				_isLoad = 0;
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
