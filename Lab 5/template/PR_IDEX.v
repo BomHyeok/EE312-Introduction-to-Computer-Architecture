@@ -1,7 +1,7 @@
 module PR_IDEX(
 	input wire CLK,
 	input wire RSTn,
-	input wire [31:0] PC, ADD_PC,
+	input wire [31:0] PC_IFID, ADD_PC_IFID,
 	input wire HALT_IFID,
 	// IMM & Register
 	input wire [31:0] IMM,
@@ -91,8 +91,8 @@ module PR_IDEX(
 
 	always @ (posedge CLK) begin
 		if (RSTn) begin
-			PC_TEMP = PC;
-			ADD_PC_TEMP = ADD_PC;
+			PC_TEMP = PC_IFID;
+			ADD_PC_TEMP = ADD_PC_IFID;
 			HALT_IDEX_TEMP = HALT_IFID;
 			IMM_TEMP = IMM;
 			RF_RA1_TEMP = RF_RA1;
