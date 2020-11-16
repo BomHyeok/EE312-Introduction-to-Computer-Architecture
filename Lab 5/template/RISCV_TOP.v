@@ -36,10 +36,10 @@ module RISCV_TOP (
    assign D_MEM_CSN = ~RSTn;
    // assign D_MEM_DOUT = RF_RD2;
 
-	reg [31:0] INSTR, _PRE_INSTR;
+	reg [31:0] INSTR, _PC, _PRE_INSTR;
 	wire [31:0] PRE_INSTR, PC, PC_IDEX, Updated_PC, ADD_PC, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
 	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT;
-	wire [31:0] ALUOUT_EXMEM, ALUOUT_MfEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
+	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
 	wire [11:0] _I_MEM_ADDR;
 	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
 	wire [3:0] ALUOp_IFID, D_MEM_BE_IFID, D_MEM_BE_IDEX, ALUOp;
@@ -53,20 +53,22 @@ module RISCV_TOP (
       NUM_INST <= 0;
       I_MEM_ADDR = 0;
       INSTR = 0;
+//      _PC = 0;
       _PRE_INSTR = 0;
    end
 
+//   assign PC = _PC;
    assign PRE_INSTR = _PRE_INSTR;
-   assign RF_WA1 = WA_MEMWB;  
-	
-	always @ (posedge CLK) begin
+   assign RF_WA1 = WA_MEMWB;  // check later
+
+   // Only allow for NUM_INST
+   always @ (posedge CLK) begin
+   //   if (RSTn) NUM_INST <= NUM_INST + 1;
 		if (RSTn) begin
+        //	_PC <= Updated_PC;
         	_PRE_INSTR <= INSTR;
 		end 
-		if (RSTn && NUM_CHECK_EXMEM) begin
-			NUM_INST <= NUM_INST + 1;
-		end
-	end
+   end
 
    TRANSLATE i_mem_read(
       .EFFECTIVE_ADDR         (PC),
@@ -138,7 +140,7 @@ module RISCV_TOP (
 		//input
 		.CLK		(CLK),
 		.RSTn		(RSTn),
-		.PC			(PC),
+		.PC		(PC),
 		.ADD_PC		(ADD_PC),
 		.HALT_IFID	(HALT_IFID),
 		.IMM		(IMM),
@@ -160,7 +162,7 @@ module RISCV_TOP (
 		.RF_WE_IFID	(RF_WE_IFID),
 		.NUM_CHECK_IFID	(NUM_CHECK_IFID),
 		//output
-		.PC_IDEX		(PC_IDEX)
+		.PC_IDEX	(PC_IDEX),
 		.ADD_PC_IDEX	(ADD_PC_IDEX),
 		.HALT_IDEX	(HALT_IDEX),
 		.IMM_OUT	(IMM_OUT),
@@ -295,6 +297,12 @@ module RISCV_TOP (
 		.HALT				(HALT),
 		.Branch_Cond_MEMWB	(Branch_Cond_MEMWB)
 	);
+
+	always @ (posedge CLK) begin
+		if (RSTn && NUM_CHECK_EXMEM) begin
+			NUM_INST <= NUM_INST + 1;
+		end
+	end
 
 	RWSRC rwsrc(
 		.ADD_PC			(ADD_PC_MEMWB),
