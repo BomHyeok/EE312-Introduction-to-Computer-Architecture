@@ -43,7 +43,8 @@ module RISCV_TOP (
 	wire [11:0] _I_MEM_ADDR;
 	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
 	wire [3:0] ALUOp_IFID, D_MEM_BE_IFID, D_MEM_BE_IDEX, ALUOp;
-	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, RWSrc, OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc, ForwardA, ForwardB;
+	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, ForwardA, ForwardB;
+	wire [1:0] RWSrc, OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc, PCSrc_IFID, PCSrc_IDEX, PCSrc;
 	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
 	wire Branch_Cond, isLoad_IFID, isJump_IFID, isLoad, isJump;
@@ -137,6 +138,7 @@ module RISCV_TOP (
 		.D_MEM_BE_IFID	(D_MEM_BE_IFID),
 		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
 		.D_MemRead_IFID	(D_MemRead_IFID),
+		.PCSrc_IFID	(PCSrc_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
 		.OPSrc_IFID	(OPSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID),
@@ -144,7 +146,7 @@ module RISCV_TOP (
    );
 	
 	HALT halt(
-		.INSTR		(INSTR_IFID),
+		.INSTR		(INSTR_IFID), //I_MEM_DI ??
 		.PRE_INSTR	(PRE_INSTR),
 		.HALT		(HALT_IFID)	
 	);
@@ -165,11 +167,12 @@ module RISCV_TOP (
 		.ALUOp_IFID	(ALUOp_IFID),
 		.ALUSrcA_IFID	(ALUSrcA_IFID),
 		.ALUSrcB_IFID	(ALUSrcB_IFID),
-		.isJump_IFID	(isJump_IFID),
-		.isLoad_IFID	(isLoad_IFID),
 		.D_MEM_BE_IFID	(D_MEM_BE_IFID),
 		.D_MEM_WEN_IFID	(D_MEM_WEN_IFID),
 		.D_MemRead_IFID	(D_MemRead_IFID),
+		.PCSrc_IFID	(PCSrc_IFID),
+		.isJump_IFID	(isJump_IFID),
+		.isLoad_IFID	(isLoad_IFID),
 		.RWSrc_IFID	(RWSrc_IFID),
 		.OPSrc_IFID	(OPSrc_IFID),
 		.RF_WE_IFID	(RF_WE_IFID),
@@ -187,11 +190,12 @@ module RISCV_TOP (
 		.ALUOp		(ALUOp),
 		.ALUSrcA	(ALUSrcA),
 		.ALUSrcB	(ALUSrcB),
-		.isJump_IDEX	(isJump_IDEX),
-		.isLoad_IDEX	(isLoad_IDEX),
 		.D_MEM_BE_IDEX	(D_MEM_BE_IDEX),
 		.D_MEM_WEN_IDEX	(D_MEM_WEN_IDEX),
 		.D_MemRead_IDEX	(D_MemRead_IDEX),
+		.PCSrc_IDEX	(PCSrc_IDEX),
+		.isJump_IDEX	(isJump_IDEX),
+		.isLoad_IDEX	(isLoad_IDEX),
 		.RWSrc_IDEX	(RWSrc_IDEX),
 		.OPSrc_IDEX	(OPSrc_IDEX),
 		.RF_WE_IDEX	(RF_WE_IDEX),
@@ -254,11 +258,13 @@ module RISCV_TOP (
 		.D_MemRead_IDEX		(D_MemRead_IDEX),
 		.isJump_IDEX		(isJump_IDEX),
 		.isLoad_IDEX		(isLoad_IDEX),
+		.PCSrc_IDEX		(PCSrc_IDEX),
 		.D_MEM_BE 			(D_MEM_BE),
 		.D_MEM_WEN			(D_MEM_WEN),
 		.D_MemRead			(D_MemRead),
 		.isJump			(isJump),
 		.isLoad			(isLoad),
+		.PCSrc			(PCSrc),
 		.RWSrc_IDEX			(RWSrc_IDEX),
 		.OPSrc_IDEX			(OPSrc_IDEX),
 		.RF_WE_IDEX			(RF_WE_IDEX),
