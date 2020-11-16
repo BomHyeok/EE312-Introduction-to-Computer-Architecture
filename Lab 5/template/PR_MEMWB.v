@@ -2,9 +2,9 @@ module PR_MEMWB(
 	input wire CLK,
 	input wire RSTn,
    // WB
-   input wire [1:0] RWSrc_EXMEM, OPSrc_EXMEM,
+   input wire [1:0] RWSrc_EXMEM, OPSrc_EXMEM, PCSrc_EXMEM,
    input wire RF_WE_EXMEM, NUM_CHECK_EXMEM,
-   output wire [1:0] RWSrc, OPSrc,
+   output wire [1:0] RWSrc, OPSrc, PCSrc_MEMWB,
    output wire RF_WE, NUM_CHECK,
    // except signals
    input wire [31:0] ALUOUT_EXMEM, ADD_PC_EXMEM, D_MEM_DI,
@@ -15,13 +15,14 @@ module PR_MEMWB(
    output wire HALT, Branch_Cond_MEMWB
 );
 
-    reg [1:0] _RWSrc, _OPSrc;
+    reg [1:0] _RWSrc, _OPSrc, _PCSrc_MEMWB;
     reg _RF_WE, _Branch_Cond_MEMWB, _NUM_CHECK, _HALT;
     reg [31:0] _ALUOUT_MEMWB, _ADD_PC_MEMWB, _D_MEM_DI_OUT;
     reg [4:0] _WA_MEMWB;
 
     assign RWSrc = _RWSrc;
     assign OPSrc = _OPSrc;
+    assign PCSrc_MEMWB = _PCSrc_MEMWB;
     assign RF_WE = _RF_WE;
 	assign NUM_CHECK = _NUM_CHECK;
     assign ALUOUT_MEMWB = _ALUOUT_MEMWB;
@@ -34,8 +35,9 @@ module PR_MEMWB(
     initial begin
         _RWSrc = 0;
         _OPSrc = 0;
+        _PCSrc_MEMWB = 0;
         _RF_WE = 0;
-	_NUM_CHECK = 0;
+	    _NUM_CHECK = 0;
         _ALUOUT_MEMWB = 0;
         _ADD_PC_MEMWB = 0;
         _D_MEM_DI_OUT = 0;
@@ -48,8 +50,9 @@ module PR_MEMWB(
         if (RSTn) begin
             _RWSrc = RWSrc_EXMEM;
             _OPSrc = OPSrc_EXMEM;
+            _PCSrc_MEMWB = PCSrc_EXMEM;
             _RF_WE = RF_WE_EXMEM;
-		_NUM_CHECK = NUM_CHECK_EXMEM;
+		    _NUM_CHECK = NUM_CHECK_EXMEM;
             _ALUOUT_MEMWB = ALUOUT_EXMEM;
             _ADD_PC_MEMWB = ADD_PC_EXMEM;
             _D_MEM_DI_OUT = D_MEM_DI;

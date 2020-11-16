@@ -37,18 +37,19 @@ module RISCV_TOP (
    // assign D_MEM_DOUT = RF_RD2;
 
 	reg [31:0] INSTR, _PC, _PRE_INSTR;
-	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
+	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
 	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT;
 	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
 	wire [11:0] _I_MEM_ADDR;
 	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
 	wire [3:0] ALUOp_IFID, D_MEM_BE_IFID, D_MEM_BE_IDEX, ALUOp;
 	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, ForwardA, ForwardB;
-	wire [1:0] RWSrc, OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc, PCSrc_IFID, PCSrc_IDEX, PCSrc;
+	wire [1:0] RWSrc, OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc, PCSrc_IFID, PCSrc_IDEX, PCSrc_EXMEM, PCSrc_MEMWB;
 	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
-	wire Branch_Cond, isLoad_IFID, isJump_IFID, isLoad, isJump;
+	wire Branch_Cond, Branch_Cond_EXMEM, Branch_Cond_MEMWB, isLoad_IFID, isJump_IFID, isLoad, isJump;
 	wire NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK, HALT_IFID, HALT_IDEX, HALT_EXMEM;
+	wire Hazard_Sig, FLUSH_IFID, FLUSH_IDEX, FLUSH_EXMEM;
 
    initial begin
       NUM_INST <= 0;
@@ -92,8 +93,7 @@ module RISCV_TOP (
    end
 
    CLKUPDATE pc(
-   //   .Updated_A      (Updated_PC),
-	  .Updated_A      (ADD_PC),
+      .Updated_A      (Updated_PC),
       .CLK         (CLK),
       .RSTn         (RSTn),
       .A            (PC)
@@ -102,14 +102,32 @@ module RISCV_TOP (
    ADDER add_pc(
       .A      (PC),
       .B      (32'h00000004),
-//      .Out    (Updated_PC)
       .Out    (ADD_PC)
    );
+
+	HAZARD_DETECT hazard_detection_unit(
+		.PCSrc			(PCSrc_EXMEM),
+		.Branch_Cond	(Branch_Cond_EXMEM),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ALUOUT_PC		(ALUOUT_PC),
+		.Hazard_Sig		(Hazard_Sig),
+		.FLUSH_IFID		(FLUSH_IFID),
+		.FLUSH_IDEX		(FLUSH_IDEX),
+		.FLUSH_EXMEM	(FLUSH_EXMEM)
+	);
+
+	MUX pc_mux(
+		.A		(ADD_PC),
+		.B		(ALUOUT_PC),
+		.S		(Hazard_Sig),
+		.Out	(Updated_PC)
+	);
 
 	PR_IFID pr_ifid(
 		//input
 		.CLK		(CLK),
 		.RSTn		(RSTn),
+		.FLUSH_IFID	(FLUSH_IFID),
 		.PC		(PC),
 		.ADD_PC		(ADD_PC),
 		.INSTR		(INSTR),
@@ -155,6 +173,7 @@ module RISCV_TOP (
 		//input
 		.CLK		(CLK),
 		.RSTn		(RSTn),
+		.FLUSH_IDEX	(FLUSH_IDEX),
 		.PC_IFID	(PC_IFID),
 		.ADD_PC_IFID	(ADD_PC_IFID),
 		.HALT_IFID	(HALT_IFID),
@@ -253,6 +272,7 @@ module RISCV_TOP (
 	PR_EXMEM pr_exmem(
 		.CLK		(CLK),
 		.RSTn		(RSTn),
+		.FLUSH_EXMEM	(FLUSH_EXMEM),
 		.D_MEM_BE_IDEX		(D_MEM_BE_IDEX),
 		.D_MEM_WEN_IDEX		(D_MEM_WEN_IDEX),
 		.D_MemRead_IDEX		(D_MemRead_IDEX),
@@ -264,7 +284,7 @@ module RISCV_TOP (
 		.D_MemRead			(D_MemRead),
 		.isJump			(isJump),
 		.isLoad			(isLoad),
-		.PCSrc			(PCSrc),
+		.PCSrc_EXMEM		(PCSrc_EXMEM),
 		.RWSrc_IDEX			(RWSrc_IDEX),
 		.OPSrc_IDEX			(OPSrc_IDEX),
 		.RF_WE_IDEX			(RF_WE_IDEX),
@@ -297,12 +317,14 @@ module RISCV_TOP (
 		.RSTn		(RSTn),
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
 		.OPSrc_EXMEM		(OPSrc_EXMEM),
+		.PCSrc_EXMEM		(PCSrc_EXMEM),
 		.RF_WE_EXMEM		(RF_WE_EXMEM),
 		.NUM_CHECK_EXMEM	(NUM_CHECK_EXMEM),
 		.RWSrc 				(RWSrc),
 		.OPSrc				(OPSrc),
+		.PCSrc_MEMWB		(PCSrc_MEMWB),
 		.RF_WE				(RF_WE),
-		.NUM_CHECK		(NUM_CHECK),
+		.NUM_CHECK			(NUM_CHECK),
 		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
 		.D_MEM_DI			(D_MEM_DI),
@@ -336,9 +358,8 @@ module RISCV_TOP (
 		.RF_WD			(RF_WD),
 		.ALUOUT			(ALUOUT_MEMWB),
 		.OPSrc			(OPSrc),
-		// check later
-	//	.isBranch		(isBranch_MEMWB),	
-	//	.Branch_Cond	(Branch_Cond_MEMWB),
+		.PCSrc			(PCSrc_MEMWB),	
+		.Branch_Cond	(Branch_Cond_MEMWB),
 		.OUTPUT_PORT	(OUTPUT_PORT)
 	);
 

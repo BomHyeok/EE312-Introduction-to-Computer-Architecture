@@ -33,17 +33,17 @@ module pipeCTRL(
     initial begin
         _ALUOp = 0;
         _ALUSrcA = 0;
-	_ALUSrcB = 0;
-	_isJump = 0;
-	_isLoad = 0;
+		_ALUSrcB = 0;
+		_isJump = 0;
+		_isLoad = 0;
         _D_MEM_BE = 0;
         _D_MEM_WEN = 1;
         _D_MemRead = 0;
-	_PCSrc = 0;
+		_PCSrc = 0;
         _RWSrc = 0;
-	_OPSrc = 0;
+		_OPSrc = 0;
         _RF_WE = 0;
-	_NUM_CHECK = 0;
+		_NUM_CHECK = 0;
     end
 
 	always@ (*) begin
@@ -178,6 +178,22 @@ module pipeCTRL(
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
 				_NUM_CHECK = 1;
+			end
+			default :
+			begin
+				_ALUOp = 0;
+				_ALUSrcA = 0;
+				_ALUSrcB = 0;
+				_isJump = 0;
+				_isLoad = 0;
+				_D_MEM_BE = 0;
+				_D_MEM_WEN = 1;
+				_D_MemRead = 0;
+				_PCSrc = 0;
+				_RWSrc = 0;
+				_OPSrc = 0;
+				_RF_WE = 0;
+				_NUM_CHECK = 0;
 			end
 		endcase
 	end
