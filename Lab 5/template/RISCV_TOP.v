@@ -153,8 +153,8 @@ module RISCV_TOP (
 		//input
 		.CLK		(CLK),
 		.RSTn		(RSTn),
-		.PC		(PC_IFID),
-		.ADD_PC		(ADD_PC_IFID),
+		.PC_IFID	(PC_IFID),
+		.ADD_PC_IFID	(ADD_PC_IFID),
 		.HALT_IFID	(HALT_IFID),
 		.IMM		(IMM),
 		.RF_RA1		(RF_RA1),
