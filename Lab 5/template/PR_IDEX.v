@@ -9,10 +9,12 @@ module PR_IDEX(
 	input wire [31:0] RF_RD1, RF_RD2,
 	// EX
 	input wire [3:0] ALUOp_IFID, 
-	input wire ALUSrcA_IFID, ALUSrcB_IFID, isJump_IFID, isLoad_IFID,
+	input wire ALUSrcA_IFID, ALUSrcB_IFID,
 	// MEM
 	input wire [3:0] D_MEM_BE_IFID, 
 	input wire D_MEM_WEN_IFID, D_MemRead_IFID,
+	input wire [1:0] PCSrc_IFID,
+	input wire isJump_IFID, isLoad_IFID,
 	// WB
 	input wire [1:0] RWSrc_IFID, OPSrc_IFID,
 	input wire RF_WE_IFID, NUM_CHECK_IFID,
@@ -25,10 +27,12 @@ module PR_IDEX(
 	output wire [31:0] RF_RD1_OUT, RF_RD2_OUT,
 	// EX
 	output wire [3:0] ALUOp, 
-	output wire ALUSrcA, ALUSrcB, isJump_IDEX, isLoad_IDEX,
+	output wire ALUSrcA, ALUSrcB,
 	// MEM
 	output wire [3:0] D_MEM_BE_IDEX, 
 	output wire D_MEM_WEN_IDEX, D_MemRead_IDEX,
+	output wire [1:0] PCSrc_IDEX,
+	output wire isJump_IDEX, isLoad_IDEX,
 	// WB
 	output wire [1:0] RWSrc_IDEX, OPSrc_IDEX,
 	output wire RF_WE_IDEX, NUM_CHECK_IDEX
@@ -37,7 +41,7 @@ module PR_IDEX(
 	reg [31:0] PC_TEMP, ADD_PC_TEMP, IMM_TEMP, RF_RD1_TEMP, RF_RD2_TEMP;
 	reg [4:0] RF_WA1_TEMP, RF_RA1_TEMP, RF_RA2_TEMP;
 	reg [3:0] ALUOp_TEMP, D_MEM_BE_TEMP;
-	reg [1:0] RWSrc_TEMP, OPSrc_TEMP;
+	reg [1:0] RWSrc_TEMP, OPSrc_TEMP, PCSrc_TEMP;
 	reg HALT_IDEX_TEMP, ALUSrcA_TEMP, ALUSrcB_TEMP, D_MEM_WEN_TEMP, D_MemRead_TEMP, RF_WE_TEMP, isJump_TEMP, isLoad_TEMP, NUM_CHECK_TEMP;
 
 	assign PC_IDEX = PC_TEMP;
@@ -53,12 +57,13 @@ module PR_IDEX(
 	assign ALUOp = ALUOp_TEMP;
 	assign ALUSrcA = ALUSrcA_TEMP;
 	assign ALUSrcB = ALUSrcB_TEMP;
-	assign isJump_IDEX = isJump_TEMP;
-	assign isLoad_IDEX = isLoad_TEMP;
 
 	assign D_MEM_BE_IDEX = D_MEM_BE_TEMP;
 	assign D_MEM_WEN_IDEX = D_MEM_WEN_TEMP;
 	assign D_MemRead_IDEX = D_MemRead_TEMP;
+	assign PCSrc_IDEX = PCSrc_TEMP;
+	assign isJump_IDEX = isJump_TEMP;
+	assign isLoad_IDEX = isLoad_TEMP;
 	
 	assign RWSrc_IDEX = RWSrc_TEMP;
 	assign OPSrc_IDEX = OPSrc_TEMP;
@@ -78,11 +83,12 @@ module PR_IDEX(
 		ALUOp_TEMP = 0;
 		ALUSrcA_TEMP = 0;
 		ALUSrcB_TEMP = 0;
-		isJump_TEMP = 0;
-		isLoad_TEMP = 0;
 		D_MEM_BE_TEMP = 0;
 		D_MEM_WEN_TEMP = 0;
 		D_MemRead_TEMP = 0;
+		PCSrc_TEMP = 0;
+		isJump_TEMP = 0;
+		isLoad_TEMP = 0;
 		RWSrc_TEMP = 0;
 		OPSrc_TEMP = 0;
 		RF_WE_TEMP = 0;
@@ -105,12 +111,13 @@ module PR_IDEX(
 			ALUOp_TEMP = ALUOp_IFID;
 			ALUSrcA_TEMP = ALUSrcA_IFID;
 			ALUSrcB_TEMP = ALUSrcB_IFID;
-			isJump_TEMP = isJump_IFID;
-			isLoad_TEMP = isLoad_IFID;
 
 			D_MEM_BE_TEMP = D_MEM_BE_IFID;
 			D_MEM_WEN_TEMP = D_MEM_WEN_IFID;
 			D_MemRead_TEMP = D_MemRead_IFID;
+			PCSrc_TEMP = PCSrc_IFID;
+			isJump_TEMP = isJump_IFID;
+			isLoad_TEMP = isLoad_IFID;
 		
 			RWSrc_TEMP = RWSrc_IFID;
 			OPSrc_TEMP = OPSrc_IFID;

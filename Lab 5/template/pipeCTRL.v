@@ -6,13 +6,14 @@ module pipeCTRL(
 	// MEM
 	output wire [3:0] D_MEM_BE_IFID,
 	output wire D_MEM_WEN_IFID, D_MemRead_IFID,
+	output wire [1:0] PCSrc_IFID,
 	// WB
 	output wire [1:0] RWSrc_IFID, OPSrc_IFID,
 	output wire RF_WE_IFID, NUM_CHECK_IFID
 	);
 
     reg [3:0] _ALUOp, _D_MEM_BE;
-    reg [1:0] _RWSrc, _OPSrc;
+    reg [1:0] _RWSrc, _OPSrc, _PCSrc;
     reg _ALUSrcA, _ALUSrcB, _D_MEM_WEN, _D_MemRead, _RF_WE, _isJump, _isLoad, _NUM_CHECK;
 
     assign ALUOp_IFID = _ALUOp;
@@ -23,6 +24,7 @@ module pipeCTRL(
     assign D_MEM_BE_IFID = _D_MEM_BE;
     assign D_MEM_WEN_IFID = _D_MEM_WEN;
     assign D_MemRead_IFID = _D_MemRead;
+	assign PCRrc_IFID = _PCSrc;
     assign RWSrc_IFID = _RWSrc;
 	assign OPSrc_IFID = _OPSrc;
     assign RF_WE_IFID = _RF_WE;
@@ -37,6 +39,7 @@ module pipeCTRL(
         _D_MEM_BE = 0;
         _D_MEM_WEN = 1;
         _D_MemRead = 0;
+	_PCSrc = 0;
         _RWSrc = 0;
 	_OPSrc = 0;
         _RF_WE = 0;
@@ -57,6 +60,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
+				_PCSrc = 2'b01;
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
@@ -73,6 +77,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
+				_PCSrc = 2'b01;
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
@@ -96,6 +101,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
+				_PCSrc = 2'b11;
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b10;
 				_RF_WE = 0;
@@ -112,6 +118,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 1;
+				_PCSrc = 2'b00;
 				_RWSrc = 2'b01;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
@@ -128,6 +135,7 @@ module pipeCTRL(
 				_D_MEM_BE = 4'b1111;
 				_D_MEM_WEN = 0;
 				_D_MemRead = 1;
+				_PCSrc = 2'b00;
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b01;
 				_RF_WE = 0;
@@ -146,6 +154,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
+				_PCSrc = 2'b00;
 				_RWSrc = 2'b10;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
@@ -164,6 +173,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
+				_PCSrc = 2'b00;
 				_RWSrc = 2'b10;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
