@@ -37,7 +37,7 @@ module RISCV_TOP (
    // assign D_MEM_DOUT = RF_RD2;
 
 	reg [31:0] INSTR, _PC, _PRE_INSTR;
-	wire [31:0] PRE_INSTR, PC, PC_IDEX, Updated_PC, ADD_PC, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
+	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
 	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT;
 	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
 	wire [11:0] _I_MEM_ADDR;
@@ -66,7 +66,7 @@ module RISCV_TOP (
    //   if (RSTn) NUM_INST <= NUM_INST + 1;
 		if (RSTn) begin
         //	_PC <= Updated_PC;
-        	_PRE_INSTR <= INSTR;
+        	_PRE_INSTR <= INSTR_IFID;
 		end 
    end
 
@@ -105,9 +105,22 @@ module RISCV_TOP (
       .Out    (ADD_PC)
    );
 
+	PR_IFID pr_ifid(
+		//input
+		.CLK		(CLK),
+		.RSTn		(RSTn),
+		.PC		(PC),
+		.ADD_PC		(ADD_PC),
+		.INSTR		(INSTR),
+		//output
+		.PC_IFID	(PC_IFID),
+		.ADD_PC_IFID	(ADD_PC_IFID),
+		.INSTR_IFID	(INSTR_IFID)
+	);
+
    ID id(
       .IRWrite   (1'b1),
-      .INSTR      (INSTR),
+      .INSTR      (INSTR_IFID),
       .RF_RA1      (RF_RA1),
       .RF_RA2      (RF_RA2),
       .RF_WA1      (WA_IFID),
@@ -115,7 +128,7 @@ module RISCV_TOP (
    );
 
 	pipeCTRL controller(
-		.INSTR      	(INSTR),
+		.INSTR      	(INSTR_IFID),
 		.ALUOp_IFID	(ALUOp_IFID),
 		.ALUSrcA_IFID	(ALUSrcA_IFID),
 		.ALUSrcB_IFID	(ALUSrcB_IFID),
@@ -131,7 +144,7 @@ module RISCV_TOP (
    );
 	
 	HALT halt(
-		.INSTR		(I_MEM_DI),
+		.INSTR		(INSTR_IFID),
 		.PRE_INSTR	(PRE_INSTR),
 		.HALT		(HALT_IFID)	
 	);
@@ -140,8 +153,8 @@ module RISCV_TOP (
 		//input
 		.CLK		(CLK),
 		.RSTn		(RSTn),
-		.PC		(PC),
-		.ADD_PC		(ADD_PC),
+		.PC		(PC_IFID),
+		.ADD_PC		(ADD_PC_IFID),
 		.HALT_IFID	(HALT_IFID),
 		.IMM		(IMM),
 		.RF_RA1		(RF_RA1),
