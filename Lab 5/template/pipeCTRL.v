@@ -24,7 +24,7 @@ module pipeCTRL(
     assign D_MEM_BE_IFID = _D_MEM_BE;
     assign D_MEM_WEN_IFID = _D_MEM_WEN;
     assign D_MemRead_IFID = _D_MemRead;
-	assign PCRrc_IFID = _PCSrc;
+	assign PCSrc_IFID = _PCSrc;
     assign RWSrc_IFID = _RWSrc;
 	assign OPSrc_IFID = _OPSrc;
     assign RF_WE_IFID = _RF_WE;
