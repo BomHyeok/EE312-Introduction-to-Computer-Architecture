@@ -77,7 +77,7 @@ module pipeCTRL(
 				_D_MEM_BE = 0;
 				_D_MEM_WEN = 1;
 				_D_MemRead = 0;
-				_PCSrc = 2'b01;
+				_PCSrc = 2'b10;
 				_RWSrc = 2'b00;
 				_OPSrc = 2'b00;
 				_RF_WE = 1;
