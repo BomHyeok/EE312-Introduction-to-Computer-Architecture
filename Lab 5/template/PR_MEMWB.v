@@ -48,17 +48,17 @@ module PR_MEMWB(
 
     always @ (posedge CLK) begin
         if (RSTn) begin
-            _RWSrc = RWSrc_EXMEM;
-            _OPSrc = OPSrc_EXMEM;
-            _PCSrc_MEMWB = PCSrc_EXMEM;
-            _RF_WE = RF_WE_EXMEM;
-		    _NUM_CHECK = NUM_CHECK_EXMEM;
-            _ALUOUT_MEMWB = ALUOUT_EXMEM;
-            _ADD_PC_MEMWB = ADD_PC_EXMEM;
-            _D_MEM_DI_OUT = D_MEM_DI;
-            _WA_MEMWB = WA_EXMEM;
-            _HALT = HALT_EXMEM;
-            _Branch_Cond_MEMWB = Branch_Cond_EXMEM;
+            _RWSrc <= RWSrc_EXMEM;
+            _OPSrc <= OPSrc_EXMEM;
+            _PCSrc_MEMWB <= PCSrc_EXMEM;
+            _RF_WE <= RF_WE_EXMEM;
+		_NUM_CHECK <= NUM_CHECK_EXMEM;
+            _ALUOUT_MEMWB <= ALUOUT_EXMEM;
+            _ADD_PC_MEMWB <= ADD_PC_EXMEM;
+            _D_MEM_DI_OUT <= D_MEM_DI;
+            _WA_MEMWB <= WA_EXMEM;
+            _HALT <= HALT_EXMEM;
+            _Branch_Cond_MEMWB <= Branch_Cond_EXMEM;
         end
     end
 
