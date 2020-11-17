@@ -32,13 +32,9 @@ module RISCV_TOP (
 //   assign OUTPUT_PORT = RF_WD;
 
    // TODO: implement
-   assign I_MEM_CSN = ~RSTn;
-   assign D_MEM_CSN = ~RSTn;
-   // assign D_MEM_DOUT = RF_RD2;
-
 	reg [31:0] INSTR, _PC, _PRE_INSTR;
 	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
-	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT, Branch_A, Branch_B;
+	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT, RF_RD2_EXMEM, Branch_A, Branch_B;
 	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
 	wire [11:0] _I_MEM_ADDR;
 	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
@@ -50,6 +46,10 @@ module RISCV_TOP (
 	wire Branch_Cond, Branch_Cond_EXMEM, Branch_Cond_MEMWB, isLoad_IFID, isJump_IFID, isLoad, isJump;
 	wire NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK, HALT_IFID, HALT_IDEX, HALT_EXMEM;
 	wire Hazard_Sig, FLUSH_IFID, FLUSH_IDEX, FLUSH_EXMEM;
+
+	assign I_MEM_CSN = ~RSTn;
+  	assign D_MEM_CSN = ~RSTn;
+   	assign D_MEM_DOUT = RF_RD2_EXMEM;
 
    initial begin
       NUM_INST <= 0;
@@ -229,6 +229,7 @@ module RISCV_TOP (
 		.RF_RA2      		(RF_RA2_OUT),
 		.WA_EXMEM      		(WA_EXMEM),
 		.WA_MEMWB      		(WA_MEMWB),
+		.PCSrc_IDEX			(PCSrc_IDEX),
 		.ForwardA      		(ForwardA),
 		.ForwardB      		(ForwardB),
 		.BranchForwardA     (BranchForwardA),
@@ -323,11 +324,13 @@ module RISCV_TOP (
 		.NUM_CHECK_EXMEM	(NUM_CHECK_EXMEM),
 		.ALU_RESULT 		(ALU_RESULT),
 		.ADD_PC_IDEX		(ADD_PC_IDEX),
+		.RF_RD2_OUT			(RF_RD2_OUT),
 		.WA_IDEX			(WA_IDEX),
 		.HALT_IDEX			(HALT_IDEX),
 		.Branch_Cond		(Branch_Cond),
 		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
+		.RF_RD2_EXMEM		(RF_RD2_EXMEM),
 		.WA_EXMEM			(WA_EXMEM),
 		.HALT_EXMEM			(HALT_EXMEM),
 		.Branch_Cond_EXMEM	(Branch_Cond_EXMEM)
