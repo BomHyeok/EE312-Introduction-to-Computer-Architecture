@@ -10,8 +10,8 @@ module CLKUPDATE(
     initial	TEMP = 0;
 
     always @ (posedge CLK) begin
-      if (~RSTn) TEMP = 0;
-      else TEMP = Updated_A;
+      if (~RSTn) TEMP <= 0;
+      else TEMP <= Updated_A;
 	  end
 
 endmodule
