@@ -15,7 +15,7 @@ module ALU(
         _Branch_Cond = 0;
     end
 
-    always @ (A, B, OP) begin
+    always @ ( * ) begin
 	_Branch_Cond = 0;
         case(OP)
         // ADD
