@@ -13,17 +13,20 @@ module MUX_ALU(
     
     always @ (*) begin
         case (Forward)
-            2'b00 : 
+            2'b00 : // No Forwarding
             begin
                 if (S == 0) TEMP = A;
                 else TEMP = B;
             end
-            2'b01 : 
+            2'b01 : // Forwarding from EXMEM
             begin
                 if (isJump) TEMP = ADD_PC_EXMEM;
                 else TEMP = ALUOUT_EXMEM;
             end
-            2'b10 : TEMP = RF_WD;
+            2'b10 : // Forwarding from MEMWB
+            begin
+                TEMP = RF_WD; 
+            end
             // instead of stall
             2'b11 : TEMP = D_MEM_DI;
         endcase
