@@ -22,14 +22,14 @@ module PR_IFID(
 	always @ (posedge CLK) begin
 		if (RSTn) begin
 			if (~FLUSH_IFID) begin
-				_PC_IFID = PC;
-				_ADD_PC_IFID = ADD_PC;
-				_INSTR_IFID = INSTR;
+				_PC_IFID <= PC;
+				_ADD_PC_IFID <= ADD_PC;
+				_INSTR_IFID <= INSTR;
 			end
 			else begin
-				_PC_IFID = 0;
-				_ADD_PC_IFID = 0;
-				_INSTR_IFID = 0;
+				_PC_IFID <= 0;
+				_ADD_PC_IFID <= 0;
+				_INSTR_IFID <= 0;
 			end
 		end
 	end
