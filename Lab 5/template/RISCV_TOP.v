@@ -32,7 +32,7 @@ module RISCV_TOP (
 //   assign OUTPUT_PORT = RF_WD;
 
    // TODO: implement
-	reg [31:0] INSTR, _PC, _PRE_INSTR;
+	reg [31:0] INSTR, _PRE_INSTR;
 	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
 	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT, RF_RD2_EXMEM, Branch_A, Branch_B;
 	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
@@ -55,19 +55,15 @@ module RISCV_TOP (
       NUM_INST <= 0;
       I_MEM_ADDR = 0;
       INSTR = 0;
-//      _PC = 0;
       _PRE_INSTR = 0;
    end
 
-//   assign PC = _PC;
    assign PRE_INSTR = _PRE_INSTR;
    assign RF_WA1 = WA_MEMWB;  // check later
 
    // Only allow for NUM_INST
    always @ (posedge CLK) begin
-   //   if (RSTn) NUM_INST <= NUM_INST + 1;
 		if (RSTn) begin
-        //	_PC <= Updated_PC;
         	_PRE_INSTR <= INSTR_IFID;
 		end 
    end
