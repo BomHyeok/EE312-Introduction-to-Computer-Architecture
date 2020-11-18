@@ -257,7 +257,7 @@ module RISCV_TOP (
    );
 
 	MUX mux_ALUSrcA(
-		.A		(PC),
+		.A		(PC_IDEX),
 		.B		(RF_RD1_OUT),
 		.S		(ALUSrcA),
 		.Out	(ALU_A)
