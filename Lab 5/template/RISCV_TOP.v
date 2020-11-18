@@ -247,6 +247,7 @@ module RISCV_TOP (
 		.WA_EXMEM      		(WA_EXMEM),
 		.WA_MEMWB      		(WA_MEMWB),
 		.PCSrc_IDEX			(PCSrc_IDEX),
+		.ALUSrcB			(ALUSrcB),
 		.ForwardA      		(ForwardA),
 		.ForwardB      		(ForwardB),
 		.BranchForwardA     (BranchForwardA),

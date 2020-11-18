@@ -2,6 +2,7 @@ module FORWARD(
     input wire RegWrite_EXMEM, RegWrite_MEMWB, isLoad,
     input wire [4:0] RF_RA1, RF_RA2, WA_EXMEM, WA_MEMWB,
     input wire [1:0] PCSrc_IDEX,
+    input wire ALUSrcB,
     output wire [1:0] ForwardA, ForwardB, BranchForwardA, BranchForwardB
     );
 
@@ -25,7 +26,7 @@ module FORWARD(
         _BranchForwardA = 0;
         _BranchForwardB = 0;
 
-        // JAL(PCSrc = 2'b01): Don't use register
+        // JAL(PCSrc = 2'b01): Don't need to forward
         if (RegWrite_EXMEM && PCSrc_IDEX != 2'b01) begin
             if (RF_RA1 != 0 && RF_RA1 == WA_EXMEM) begin
                 // Branch(PCSrc = 2'b11)
@@ -48,9 +49,8 @@ module FORWARD(
                     end
                 end
             end
-            // JALR(PCSrc = 2'b10): Don't use RA2
-            if (RF_RA2 != 0 && RF_RA2 == WA_EXMEM && PCSrc_IDEX != 2'b10) begin
-                // Branch(PCSrc = 2'b11)
+            // only Branch(PCSrc = 2'b11) and R-type(ALUSrcB = 0) need RA2 forwarding
+            if (RF_RA2 != 0 && RF_RA2 == WA_EXMEM) begin
                 if (PCSrc_IDEX == 2'b11) begin
                     if (isLoad) begin
                     //    STALL;
@@ -60,7 +60,7 @@ module FORWARD(
                         _BranchForwardB = 2'b01;
                     end
                 end
-                else begin
+                if (ALUSrcB == 0) begin
                     if (isLoad) begin
                     //    STALL;
                         _ForwardB = 2'b11;
@@ -71,6 +71,7 @@ module FORWARD(
                 end
             end
         end
+        // JAL(PCSrc = 2'b01): Don't need to forward
         if (RegWrite_MEMWB && PCSrc_IDEX != 2'b01) begin
             if ((~RegWrite_EXMEM || RF_RA1 != WA_EXMEM) && RF_RA1 != 0 && RF_RA1 == WA_MEMWB) begin
                 if (PCSrc_IDEX == 2'b11) begin
@@ -80,12 +81,12 @@ module FORWARD(
                     _ForwardA = 2'b10;
                 end
             end
-            // JALR(PCSrc = 2'b10): Don't use RA2
-            if ((~RegWrite_EXMEM || RF_RA2 != WA_EXMEM) && RF_RA2 != 0 && RF_RA2 == WA_MEMWB && PCSrc_IDEX != 2'b10) begin
+            // only Branch(PCSrc = 2'b11) and R-type(ALUSrcB = 0) need RA2 forwarding
+            if ((~RegWrite_EXMEM || RF_RA2 != WA_EXMEM) && RF_RA2 != 0 && RF_RA2 == WA_MEMWB) begin
                 if (PCSrc_IDEX == 2'b11) begin
                     _BranchForwardB = 2'b10;
                 end
-                else begin
+                if (ALUSrcB == 0) begin
                     _ForwardB = 2'b10;
                 end
             end
