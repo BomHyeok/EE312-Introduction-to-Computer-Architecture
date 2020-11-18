@@ -60,7 +60,7 @@ module FORWARD(
                         _BranchForwardB = 2'b01;
                     end
                 end
-                if (ALUSrcB = 0) begin
+                if (ALUSrcB == 0) begin
                     if (isLoad) begin
                     //    STALL;
                         _ForwardB = 2'b11;
@@ -86,7 +86,7 @@ module FORWARD(
                 if (PCSrc_IDEX == 2'b11) begin
                     _BranchForwardB = 2'b10;
                 end
-                if (ALUSrcB = 0) begin
+                if (ALUSrcB == 0) begin
                     _ForwardB = 2'b10;
                 end
             end
