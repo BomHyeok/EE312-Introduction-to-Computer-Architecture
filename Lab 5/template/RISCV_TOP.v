@@ -34,12 +34,12 @@ module RISCV_TOP (
    // TODO: implement
 	reg [31:0] INSTR, _PRE_INSTR;
 	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
-	wire [31:0] IMM, IMM_OUT, RF_RD1_IDEX, RF_RD2_IDEX, RF_RD1_OUT, RF_RD2_OUT, RF_RD2_EXMEM;
+	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT, RF_RD2_IDEX, RF_RD2_EXMEM, Branch_A, Branch_B;
 	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
 	wire [11:0] _I_MEM_ADDR;
 	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
 	wire [3:0] ALUOp_IFID, D_MEM_BE_IFID, D_MEM_BE_IDEX, ALUOp;
-	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, ForwardA, ForwardB, BranchForwardA, BranchForwardB;
+	wire [1:0] RWSrc_IFID, RWSrc_IDEX, RWSrc_EXMEM, ForwardA, ForwardB, BranchForwardA, BranchForwardB, SWForwardB;
 	wire [1:0] RWSrc, OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc, PCSrc_IFID, PCSrc_IDEX, PCSrc_EXMEM, PCSrc_MEMWB;
 	wire ALUSrcA_IFID, ALUSrcB_IFID, ALUSrcA, ALUSrcB, D_MEM_WEN_IFID, D_MEM_WEN_IDEX;
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
@@ -105,6 +105,7 @@ module RISCV_TOP (
    //$display("D_MEM_WEN: 0x%0h, D_MEM_BE: 0x%0h, D_MEM_DOUT: 0x%0h", D_MEM_WEN, D_MEM_BE, D_MEM_DOUT);
    $display("OPSrc_IFID: 0x%0h, OPSrc_IDEX: 0x%0h, OPSrc_EXMEM: 0x%0h, OPSrc: 0x%0h", OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc);
 	$display("Branch_Cond: 0x%0h, Branch_Cond_EXMEM: 0x%0h, Branch_Cond_MEMWB: 0x%0h", Branch_Cond, Branch_Cond_EXMEM, Branch_Cond_MEMWB);
+	$display("Branch_A: 0x%0h, Branch_B: 0x%0h, BranchForwardA: 0x%0h, BranchForwardB: 0x%0h", Branch_A, Branch_B, BranchForwardA, BranchForwardB);
 
 	end
 
@@ -220,8 +221,8 @@ module RISCV_TOP (
 		.RF_RA1_OUT	(RF_RA1_OUT),
 		.RF_RA2_OUT	(RF_RA2_OUT),
 		.WA_IDEX	(WA_IDEX),
-		.RF_RD1_IDEX	(RF_RD1_IDEX),
-		.RF_RD2_IDEX	(RF_RD2_IDEX),
+		.RF_RD1_OUT	(RF_RD1_OUT),
+		.RF_RD2_OUT	(RF_RD2_OUT),
 		.ALUOp		(ALUOp),
 		.ALUSrcA	(ALUSrcA),
 		.ALUSrcB	(ALUSrcB),
@@ -238,45 +239,94 @@ module RISCV_TOP (
 	);
 
    FORWARD forwarding_unit(
-		.RF_WE_EXMEM   		(RF_WE_EXMEM),
-		.RF_WE_MEMWB   		(RF_WE),
+		.RegWrite_EXMEM   	(RF_WE_EXMEM),
+		.RegWrite_MEMWB   	(RF_WE),
 		.isLoad     		(isLoad),
-		.isJump				(isJump),
 		.RF_RA1      		(RF_RA1_OUT),
 		.RF_RA2      		(RF_RA2_OUT),
 		.WA_EXMEM      		(WA_EXMEM),
 		.WA_MEMWB      		(WA_MEMWB),
-		.RF_RD1_IDEX		(RF_RD1_IDEX),
-		.RF_RD2_IDEX		(RF_RD2_IDEX),
-		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
-		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
-		.RF_WD				(RF_WD),
-		.D_MEM_DI			(D_MEM_DI),
-		.RF_RD1_OUT			(RF_RD1_OUT),
-		.RF_RD2_OUT			(RF_RD2_OUT)
+		.OPSrc_IDEX			(OPSrc_IDEX),
+		.ALUSrcB			(ALUSrcB),
+		.ForwardA      		(ForwardA),
+		.ForwardB      		(ForwardB),
+		.BranchForwardA     (BranchForwardA),
+		.BranchForwardB     (BranchForwardB),
+		.SWForwardB			(SWForwardB)
    );
 
-	MUX mux_ALUSrcA(
-		.A		(PC_IDEX),
-		.B		(RF_RD1_OUT),
-		.S		(ALUSrcA),
-		.Out	(ALU_A)
-	);
+   MUX_ALU mux_ALUSrcA(
+		.A				(PC_IDEX),	// check later
+		.B				(RF_RD1_OUT),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.D_MEM_DI		(D_MEM_DI),
+		.Forward		(ForwardA),
+		.S				(ALUSrcA),
+		.isJump			(isJump),
+		.Out			(ALU_A)
+   );
 
-	MUX mux_ALUSrcB(
-		.A		(RF_RD2_OUT),
-		.B		(IMM),
-		.S		(ALUSrcB),
-		.Out	(ALU_B)
-	);
+   MUX_ALU mux_ALUSrcB(
+		.A				(RF_RD2_OUT),
+		.B				(IMM_OUT),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.D_MEM_DI		(D_MEM_DI),
+		.Forward		(ForwardB),
+		.S				(ALUSrcB),
+		.isJump			(isJump),
+		.Out			(ALU_B)
+   );
+
+   MUX_ALU mux_BranchA(
+	    .A				(PC_IDEX),	// check later
+		.B				(RF_RD1_OUT),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.D_MEM_DI		(D_MEM_DI),
+		.Forward		(BranchForwardA),
+		.S				(1'b1),
+		.isJump			(isJump),
+		.Out			(Branch_A)
+   );
+   
+   MUX_ALU mux_BranchB(
+	    .A				(RF_RD2_OUT),
+		.B				(IMM_OUT),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.D_MEM_DI		(D_MEM_DI),
+		.Forward		(BranchForwardB),
+		.S				(1'b0),
+		.isJump			(isJump),
+		.Out			(Branch_B)
+   );
+
+   MUX_ALU mux_SW_RD(
+	    .A				(RF_RD2_OUT),
+		.B				(IMM_OUT),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
+		.RF_WD			(RF_WD),
+		.D_MEM_DI		(D_MEM_DI),
+		.Forward		(SWForwardB),
+		.S				(1'b0),
+		.isJump			(isJump),
+		.Out			(RF_RD2_IDEX)
+   );
 
    ALU alu(
 		.A				(ALU_A),
 		.B				(ALU_B),
 		.OP				(ALUOp),
 		.Out 			(ALU_RESULT),
-		.Branch_A		(RF_RD1_OUT),
-		.Branch_B		(RF_RD2_OUT),
+		.Branch_A		(Branch_A),
+		.Branch_B		(Branch_B),
 		.Branch_Cond	(Branch_Cond)
 	);
 
@@ -306,7 +356,7 @@ module RISCV_TOP (
 		.NUM_CHECK_EXMEM	(NUM_CHECK_EXMEM),
 		.ALU_RESULT 		(ALU_RESULT),
 		.ADD_PC_IDEX		(ADD_PC_IDEX),
-		.RF_RD2_OUT			(RF_RD2_OUT), 
+		.RF_RD2_OUT			(RF_RD2_IDEX), 	//check later
 		.WA_IDEX			(WA_IDEX),
 		.HALT_IDEX			(HALT_IDEX),
 		.Branch_Cond		(Branch_Cond),
