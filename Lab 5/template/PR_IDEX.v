@@ -25,7 +25,7 @@ module PR_IDEX(
 	// IMM & Register
 	output wire [31:0] IMM_OUT,
 	output wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IDEX,
-	output wire [31:0] RF_RD1_IDEX, RF_RD2_IDEX,
+	output wire [31:0] RF_RD1_OUT, RF_RD2_OUT,
 	// EX
 	output wire [3:0] ALUOp, 
 	output wire ALUSrcA, ALUSrcB,
@@ -52,8 +52,8 @@ module PR_IDEX(
 	assign RF_RA1_OUT = RF_RA1_TEMP;
  	assign RF_RA2_OUT = RF_RA2_TEMP;
 	assign WA_IDEX = RF_WA1_TEMP;
-	assign RF_RD1_IDEX = RF_RD1_TEMP;
-	assign RF_RD2_IDEX = RF_RD2_TEMP;
+	assign RF_RD1_OUT = RF_RD1_TEMP;
+	assign RF_RD2_OUT = RF_RD2_TEMP;
 
 	assign ALUOp = ALUOp_TEMP;
 	assign ALUSrcA = ALUSrcA_TEMP;
