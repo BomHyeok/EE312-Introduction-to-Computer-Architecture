@@ -33,7 +33,7 @@ module RISCV_TOP (
 
    // TODO: implement
 	reg [31:0] INSTR, _PRE_INSTR;
-	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
+	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, PC_EXMEM, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
 	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT, RF_RD2_IDEX, RF_RD2_EXMEM, Branch_A, Branch_B;
 	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, D_MEM_DI_OUT;
 	wire [11:0] _I_MEM_ADDR;
@@ -46,6 +46,12 @@ module RISCV_TOP (
 	wire Branch_Cond, Branch_Cond_EXMEM, Branch_Cond_MEMWB, isLoad_IFID, isJump_IFID, isLoad, isJump;
 	wire NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK, HALT_IFID, HALT_IDEX, HALT_EXMEM;
 	wire Hazard_Sig, FLUSH_IFID, FLUSH_IDEX, FLUSH_EXMEM;
+
+	// for BTB
+	wire BTB_WE, TAKEN, PRE_TAKEN;
+	wire [31:0] BTBIN, BTBOUT, ACTUAL_PC;
+	wire [29:0] BTBidx;
+	wire [1:0] 2bitSC_IN, 2bitSC_OUT;
 
 	assign I_MEM_CSN = ~RSTn;
   	assign D_MEM_CSN = ~RSTn;
@@ -122,6 +128,7 @@ module RISCV_TOP (
       .Out    (ADD_PC)
    );
 
+/*
 	HAZARD_DETECT hazard_detection_unit(
 		.PCSrc			(PCSrc_EXMEM),
 		.Branch_Cond	(Branch_Cond_EXMEM),
@@ -133,10 +140,56 @@ module RISCV_TOP (
 		.FLUSH_EXMEM	(FLUSH_EXMEM)
 	);
 
+
 	MUX pc_mux(
 		.A		(ADD_PC),
 		.B		(ALUOUT_PC),
 		.S		(Hazard_Sig),
+		.Out	(Updated_PC)
+	);
+*/
+	BTB btb(
+		.CLK			(CLK),
+		.BTBidx			(BTBidx),
+		.BTB_CSN		(~RSTn),
+		.WEN			(BTB_WE),
+		.TAKEN			(TAKEN),
+		.BTBIN			(BTBIN),
+		.2bitSC_IN		(2bitSC_IN),
+		.PRE_TAKEN		(PRE_TAKEN),
+		.2bitSC_OUT		(2bitSC_OUT),
+		.BTBOUT			(BTBOUT)
+	);
+
+	CLKUPDATE_2bit btbsc(
+      .Updated_A      (2bitSC_OUT),
+      .CLK         (CLK), 
+      .RSTn         (RSTn),
+      .A            (2bitSC_IN)
+	);
+	
+
+	HAZARD_BTB hazard_detection_unit(
+		.PCSrc			(PCSrc_EXMEM),
+		.Branch_Cond	(Branch_Cond_EXMEM),
+		.PC_IDEX		(PC_IDEX),
+		.PC_EXMEM		(PC_EXMEM),
+		.ALUOUT_EXMEM	(ALUOUT_EXMEM),
+		.ADD_PC_EXMEM	(ADD_PC_EXMEM),
+		.ACTUAL_PC		(ACTUAL_PC),
+		.TAKEN			(TAKEN),
+		.FLUSH_IFID		(FLUSH_IFID),
+		.FLUSH_IDEX		(FLUSH_IDEX),
+		.FLUSH_EXMEM	(FLUSH_EXMEM),
+		.BTB_WE			(BTB_WE),
+		.BTBIN			(BTBIN),
+		.BTBidx			(BTBidx)
+	);
+
+	MUX btb_mux(
+		.A		(ADD_PC),
+		.B		(BTBOUT),
+		.S		(PRE_TAKEN),
 		.Out	(Updated_PC)
 	);
 
@@ -357,12 +410,14 @@ module RISCV_TOP (
 		.ALU_RESULT 		(ALU_RESULT),
 		.ADD_PC_IDEX		(ADD_PC_IDEX),
 		.RF_RD2_OUT			(RF_RD2_IDEX), 	//check later
+		.PC_IDEX			(PC_IDEX),
 		.WA_IDEX			(WA_IDEX),
 		.HALT_IDEX			(HALT_IDEX),
 		.Branch_Cond		(Branch_Cond),
 		.ALUOUT_EXMEM		(ALUOUT_EXMEM),
 		.ADD_PC_EXMEM		(ADD_PC_EXMEM),
 		.RF_RD2_EXMEM		(RF_RD2_EXMEM),
+		.PC_EXMEM			(PC_EXMEM),
 		.WA_EXMEM			(WA_EXMEM),
 		.HALT_EXMEM			(HALT_EXMEM),
 		.Branch_Cond_EXMEM	(Branch_Cond_EXMEM)
