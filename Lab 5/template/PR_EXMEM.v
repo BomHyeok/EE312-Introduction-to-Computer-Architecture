@@ -5,7 +5,7 @@ module PR_EXMEM(
    // MEM
    input wire [3:0] D_MEM_BE_IDEX, 
    input wire D_MEM_WEN_IDEX, D_MemRead_IDEX, isJump_IDEX, isLoad_IDEX,
-	input wire [1:0] PCSrc_IDEX,
+   input wire [1:0] PCSrc_IDEX,
    output wire [3:0] D_MEM_BE, 
    output wire D_MEM_WEN, D_MemRead, isJump, isLoad,
 	output wire [1:0] PCSrc_EXMEM,
@@ -15,10 +15,10 @@ module PR_EXMEM(
    output wire [1:0] RWSrc_EXMEM, OPSrc_EXMEM,
    output wire RF_WE_EXMEM, NUM_CHECK_EXMEM,
    // except signals
-   input wire [31:0] ALU_RESULT, ADD_PC_IDEX, RF_RD2_OUT,
+   input wire [31:0] ALU_RESULT, ADD_PC_IDEX, RF_RD2_OUT, PC_IDEX,
    input wire [4:0] WA_IDEX,
    input wire HALT_IDEX, Branch_Cond,
-   output wire [31:0] ALUOUT_EXMEM, ADD_PC_EXMEM, RF_RD2_EXMEM,
+   output wire [31:0] ALUOUT_EXMEM, ADD_PC_EXMEM, RF_RD2_EXMEM, PC_EXMEM,
    output wire [4:0] WA_EXMEM,
    output wire HALT_EXMEM, Branch_Cond_EXMEM
 );
@@ -26,7 +26,7 @@ module PR_EXMEM(
     reg [3:0] _D_MEM_BE;
     reg [1:0] _RWSrc_EXMEM, _OPSrc_EXMEM, _PCSrc_EXMEM;
     reg _D_MEM_WEN, _D_MemRead, _RF_WE_EXMEM, _HALT_EXMEM, _Branch_Cond_EXMEM, _NUM_CHECK_EXMEM, _isJump, _isLoad;
-    reg [31:0] _ALUOUT_EXMEM, _ADD_PC_EXMEM, _RF_RD2_EXMEM;
+    reg [31:0] _ALUOUT_EXMEM, _ADD_PC_EXMEM, _RF_RD2_EXMEM, _PC_EXMEM;
     reg [4:0] _WA_EXMEM;
 
     assign D_MEM_BE = _D_MEM_BE;
@@ -42,6 +42,7 @@ module PR_EXMEM(
     assign ALUOUT_EXMEM = _ALUOUT_EXMEM;
     assign ADD_PC_EXMEM = _ADD_PC_EXMEM;
     assign RF_RD2_EXMEM = _RF_RD2_EXMEM;
+    assign PC_EXMEM = _PC_EXMEM;
     assign WA_EXMEM = _WA_EXMEM;
     assign HALT_EXMEM = _HALT_EXMEM;
     assign Branch_Cond_EXMEM = _Branch_Cond_EXMEM;
@@ -60,6 +61,7 @@ module PR_EXMEM(
         _ALUOUT_EXMEM = 0;
         _ADD_PC_EXMEM = 0;
         _RF_RD2_EXMEM = 0;
+        _PC_EXMEM = 0;
         _WA_EXMEM = 0;
         _HALT_EXMEM = 0;
         _Branch_Cond_EXMEM = 0;
@@ -81,6 +83,7 @@ module PR_EXMEM(
                 _ALUOUT_EXMEM <= ALU_RESULT;
                 _ADD_PC_EXMEM <= ADD_PC_IDEX;
                 _RF_RD2_EXMEM <= RF_RD2_OUT;
+                _PC_EXMEM <= PC_IDEX;
                 _WA_EXMEM <= WA_IDEX;
                 _HALT_EXMEM <= HALT_IDEX;
                 _Branch_Cond_EXMEM <= Branch_Cond;
@@ -99,6 +102,7 @@ module PR_EXMEM(
                 _ALUOUT_EXMEM <= 0;
                 _ADD_PC_EXMEM <= 0;
                 _RF_RD2_EXMEM <= 0;
+                _PC_EXMEM <= 0;
                 _WA_EXMEM <= 0;
                 _HALT_EXMEM <= 0;
                 _Branch_Cond_EXMEM <= 0;
