@@ -375,6 +375,15 @@ module RISCV_TOP (
 		.MEM_ADDR         		 (D_MEM_ADDR)
 	);
 
+	CACHE data_cache(
+		.CLK				(CLK),
+		.C_MEM_WEN			(D_MEM_WEN),
+		.C_MEM_CSN			(~RSTn),
+		.C_MEM_READ			(D_MemRead),
+		.C_MEM_ADDR			(D_MEM_ADDR),
+		.C_MEM_DOUT			(C_MEM_DOUT)
+	);
+
 	PR_MEMWB pr_memwb(
 		.CLK		(CLK),
 		.RSTn		(RSTn),
