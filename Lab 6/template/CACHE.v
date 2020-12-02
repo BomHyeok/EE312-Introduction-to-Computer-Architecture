@@ -249,7 +249,6 @@ module CACHE (
 						_C_MEM_DOUT = 0;
 						_STALL = 1;
 						NEXT_COUNTER = 3'b101;
-						end
 					end
 					// 6th cycle
 					3'b101 : begin
