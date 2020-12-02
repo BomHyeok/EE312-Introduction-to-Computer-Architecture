@@ -165,7 +165,12 @@ module CACHE (
 						else if (WRITE_HIT) begin
 							_D_MEM_WEN = 0;
 							_D_MEM_ADDR = C_MEM_ADDR;
-							_D_MEM_DOUT = CACHE[IDX][127:0];
+							case (BO)
+								2'b00 : _D_MEM_DOUT = CACHE[IDX][127:96];
+								2'b01 : _D_MEM_DOUT = CACHE[IDX][95:64];
+								2'b10 : _D_MEM_DOUT = CACHE[IDX][63:32];
+								2'b11 : _D_MEM_DOUT = CACHE[IDX][31:0];
+							endcase
 							_C_MEM_DOUT = 0;
 							_STALL = 1;
 						end
@@ -249,7 +254,6 @@ module CACHE (
 						_C_MEM_DOUT = 0;
 						_STALL = 1;
 						NEXT_COUNTER = 3'b101;
-						end
 					end
 					// 6th cycle
 					3'b101 : begin
