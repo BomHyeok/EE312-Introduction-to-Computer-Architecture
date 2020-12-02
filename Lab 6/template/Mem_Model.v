@@ -6,17 +6,12 @@ module SP_SRAM #(parameter ROMDATA = "", AWIDTH = 12, SIZE = 4096) (
 	input	wire			WEN,//write enable negative??
 	input	wire	[3:0]		BE,//byte enable
 	input	wire	[31:0]		DI, //data in
-	output	wire	[127:0]		DOUT // data out
+	output	wire	[31:0]		DOUT // data out
 );
 
-	reg		[127:0]		outline;
+	reg		[31:0]		outline;
 	reg		[31:0]		ram[0 : SIZE-1];
 	reg		[31:0]		temp;
-
-	reg [11:0] ADDR_1;
-	reg [11:0] ADDR_2;
-	reg [11:0] ADDR_3;
-	reg [11:0] ADDR_4;
 
 	initial begin
 		if (ROMDATA != "")
@@ -46,13 +41,8 @@ module SP_SRAM #(parameter ROMDATA = "", AWIDTH = 12, SIZE = 4096) (
 		// Asynchronous read
 		if (~CSN)
 		begin
-			if (WEN) begin
-				ADDR_1 = {ADDR[11:4], 2'b00, ADDR[1:0]};
-				ADDR_2 = {ADDR[11:4], 2'b01, ADDR[1:0]};
-				ADDR_3 = {ADDR[11:4], 2'b10, ADDR[1:0]};
-				ADDR_4 = {ADDR[11:4], 2'b11, ADDR[1:0]};
-				outline = {ram[ADDR_1], ram[ADDR_2], ram[ADDR_3], ram[ADDR_4]};
-			end
+			if (WEN)
+				outline = ram[ADDR];
 		end
 	end
 
