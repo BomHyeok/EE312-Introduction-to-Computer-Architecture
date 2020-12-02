@@ -35,7 +35,7 @@ module RISCV_TOP (
 	reg [31:0] INSTR, _PRE_INSTR;
 	wire [31:0] PRE_INSTR, INSTR_IFID, PC, PC_IFID, PC_IDEX, Updated_PC, ALUOUT_PC, ADD_PC, ADD_PC_IFID, ADD_PC_IDEX, ADD_PC_EXMEM, ADD_PC_MEMWB;
 	wire [31:0] IMM, IMM_OUT, RF_RD1_OUT, RF_RD2_OUT, RF_RD2_IDEX, RF_RD2_EXMEM, Branch_A, Branch_B;
-	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, C_MEM_DI_OUT, C_MEM_DOUT, C_MEM_DIN;
+	wire [31:0] ALUOUT_EXMEM, ALUOUT_MEMWB, ALU_A, ALU_B, ALU_RESULT, C_MEM_DI_OUT, C_MEM_DOUT, C_MEM_DI;
 	wire [11:0] _I_MEM_ADDR, C_MEM_ADDR;
 	wire [4:0] RF_RA1_OUT, RF_RA2_OUT, WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB;
 	wire [3:0] ALUOp_IFID, D_MEM_BE_IFID, D_MEM_BE_IDEX, ALUOp;
@@ -45,7 +45,7 @@ module RISCV_TOP (
 	wire D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM;
 	wire Branch_Cond, Branch_Cond_EXMEM, Branch_Cond_MEMWB, isLoad_IFID, isJump_IFID, isLoad, isJump;
 	wire NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK, HALT_IFID, HALT_IDEX, HALT_EXMEM;
-	wire Hazard_Sig, FLUSH_IFID, FLUSH_IDEX, FLUSH_EXMEM;
+	wire Hazard_Sig, FLUSH_IFID, FLUSH_IDEX, FLUSH_EXMEM, STALL;
 
 	assign I_MEM_CSN = ~RSTn;
   	assign D_MEM_CSN = ~RSTn;
@@ -145,6 +145,7 @@ module RISCV_TOP (
 		.CLK		(CLK),
 		.RSTn		(RSTn),
 		.FLUSH_IFID	(FLUSH_IFID),
+		.STALL		(STALL),
 		.PC		(PC),
 		.ADD_PC		(ADD_PC),
 		.INSTR		(INSTR),
@@ -190,6 +191,7 @@ module RISCV_TOP (
 		.CLK		(CLK),
 		.RSTn		(RSTn),
 		.FLUSH_IDEX	(FLUSH_IDEX),
+		.STALL		(STALL),
 		.PC_IFID	(PC_IFID),
 		.ADD_PC_IFID	(ADD_PC_IFID),
 		.HALT_IFID	(HALT_IFID),
@@ -333,6 +335,7 @@ module RISCV_TOP (
 		.CLK		(CLK),
 		.RSTn		(RSTn),
 		.FLUSH_EXMEM	(FLUSH_EXMEM),
+		.STALL		(STALL),
 		.D_MEM_BE_IDEX		(D_MEM_BE_IDEX),
 		.D_MEM_WEN_IDEX		(D_MEM_WEN_IDEX),
 		.D_MemRead_IDEX		(D_MemRead_IDEX),
@@ -378,17 +381,20 @@ module RISCV_TOP (
 		.CLK				(CLK),
 		.C_MEM_WEN			(C_MEM_WEN),
 		.C_MEM_CSN			(~RSTn),
-		.C_MEM_READ			(D_MemRead),
+		.D_MemRead			(D_MemRead),
 		.C_MEM_ADDR			(C_MEM_ADDR),
 		.C_MEM_DI			(C_MEM_DOUT),
-		.C_MEM_DOUT			(C_MEM_DIN),
+		.C_MEM_DOUT			(C_MEM_DI),
+	//	.D_MEM_DOUT			(D_MEM_DI or DOUT?), 
 		.D_MEM_WEN			(D_MEM_WEN),
-		.D_MEM_ADDR			(D_MEM_ADDR)
+		.D_MEM_ADDR			(D_MEM_ADDR),
+		.STALL				(STALL)
 	);
 
 	PR_MEMWB pr_memwb(
 		.CLK		(CLK),
 		.RSTn		(RSTn),
+		.STALL		(STALL),
 		.RWSrc_EXMEM		(RWSrc_EXMEM),
 		.OPSrc_EXMEM		(OPSrc_EXMEM),
 		.PCSrc_EXMEM		(PCSrc_EXMEM),

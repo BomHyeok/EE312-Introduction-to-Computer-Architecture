@@ -2,18 +2,19 @@ module CACHE (
 	input wire CLK,
 	input wire C_MEM_WEN,
 	input wire C_MEM_CSN,
-	input wire C_MEM_READ,
+//	input wire C_MEM_READ,
+	input wire D_MemRead,
 	input wire [11:1] C_MEM_ADDR,
 	input wire [31:0] C_MEM_DI,
 	input wire [31:0] D_MEM_DOUT,
 
-	output wire D_MemRead,
+//	output wire D_MemRead,
 	output wire D_MEM_WEN,
 	output wire [11:0] D_MEM_ADDR,
 	output wire [31:0] C_MEM_DOUT,
 
 	output wire STALL
-)
+	);
 	
 	integer i;
 	reg [2:0] COUNT, NEXT_COUNTER;
@@ -26,13 +27,15 @@ module CACHE (
 	reg READ_MISS, WRITE_HIT, WRITE_MISS;
 
 	reg _D_MemRead, _D_MEM_WEN;
+	reg [11:0] _D_MEM_ADDR;
 	reg [31:0] _C_MEM_DOUT;
 
 	reg _STALL;
 
 	assign D_MemRead = _D_MemRead;
 	assign D_MEM_WEN = _D_MEM_WEN;
-	assign D_MEM_ADDR = C_MEM_ADDR;
+//	assign D_MEM_ADDR = C_MEM_ADDR;
+	assign D_MEM_ADDR = _D_MEM_ADDR;
 	assign C_MEM_DOUT = _C_MEM_DOUT;
 
 	assign STALL = _STALL;
@@ -50,8 +53,9 @@ module CACHE (
 		WRITE_HIT = 0;
 		WRITE_MISS = 0;
 
-		_D_MemRead = 0;
+	//	_D_MemRead = 0;
 		_D_MEM_WEN = 0;
+		_D_MEM_ADDR = 0;
 		_C_MEM_DOUT = 0;
 
 		_STALL = 0;
@@ -68,7 +72,8 @@ module CACHE (
 	end
 
 	always @ (posedge CLK) begin
-		if (~C_MEM_CSN && C_MEM_READ) begin
+	//	if (~C_MEM_CSN && C_MEM_READ) begin
+		if (~C_MEM_CSN && D_MemRead) begin
 			COUNTER = NEXT_COUNTER;
 			// 1st cycle
 			if (COUNTER = 3'b000) begin
@@ -86,7 +91,8 @@ module CACHE (
 						// read-miss
 						READ_MISS = 1;
 						CACHE[IDX][133] = 0;
-						D_MemRead = 1;
+					//	D_MemRead = 1;
+						_D_MEM_ADDR = C_MEM_ADDR;
 						NEXT_COUNTER = 3'b001;
 						_STALL = 1;
 					end
@@ -111,7 +117,8 @@ module CACHE (
 					else begin
 						WRITE_MISS = 1;
 						CACHE[IDX][133] = 0;
-						D_MemRead = 1;
+					//	D_MemRead = 1;
+						_D_MEM_ADDR = C_MEM_ADDR;
 						NEXT_COUNTER = 3'b001;
 						_STALL = 1;
 					end
@@ -129,7 +136,8 @@ module CACHE (
 								3'b10 : CACHE[63:32] = D_MEM_DOUT;
 								3'b11 : CACHE[31:0] = D_MEM_DOUT;
 							endcase
-							_D_MemRead = 0;
+							// _D_MemRead = 0;
+							_D_MEM_ADDR = 0;
 						end
 						else if (WRITE_HIT) begin
 							_D_MEM_WEN = 1;

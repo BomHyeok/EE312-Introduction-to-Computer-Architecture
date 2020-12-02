@@ -2,6 +2,7 @@ module PR_EXMEM(
 	input wire CLK,
 	input wire RSTn,
     input wire FLUSH_EXMEM,
+    input wire STALL,
    // MEM
    input wire [3:0] D_MEM_BE_IDEX, 
    input wire D_MEM_WEN_IDEX, D_MemRead_IDEX, isJump_IDEX, isLoad_IDEX,
@@ -67,7 +68,7 @@ module PR_EXMEM(
 
     always @ (posedge CLK) begin
         if (RSTn) begin
-            if (~FLUSH_EXMEM) begin
+            if (~FLUSH_EXMEM && ~STALL) begin
                 _D_MEM_BE <= D_MEM_BE_IDEX;
                 _D_MEM_WEN <= D_MEM_WEN_IDEX;
                 _D_MemRead <= D_MemRead_IDEX;
@@ -85,7 +86,7 @@ module PR_EXMEM(
                 _HALT_EXMEM <= HALT_IDEX;
                 _Branch_Cond_EXMEM <= Branch_Cond;
             end
-            else begin
+            if (FLUSH_EXMEM) begin
                 _D_MEM_BE <= 0;
                 _D_MEM_WEN <= 1;
                 _D_MemRead <= 0;

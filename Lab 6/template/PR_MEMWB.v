@@ -1,6 +1,7 @@
 module PR_MEMWB(
 	input wire CLK,
 	input wire RSTn,
+    input wire STALL,
    // WB
    input wire [1:0] RWSrc_EXMEM, OPSrc_EXMEM, PCSrc_EXMEM,
    input wire RF_WE_EXMEM, NUM_CHECK_EXMEM,
@@ -47,7 +48,7 @@ module PR_MEMWB(
     end
 
     always @ (posedge CLK) begin
-        if (RSTn) begin
+        if (RSTn && ~STALL) begin
             _RWSrc <= RWSrc_EXMEM;
             _OPSrc <= OPSrc_EXMEM;
             _PCSrc_MEMWB <= PCSrc_EXMEM;

@@ -2,6 +2,7 @@ module PR_IDEX(
 	input wire CLK,
 	input wire RSTn,
 	input wire FLUSH_IDEX,
+	input wire STALL,
 	input wire [31:0] PC_IFID, ADD_PC_IFID,
 	input wire HALT_IFID,
 	// IMM & Register
@@ -98,7 +99,7 @@ module PR_IDEX(
 
 	always @ (posedge CLK) begin
 		if (RSTn) begin
-			if (~FLUSH_IDEX) begin
+			if (~FLUSH_IDEX && ~STALL) begin
 				PC_TEMP <= PC_IFID;
 				ADD_PC_TEMP <= ADD_PC_IFID;
 				HALT_IDEX_TEMP <= HALT_IFID;
@@ -126,7 +127,7 @@ module PR_IDEX(
 				RF_WE_TEMP <= RF_WE_IFID;
 				NUM_CHECK_TEMP <= NUM_CHECK_IFID;
 			end
-			else begin
+			if (FLUSH_IDEX) begin
 				PC_TEMP <= 0;
 				ADD_PC_TEMP <= 0;
 				HALT_IDEX_TEMP <= 0;
