@@ -104,6 +104,9 @@ module PR_EXMEM(
                 _HALT_EXMEM <= 0;
                 _Branch_Cond_EXMEM <= 0;
             end
+            if (STALL) begin
+                _NUM_CHECK_EXMEM <= 0;
+            end
         end
     end
 
