@@ -28,13 +28,14 @@ module CACHE (
 
 	reg READ_MISS, WRITE_HIT, WRITE_MISS;
 
-	reg _D_MemRead, _D_MEM_WEN;
+//	reg _D_MemRead, 
+	reg _D_MEM_WEN;
 	reg [11:0] _D_MEM_ADDR;
 	reg [31:0] _C_MEM_DOUT, _D_MEM_DOUT;
 
 	reg _STALL;
 
-	assign D_MemRead = _D_MemRead;
+//	assign D_MemRead = _D_MemRead;
 	assign D_MEM_WEN = _D_MEM_WEN;
 //	assign D_MEM_ADDR = C_MEM_ADDR;
 	assign D_MEM_ADDR = _D_MEM_ADDR;
