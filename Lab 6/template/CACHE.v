@@ -17,7 +17,7 @@ module CACHE (
 	);
 	
 	integer i;
-	reg [2:0] COUNT, NEXT_COUNTER;
+	reg [2:0] COUNTER, NEXT_COUNTER;
 	reg [1:0] BO;
 	reg [2:0] IDX;
 	reg [4:0] TAG;
@@ -76,15 +76,15 @@ module CACHE (
 		if (~C_MEM_CSN && D_MemRead) begin
 			COUNTER = NEXT_COUNTER;
 			// 1st cycle
-			if (COUNTER = 3'b000) begin
+			if (COUNTER == 3'b000) begin
 				if (C_MEM_WEN) begin
 					// read-hit
 					if (CACHE[IDX][132:128] == TAG && CACHE[IDX][133] == 1) begin
 						case (BO)
-							3'b00 : _C_MEM_DOUT = CACHE[127:96];
-							3'b01 : _C_MEM_DOUT = CACHE[95:64];
-							3'b10 : _C_MEM_DOUT = CACHE[63:32];
-							3'b11 : _C_MEM_DOUT = CACHE[31:0];
+							2'b00 : _C_MEM_DOUT = CACHE[IDX][127:96];
+							2'b01 : _C_MEM_DOUT = CACHE[IDX][95:64];
+							2'b10 : _C_MEM_DOUT = CACHE[IDX][63:32];
+							2'b11 : _C_MEM_DOUT = CACHE[IDX][31:0];
 						endcase
 					end
 					else begin
@@ -107,10 +107,10 @@ module CACHE (
 						_D_MEM_WEN = 0;
 						WRITE_HIT = 1;
 						case (BO)
-							3'b00 : CACHE[127:96] = C_MEM_DI;
-							3'b01 : CACHE[95:64] = C_MEM_DI;
-							3'b10 : CACHE[63:32] = C_MEM_DI;
-							3'b11 : CACHE[31:0] = C_MEM_DI;
+							2'b00 : CACHE[IDX][127:96] = C_MEM_DI;
+							2'b01 : CACHE[IDX][95:64] = C_MEM_DI;
+							2'b10 : CACHE[IDX][63:32] = C_MEM_DI;
+							2'b11 : CACHE[IDX][31:0] = C_MEM_DI;
 						endcase
 					end
 					// write-miss
@@ -131,10 +131,10 @@ module CACHE (
 					3'b001 : begin
 						if (READ_MISS) begin
 							case (BO)
-								3'b00 : CACHE[127:96] = D_MEM_DOUT;
-								3'b01 : CACHE[95:64] = D_MEM_DOUT;
-								3'b10 : CACHE[63:32] = D_MEM_DOUT;
-								3'b11 : CACHE[31:0] = D_MEM_DOUT;
+								3'b00 : CACHE[IDX][127:96] = D_MEM_DOUT;
+								3'b01 : CACHE[IDX][95:64] = D_MEM_DOUT;
+								3'b10 : CACHE[IDX][63:32] = D_MEM_DOUT;
+								3'b11 : CACHE[IDX][31:0] = D_MEM_DOUT;
 							endcase
 							// _D_MemRead = 0;
 							_D_MEM_ADDR = 0;
