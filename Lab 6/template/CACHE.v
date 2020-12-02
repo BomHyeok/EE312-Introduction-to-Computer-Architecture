@@ -4,7 +4,7 @@ module CACHE (
 	input wire C_MEM_CSN,
 //	input wire C_MEM_READ,
 	input wire D_MemRead,
-	input wire [11:1] C_MEM_ADDR,
+	input wire [11:0] C_MEM_ADDR,
 	input wire [31:0] C_MEM_DI,
 	input wire [127:0] D_MEM_DI,
 
