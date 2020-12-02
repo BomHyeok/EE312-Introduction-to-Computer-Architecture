@@ -25,6 +25,8 @@ module CACHE (
 	reg [133:0] CACHE [7:0];
 
 	reg READ_MISS, WRITE_HIT, WRITE_MISS;
+	// for count the num of hit or miss
+	reg r_hit, r_miss, w_hit, w_miss;
 
 	reg _D_MEM_WEN;
 	reg [11:0] _D_MEM_ADDR;
@@ -40,7 +42,6 @@ module CACHE (
 	assign STALL = _STALL;
 	
 
-
 	initial begin 
 		COUNTER = 0;
 		NEXT_COUNTER = 0;
@@ -52,6 +53,11 @@ module CACHE (
 		READ_MISS = 0;
 		WRITE_HIT = 0;
 		WRITE_MISS = 0;
+
+		r_hit = 0;
+		r_miss = 0;
+		w_hit = 0;
+		w_miss = 0;
 
 		_D_MEM_WEN = 0;
 		_D_MEM_ADDR = 0;
@@ -73,7 +79,6 @@ module CACHE (
 	end
 
 	always @ (negedge CLK) begin
-	//	if (~C_MEM_CSN && C_MEM_READ) begin
 		if (~C_MEM_CSN && D_MemRead) begin
 			COUNTER = NEXT_COUNTER;
 			// 1st cycle
@@ -81,6 +86,7 @@ module CACHE (
 				if (C_MEM_WEN) begin
 					// read-hit
 					if (CACHE[IDX][132:128] == TAG && CACHE[IDX][133] == 1) begin
+						r_hit = r_hit + 1;
 						_D_MEM_WEN = 1;
 						_D_MEM_ADDR = 0;
 						_D_MEM_DOUT = 0;
@@ -91,10 +97,10 @@ module CACHE (
 							2'b10 : _C_MEM_DOUT = CACHE[IDX][63:32];
 							2'b11 : _C_MEM_DOUT = CACHE[IDX][31:0];
 						endcase
-						
 					end
 					else begin
 						// read-miss
+						r_miss = r_miss + 1;
 						_D_MEM_ADDR = {TAG, IDX, 2'b00, g};
 						CACHE[IDX][127:96] = D_MEM_DI;
 						CACHE[IDX][132:128] = TAG;
@@ -111,6 +117,7 @@ module CACHE (
 				if (~C_MEM_WEN) begin
 					// write-hit
 					if (CACHE[IDX][132:128] == TAG && CACHE[IDX][133] == 1) begin
+						w_hit = w_hit + 1;
 						WRITE_HIT = 1;
 						CACHE[IDX][133] = 0;
 						NEXT_COUNTER = 3'b001;
@@ -122,6 +129,7 @@ module CACHE (
 					end
 					// write-miss
 					else begin
+						w_miss = w_miss + 1;
 						_D_MEM_ADDR = {TAG, IDX, 2'b00, g};
 						CACHE[IDX][127:96] = D_MEM_DI;
 						CACHE[IDX][132:128] = TAG;
@@ -140,20 +148,12 @@ module CACHE (
 				case (COUNTER)
 					// 2nd cycle
 					3'b001 : begin
-						if (READ_MISS) begin
+						if (READ_MISS || WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
 							CACHE[IDX][95:64] = D_MEM_DI;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
 						end
 						else if (WRITE_HIT) begin
-							_D_MEM_WEN = 1;
 							_D_MEM_ADDR = 0;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
 							case (BO)
 								2'b00 : CACHE[IDX][127:96] = C_MEM_DI;
 								2'b01 : CACHE[IDX][95:64] = C_MEM_DI;
@@ -161,26 +161,19 @@ module CACHE (
 								2'b11 : CACHE[IDX][31:0] = C_MEM_DI;
 							endcase
 						end
-						else if (WRITE_MISS) begin
-							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
-							CACHE[IDX][95:64] = D_MEM_DI;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-							
-						end
+						_D_MEM_WEN = 1;
+						_D_MEM_DOUT = 0;
+						_C_MEM_DOUT = 0;
+						_STALL = 1;
 						NEXT_COUNTER = 3'b010;	
 					end
 					// 3rd cycle
 					3'b010 : begin
-						if (READ_MISS) begin
+						if (READ_MISS || WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b10, g};
 							CACHE[IDX][63:32] = D_MEM_DI;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
 						end
 						else if (WRITE_HIT) begin
 							_D_MEM_WEN = 0;
@@ -191,46 +184,22 @@ module CACHE (
 								2'b10 : _D_MEM_DOUT = CACHE[IDX][63:32];
 								2'b11 : _D_MEM_DOUT = CACHE[IDX][31:0];
 							endcase
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
 						end
-						else if (WRITE_MISS) begin
-							_D_MEM_ADDR = {TAG, IDX, 2'b10, g};
-							CACHE[IDX][63:32] = D_MEM_DI;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-							
-						end
+						_C_MEM_DOUT = 0;
+						_STALL = 1;
 						NEXT_COUNTER = 3'b011;
 					end
 					// 4th cycle
 					3'b011 : begin
-						if (READ_MISS) begin
+						if (READ_MISS || WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b11, g};
 							CACHE[IDX][31:0] = D_MEM_DI;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
 						end
-						else if (WRITE_HIT) begin
-							_D_MEM_WEN = 1;
-							_D_MEM_ADDR = 0;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-						end
-						else if (WRITE_MISS) begin
-							_D_MEM_ADDR = {TAG, IDX, 2'b11, g};
-							CACHE[IDX][31:0] = D_MEM_DI;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-							
-						end
+						else if (WRITE_HIT) _D_MEM_ADDR = 0;
+						_D_MEM_WEN = 1;
+						_D_MEM_DOUT = 0;
+						_C_MEM_DOUT = 0;
+						_STALL = 1;
 						NEXT_COUNTER = 3'b100;
 					end
 					// 5th cycle

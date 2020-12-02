@@ -78,35 +78,16 @@ module RISCV_TOP (
    always@ (*) begin
       I_MEM_ADDR = _I_MEM_ADDR;
       INSTR = I_MEM_DI;
-	  //$display("--------------------------------------------------------------------------------");
-     	//$display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
-    	//$display("RF_RD1: 0x%0h, ALUSrcA: 0x%0h, ALUSrcB: 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcB, IMM, ALUOp, ALU_RESULT);
-    	//$display("PC: 0x%0h, ADD_PC: 0x%0h, Updated_PC: 0x%0h, NUM_INST: 0x%0h", PC, ADD_PC, Updated_PC, NUM_INST);
-	//	$display("uPC: 0x%0h, Updated_uPC: 0x%0h, PCWrite: 0x%0h, PCUpdate: 0x%0h", uPC, Updated_uPC, PCWrite, PCUpdate);
-	//	$display("isBranch: 0x%0h, isBranchTaken: 0x%0h", isBranch, isBranchTaken);
-		//$display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
-		//$display("NUM_CHECK_IFID: 0x%0h, NUM_CHECK_IDEX: 0x%0h, NUM_CHECK_EXMEM: 0x%0h, NUM_CHECK: 0x%0h", NUM_CHECK_IFID, NUM_CHECK_IDEX, NUM_CHECK_EXMEM, NUM_CHECK);
-            //$display("--------------------------------------------------------------------------------");
-  // $display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
-   //$display("RF_RD1: 0x%0h, ALUSrcA: 0x%0h, ALUSrcB: 0x%0h, IMM: 0x%0h, ALUOp: 0x%0h, ALU_RESULT: 0x%0h", RF_RD1, ALUSrcA, ALUSrcB, IMM, ALUOp, ALU_RESULT);
-   //$display("PC: 0x%0h, ADD_PC: 0x%0h, Updated_PC: 0x%0h, ALUOUT_PC: 0x%0h", PC, ADD_PC, Updated_PC, ALUOUT_PC);
-//   $display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
-   //$display("D_MEM_DI: 0x%0h, D_MEM_DI_OUT: 0x%0h", D_MEM_DI,D_MEM_DI_OUT);
-//   $display("RF_RA1: 0x%0h, RF_RA1_OUT: 0x%0h, RF_RA2: 0x%0h, RF_RA2_OUT: 0x%0h", RF_RA1, RF_RA1_OUT, RF_RA2, RF_RA2_OUT);
-//   $display("ForwardA: 0x%0h, ALUSrcA: 0x%0h, ALU_A: 0x%0h, a", ForwardA, ALUSrcA, ALU_A);
-//   $display("ForwardB: 0x%0h, ALUSrcB: 0x%0h, ALU_B: 0x%0h", ForwardB, ALUSrcB, ALU_B);
-//	$display("ALUOp_IFID: 0x%0h, ALUOp: 0x%0h", ALUOp_IFID, ALUOp);
-//   $display("ALU_RESULT: 0x%0h, ALUOUT_EXMEM: 0x%0h, ALUOUT_MEMWB: 0x%0h", ALU_RESULT, ALUOUT_EXMEM, ALUOUT_MEMWB);
-//   $display("PCSrc_IFID: 0x%0h, PCSrc_IDEX: 0x%0h, PCSrc_EXMEM: 0x%0h, PCSrc_MEMWB: 0x%0h", PCSrc_IFID, PCSrc_IDEX, PCSrc_EXMEM, PCSrc_MEMWB);
-//   $display("RF_RD1: 0x%0h, RF_RD1_OUT: 0x%0h, RF_RD2: 0x%0h, RF_RD2_OUT: 0x%0h", RF_RD1, RF_RD1_OUT, RF_RD2, RF_RD2_OUT);
-//   $display("RF_WE_IFID: 0x%0h, RF_WE_IDEX: 0x%0h, RF_WE_EXMEM: 0x%0h, RF_WE: 0x%0h", RF_WE_IFID, RF_WE_IDEX, RF_WE_EXMEM, RF_WE);
-//   $display("WA_IFID: 0x%0h, WA_IDEX: 0x%0h, WA_EXMEM: 0x%0h, WA_MEMWB: 0x%0h", WA_IFID, WA_IDEX, WA_EXMEM, WA_MEMWB);
-   //$display("D_MemRead_IFID: 0x%0h, D_MemRead_IDEX: 0x%0h, D_MemRead: 0x%0h, D_MEM_ADDR: 0x%0h", D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, D_MEM_ADDR);
-   //$display("D_MEM_WEN: 0x%0h, D_MEM_BE: 0x%0h, D_MEM_DOUT: 0x%0h", D_MEM_WEN, D_MEM_BE, D_MEM_DOUT);
-//   $display("OPSrc_IFID: 0x%0h, OPSrc_IDEX: 0x%0h, OPSrc_EXMEM: 0x%0h, OPSrc: 0x%0h", OPSrc_IFID, OPSrc_IDEX, OPSrc_EXMEM, OPSrc);
-//	$display("Branch_Cond: 0x%0h, Branch_Cond_EXMEM: 0x%0h, Branch_Cond_MEMWB: 0x%0h", Branch_Cond, Branch_Cond_EXMEM, Branch_Cond_MEMWB);
-//	$display("Branch_A: 0x%0h, Branch_B: 0x%0h, BranchForwardA: 0x%0h, BranchForwardB: 0x%0h", Branch_A, Branch_B, BranchForwardA, BranchForwardB);
-
+	  /*
+	  $display("--------------------------------------------------------------------------------");
+    $display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
+   $display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
+   $display("D_MEM_DI: 0x%0h, C_MEM_DI: 0x%0h, C_MEM_DI_OUT: 0x%0h", D_MEM_DI, C_MEM_DI, C_MEM_DI_OUT);
+   $display("ALU_RESULT: 0x%0h, ALUOUT_EXMEM: 0x%0h, ALUOUT_MEMWB: 0x%0h", ALU_RESULT, ALUOUT_EXMEM, ALUOUT_MEMWB);
+   $display("D_MemRead_IFID: 0x%0h, D_MemRead_IDEX: 0x%0h, D_MemRead: 0x%0h, D_MEM_ADDR: 0x%0h", D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, D_MEM_ADDR);
+   $display("D_MEM_WEN: 0x%0h, D_MEM_BE: 0x%0h, D_MEM_DOUT: 0x%0h", D_MEM_WEN, D_MEM_BE, D_MEM_DOUT);
+   $display("C_MEM_DOUT: 0x%0h, D_MEM_ADDR: 0x%0h, Updated_PC: 0x%0h, STALL: 0x%0h", C_MEM_DOUT, D_MEM_ADDR, Updated_PC, STALL);
+*/
 	end
 
    CLKUPDATE pc(
