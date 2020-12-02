@@ -422,7 +422,7 @@ module RISCV_TOP (
 	);
 
 	always @ (posedge CLK) begin
-		if (RSTn && NUM_CHECK_EXMEM) begin
+		if (RSTn && NUM_CHECK_EXMEM && ~STALL) begin
 			NUM_INST <= NUM_INST + 1;
 		end
 	end

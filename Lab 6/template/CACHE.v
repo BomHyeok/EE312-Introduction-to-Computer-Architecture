@@ -78,7 +78,7 @@ module CACHE (
 		TAG = C_MEM_ADDR[11:7];
 	end
 
-	always @ (posedge CLK) begin
+	always @ (negedge CLK) begin
 	//	if (~C_MEM_CSN && C_MEM_READ) begin
 		if (~C_MEM_CSN && D_MemRead) begin
 			COUNTER = NEXT_COUNTER;
