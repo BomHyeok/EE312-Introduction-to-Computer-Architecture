@@ -2,6 +2,7 @@ module PR_IFID(
 	input wire CLK,
 	input wire RSTn,
 	input wire FLUSH_IFID,
+	input wire STALL,
 	input wire [31:0] PC, ADD_PC, INSTR,
 	
 	output wire [31:0] PC_IFID, ADD_PC_IFID, INSTR_IFID
@@ -21,12 +22,12 @@ module PR_IFID(
 
 	always @ (posedge CLK) begin
 		if (RSTn) begin
-			if (~FLUSH_IFID) begin
+			if (~FLUSH_IFID && ~STALL) begin
 				_PC_IFID <= PC;
 				_ADD_PC_IFID <= ADD_PC;
 				_INSTR_IFID <= INSTR;
 			end
-			else begin
+			if (FLUSH_IFID) begin
 				_PC_IFID <= 0;
 				_ADD_PC_IFID <= 0;
 				_INSTR_IFID <= 0;

@@ -14,7 +14,7 @@ module CACHE (
 	output wire [31:0] C_MEM_DOUT,
 
 	output wire STALL
-)
+	);
 	
 	integer i;
 	reg [2:0] COUNT, NEXT_COUNTER;
