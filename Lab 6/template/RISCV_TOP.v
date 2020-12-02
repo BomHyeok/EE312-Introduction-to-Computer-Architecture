@@ -113,6 +113,7 @@ module RISCV_TOP (
       .Updated_A      (Updated_PC),
       .CLK         (CLK), 
       .RSTn         (RSTn),
+	  .STALL		(STALL),
       .A            (PC)
    );
 
