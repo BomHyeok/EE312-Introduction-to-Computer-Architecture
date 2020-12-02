@@ -26,7 +26,7 @@ module CACHE (
 
 	reg READ_MISS, WRITE_HIT, WRITE_MISS;
 	// for count the num of hit or miss
-	reg r_hit, r_miss, w_hit, w_miss;
+	reg [31:0] r_hit, r_miss, w_hit, w_miss;
 
 	reg _D_MEM_WEN;
 	reg [11:0] _D_MEM_ADDR;
@@ -142,7 +142,7 @@ module CACHE (
 						_STALL = 1;
 					end
 				end 
-				$display("read-hit: 0x%0h, read-miss: 0x%0h, write-hit: 0x%0h, write-miss: 0x%0h", r_hit, r_miss, w_hit, w_miss);
+			//	$display("read-hit: %d, read-miss: %d, write-hit: %d, write-miss: %d", r_hit, r_miss, w_hit, w_miss);
 			end
 			else begin
 				case (COUNTER)
