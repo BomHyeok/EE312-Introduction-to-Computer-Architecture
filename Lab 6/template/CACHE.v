@@ -100,7 +100,6 @@ module CACHE (
 						CACHE[IDX][132:128] = TAG;
 						CACHE[IDX][133] = 0;
 						READ_MISS = 1;
-					//	D_MemRead = 1;
 						NEXT_COUNTER = 3'b001;
 						_D_MEM_WEN = 1;
 						_D_MEM_DOUT = 0;
@@ -129,7 +128,6 @@ module CACHE (
 						CACHE[IDX][133] = 0;
 						WRITE_MISS = 1;
 						NEXT_COUNTER = 3'b001;
-					//	D_MemRead = 1;
 						_D_MEM_WEN = 1;
 						_D_MEM_DOUT = 0;
 						_C_MEM_DOUT = 0;
@@ -145,7 +143,6 @@ module CACHE (
 						if (READ_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
 							CACHE[IDX][95:64] = D_MEM_DI;
-							// _D_MemRead = 0;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
@@ -167,7 +164,6 @@ module CACHE (
 						else if (WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
 							CACHE[IDX][95:64] = D_MEM_DI;
-							// _D_MemRead = 0;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
