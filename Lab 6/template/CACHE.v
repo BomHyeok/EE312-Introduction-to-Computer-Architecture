@@ -142,7 +142,7 @@ module CACHE (
 						_STALL = 1;
 					end
 				end 
-				
+				$display("read-hit: 0x%0h, read-miss: 0x%0h, write-hit: 0x%0h, write-miss: 0x%0h", r_hit, r_miss, w_hit, w_miss);
 			end
 			else begin
 				case (COUNTER)
