@@ -10,7 +10,7 @@ module RISCV_TOP (
 
    //D-Memory Signals
    output wire D_MEM_CSN,
-   input wire [127:0] D_MEM_DI,
+   input wire [31:0] D_MEM_DI,
    output wire [31:0] D_MEM_DOUT,
    output wire [11:0] D_MEM_ADDR,//in word address
    output wire D_MEM_WEN,
