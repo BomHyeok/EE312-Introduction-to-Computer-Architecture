@@ -1,4 +1,4 @@
-module RISCV_TOP (
+	module RISCV_TOP (
    //General Signals
    input wire CLK,
    input wire RSTn,
@@ -78,6 +78,7 @@ module RISCV_TOP (
    always@ (*) begin
       I_MEM_ADDR = _I_MEM_ADDR;
       INSTR = I_MEM_DI;
+<<<<<<< HEAD
 	  /*
 	  $display("--------------------------------------------------------------------------------");
     $display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
@@ -88,6 +89,8 @@ module RISCV_TOP (
    $display("D_MEM_WEN: 0x%0h, D_MEM_BE: 0x%0h, D_MEM_DOUT: 0x%0h", D_MEM_WEN, D_MEM_BE, D_MEM_DOUT);
    $display("C_MEM_DOUT: 0x%0h, D_MEM_ADDR: 0x%0h, Updated_PC: 0x%0h, STALL: 0x%0h", C_MEM_DOUT, D_MEM_ADDR, Updated_PC, STALL);
 */
+=======
+>>>>>>> hyeok
 	end
 
    CLKUPDATE pc(
