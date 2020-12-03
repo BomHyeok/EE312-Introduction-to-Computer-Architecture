@@ -54,14 +54,11 @@ module CACHE (
 		WRITE_HIT = 0;
 		WRITE_MISS = 0;
 
-<<<<<<< HEAD
 		r_hit = 0;
 		r_miss = 0;
 		w_hit = 0;
 		w_miss = 0;
 
-=======
->>>>>>> hyeok
 		_D_MEM_WEN = 0;
 		_D_MEM_ADDR = 0;
 		_D_MEM_DOUT = 0;
@@ -82,10 +79,6 @@ module CACHE (
 	end
 
 	always @ (negedge CLK) begin
-<<<<<<< HEAD
-=======
-	//	if (~C_MEM_CSN && C_MEM_READ) begin
->>>>>>> hyeok
 		if (~C_MEM_CSN && D_MemRead) begin
 			COUNTER = NEXT_COUNTER;
 			// 1st cycle
@@ -157,12 +150,6 @@ module CACHE (
 					3'b001 : begin
 						if (READ_MISS || WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
-<<<<<<< HEAD
-							CACHE[IDX][95:64] = D_MEM_DI;
-						end
-						else if (WRITE_HIT) begin
-							_D_MEM_ADDR = 0;
-=======
 							//CACHE[IDX][95:64] = D_MEM_DI;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
@@ -175,15 +162,12 @@ module CACHE (
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
 							_STALL = 1;
->>>>>>> hyeok
 							case (BO)
 								2'b00 : CACHE[IDX][127:96] = C_MEM_DI;
 								2'b01 : CACHE[IDX][95:64] = C_MEM_DI;
 								2'b10 : CACHE[IDX][63:32] = C_MEM_DI;
 								2'b11 : CACHE[IDX][31:0] = C_MEM_DI;
 							endcase
-<<<<<<< HEAD
-=======
 						end
 						else if (WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
@@ -192,8 +176,6 @@ module CACHE (
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
 							_STALL = 1;
-							
->>>>>>> hyeok
 						end
 						_D_MEM_WEN = 1;
 						_D_MEM_DOUT = 0;
@@ -205,11 +187,7 @@ module CACHE (
 					3'b010 : begin
 						if (READ_MISS || WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b10, g};
-<<<<<<< HEAD
-							CACHE[IDX][63:32] = D_MEM_DI;
-=======
 							//CACHE[IDX][63:32] = D_MEM_DI;
->>>>>>> hyeok
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 						end
@@ -222,8 +200,6 @@ module CACHE (
 								2'b10 : _D_MEM_DOUT = CACHE[IDX][63:32];
 								2'b11 : _D_MEM_DOUT = CACHE[IDX][31:0];
 							endcase
-<<<<<<< HEAD
-=======
 							_C_MEM_DOUT = 0;
 							_STALL = 1;
 						end
@@ -234,8 +210,6 @@ module CACHE (
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
 							_STALL = 1;
-							
->>>>>>> hyeok
 						end
 						_C_MEM_DOUT = 0;
 						_STALL = 1;
@@ -243,11 +217,6 @@ module CACHE (
 					end
 					// 4th cycle
 					3'b011 : begin
-<<<<<<< HEAD
-						if (READ_MISS || WRITE_MISS) begin
-							_D_MEM_ADDR = {TAG, IDX, 2'b11, g};
-							CACHE[IDX][31:0] = D_MEM_DI;
-=======
 						if (READ_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b11, g};
 							//CACHE[IDX][31:0] = D_MEM_DI;
@@ -270,8 +239,6 @@ module CACHE (
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
 							_STALL = 1;
-							
->>>>>>> hyeok
 						end
 						else if (WRITE_HIT) _D_MEM_ADDR = 0;
 						_D_MEM_WEN = 1;

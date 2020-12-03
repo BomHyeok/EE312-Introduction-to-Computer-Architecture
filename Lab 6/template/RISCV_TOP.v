@@ -78,19 +78,6 @@
    always@ (*) begin
       I_MEM_ADDR = _I_MEM_ADDR;
       INSTR = I_MEM_DI;
-<<<<<<< HEAD
-	  /*
-	  $display("--------------------------------------------------------------------------------");
-    $display("INSTR: 0x%0h PRE_INSTR: 0x%0h , NUM_INST: 0x%0h", INSTR, PRE_INSTR, NUM_INST);
-   $display("RF_WE: 0x%0h, RWSrc: 0x%0h, RF_WD: 0x%0h, OUTPUT_PORT: 0x%0h", RF_WE, RWSrc, RF_WD, OUTPUT_PORT);
-   $display("D_MEM_DI: 0x%0h, C_MEM_DI: 0x%0h, C_MEM_DI_OUT: 0x%0h", D_MEM_DI, C_MEM_DI, C_MEM_DI_OUT);
-   $display("ALU_RESULT: 0x%0h, ALUOUT_EXMEM: 0x%0h, ALUOUT_MEMWB: 0x%0h", ALU_RESULT, ALUOUT_EXMEM, ALUOUT_MEMWB);
-   $display("D_MemRead_IFID: 0x%0h, D_MemRead_IDEX: 0x%0h, D_MemRead: 0x%0h, D_MEM_ADDR: 0x%0h", D_MemRead_IFID, D_MemRead_IDEX, D_MemRead, D_MEM_ADDR);
-   $display("D_MEM_WEN: 0x%0h, D_MEM_BE: 0x%0h, D_MEM_DOUT: 0x%0h", D_MEM_WEN, D_MEM_BE, D_MEM_DOUT);
-   $display("C_MEM_DOUT: 0x%0h, D_MEM_ADDR: 0x%0h, Updated_PC: 0x%0h, STALL: 0x%0h", C_MEM_DOUT, D_MEM_ADDR, Updated_PC, STALL);
-*/
-=======
->>>>>>> hyeok
 	end
 
    CLKUPDATE pc(
