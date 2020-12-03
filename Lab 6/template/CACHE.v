@@ -2,13 +2,11 @@ module CACHE (
 	input wire CLK,
 	input wire C_MEM_WEN,
 	input wire C_MEM_CSN,
-//	input wire C_MEM_READ,
 	input wire D_MemRead,
 	input wire [11:0] C_MEM_ADDR,
 	input wire [31:0] C_MEM_DI,
 	input wire [31:0] D_MEM_DI,
 
-//	output wire D_MemRead,
 	output wire D_MEM_WEN,
 	output wire [11:0] D_MEM_ADDR,
 	output wire [31:0] D_MEM_DOUT,
@@ -28,16 +26,13 @@ module CACHE (
 
 	reg READ_MISS, WRITE_HIT, WRITE_MISS;
 
-//	reg _D_MemRead, 
 	reg _D_MEM_WEN;
 	reg [11:0] _D_MEM_ADDR;
 	reg [31:0] _C_MEM_DOUT, _D_MEM_DOUT;
 
 	reg _STALL;
 
-//	assign D_MemRead = _D_MemRead;
 	assign D_MEM_WEN = _D_MEM_WEN;
-//	assign D_MEM_ADDR = C_MEM_ADDR;
 	assign D_MEM_ADDR = _D_MEM_ADDR;
 	assign D_MEM_DOUT = _D_MEM_DOUT;
 	assign C_MEM_DOUT = _C_MEM_DOUT;
@@ -58,7 +53,6 @@ module CACHE (
 		WRITE_HIT = 0;
 		WRITE_MISS = 0;
 
-	//	_D_MemRead = 0;
 		_D_MEM_WEN = 0;
 		_D_MEM_ADDR = 0;
 		_D_MEM_DOUT = 0;
@@ -78,7 +72,7 @@ module CACHE (
 		TAG = C_MEM_ADDR[11:7];
 	end
 
-	always @ (posedge CLK) begin
+	always @ (negedge CLK) begin
 	//	if (~C_MEM_CSN && C_MEM_READ) begin
 		if (~C_MEM_CSN && D_MemRead) begin
 			COUNTER = NEXT_COUNTER;
@@ -102,11 +96,10 @@ module CACHE (
 					else begin
 						// read-miss
 						_D_MEM_ADDR = {TAG, IDX, 2'b00, g};
-						CACHE[IDX][127:96] = D_MEM_DI;
+						//CACHE[IDX][127:96] = D_MEM_DI;
 						CACHE[IDX][132:128] = TAG;
 						CACHE[IDX][133] = 0;
 						READ_MISS = 1;
-					//	D_MemRead = 1;
 						NEXT_COUNTER = 3'b001;
 						_D_MEM_WEN = 1;
 						_D_MEM_DOUT = 0;
@@ -126,22 +119,15 @@ module CACHE (
 						_D_MEM_DOUT = 0;
 						_C_MEM_DOUT = 0;
 						_STALL = 1;
-						case (BO)
-							2'b00 : CACHE[IDX][127:96] = C_MEM_DI;
-							2'b01 : CACHE[IDX][95:64] = C_MEM_DI;
-							2'b10 : CACHE[IDX][63:32] = C_MEM_DI;
-							2'b11 : CACHE[IDX][31:0] = C_MEM_DI;
-						endcase
 					end
 					// write-miss
 					else begin
 						_D_MEM_ADDR = {TAG, IDX, 2'b00, g};
-						CACHE[IDX][127:96] = D_MEM_DI;
+						//CACHE[IDX][127:96] = D_MEM_DI;
 						CACHE[IDX][132:128] = TAG;
 						CACHE[IDX][133] = 0;
 						WRITE_MISS = 1;
 						NEXT_COUNTER = 3'b001;
-					//	D_MemRead = 1;
 						_D_MEM_WEN = 1;
 						_D_MEM_DOUT = 0;
 						_C_MEM_DOUT = 0;
@@ -156,8 +142,41 @@ module CACHE (
 					3'b001 : begin
 						if (READ_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
-							CACHE[IDX][95:64] = D_MEM_DI;
-							// _D_MemRead = 0;
+							//CACHE[IDX][95:64] = D_MEM_DI;
+							_D_MEM_WEN = 1;
+							_D_MEM_DOUT = 0;
+							_C_MEM_DOUT = 0;
+							_STALL = 1;
+						end
+						else if (WRITE_HIT) begin
+							_D_MEM_WEN = 1;
+							_D_MEM_ADDR = 0;
+							_D_MEM_DOUT = 0;
+							_C_MEM_DOUT = 0;
+							_STALL = 1;
+							case (BO)
+								2'b00 : CACHE[IDX][127:96] = C_MEM_DI;
+								2'b01 : CACHE[IDX][95:64] = C_MEM_DI;
+								2'b10 : CACHE[IDX][63:32] = C_MEM_DI;
+								2'b11 : CACHE[IDX][31:0] = C_MEM_DI;
+							endcase
+						end
+						else if (WRITE_MISS) begin
+							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
+							//CACHE[IDX][95:64] = D_MEM_DI;
+							_D_MEM_WEN = 1;
+							_D_MEM_DOUT = 0;
+							_C_MEM_DOUT = 0;
+							_STALL = 1;
+							
+						end
+						NEXT_COUNTER = 3'b010;	
+					end
+					// 3rd cycle
+					3'b010 : begin
+						if (READ_MISS) begin
+							_D_MEM_ADDR = {TAG, IDX, 2'b10, g};
+							//CACHE[IDX][63:32] = D_MEM_DI;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
@@ -176,39 +195,8 @@ module CACHE (
 							_STALL = 1;
 						end
 						else if (WRITE_MISS) begin
-							_D_MEM_ADDR = {TAG, IDX, 2'b01, g};
-							CACHE[IDX][95:64] = D_MEM_DI;
-							// _D_MemRead = 0;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-							
-						end
-						NEXT_COUNTER = 3'b010;	
-					end
-					// 3rd cycle
-					3'b010 : begin
-						if (READ_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b10, g};
-							CACHE[IDX][63:32] = D_MEM_DI;
-							// _D_MemRead = 0;
-							_D_MEM_WEN = 1;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-						end
-						else if (WRITE_HIT) begin
-							_D_MEM_WEN = 1;
-							_D_MEM_ADDR = 0;
-							_D_MEM_DOUT = 0;
-							_C_MEM_DOUT = 0;
-							_STALL = 1;
-						end
-						else if (WRITE_MISS) begin
-							_D_MEM_ADDR = {TAG, IDX, 2'b10, g};
-							CACHE[IDX][63:32] = D_MEM_DI;
-							// _D_MemRead = 0;
+							//CACHE[IDX][63:32] = D_MEM_DI;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
@@ -221,8 +209,7 @@ module CACHE (
 					3'b011 : begin
 						if (READ_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b11, g};
-							CACHE[IDX][31:0] = D_MEM_DI;
-							// _D_MemRead = 0;
+							//CACHE[IDX][31:0] = D_MEM_DI;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
@@ -237,8 +224,7 @@ module CACHE (
 						end
 						else if (WRITE_MISS) begin
 							_D_MEM_ADDR = {TAG, IDX, 2'b11, g};
-							CACHE[IDX][31:0] = D_MEM_DI;
-							// _D_MemRead = 0;
+							//CACHE[IDX][31:0] = D_MEM_DI;
 							_D_MEM_WEN = 1;
 							_D_MEM_DOUT = 0;
 							_C_MEM_DOUT = 0;
@@ -305,6 +291,27 @@ module CACHE (
 					end
 				endcase
 			end
+		end
+	end
+
+	always@ (posedge CLK) begin
+		if (~C_MEM_CSN && D_MemRead) begin
+			if (READ_MISS) begin
+				case (COUNTER) 
+					3'b000: CACHE[IDX][127:96] = D_MEM_DI;
+					3'b001: CACHE[IDX][95:64] = D_MEM_DI;
+					3'b010: CACHE[IDX][63:32] = D_MEM_DI;
+					3'b011: CACHE[IDX][31:0] = D_MEM_DI;
+				endcase
+			end	
+			if (WRITE_MISS) begin
+				case (COUNTER) 
+					3'b000: CACHE[IDX][127:96] = D_MEM_DI;
+					3'b001: CACHE[IDX][95:64] = D_MEM_DI;
+					3'b010: CACHE[IDX][63:32] = D_MEM_DI;
+					3'b011: CACHE[IDX][31:0] = D_MEM_DI;
+				endcase
+			end	
 		end
 	end
 
